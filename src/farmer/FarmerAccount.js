@@ -243,15 +243,7 @@ export default function FarmerAccount() {
           <span className="dash-icon">📊</span>
           <span className="dash-label">{t('farmerAccount.dashboard')}</span>
         </button>
-        <button className="settings-btn" style={{marginLeft: 8}} onClick={() => setShowSettings((v) => !v)}>
-          <span role="img" aria-label="settings">⚙️</span> {t('farmerAccount.settings')}
-        </button>
       </div>
-      {showSettings && (
-        <div style={{ margin: '10px 0', display: 'flex', justifyContent: 'flex-end' }}>
-          <LanguageSwitcher />
-        </div>
-      )}
       <div className="profile-card">
         <div className="avatar">
           {(farmer?.name || "F").charAt(0).toUpperCase()}

@@ -1,20 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import FarmerBottomNav from "./FarmerBottomNav";
+
 import { apiGet } from "../utils/api";
 import "../styles/FarmerDashboard.css";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
 
 export default function FarmerDashboard() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const [showLangSwitcher, setShowLangSwitcher] = useState(() => {
-    return !localStorage.getItem("dashboardLangSelected");
-  });
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("registeredUser") || "null"));
   const [farmerProfile, setFarmerProfile] = useState(JSON.parse(localStorage.getItem("farmerProfile") || "null"));
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [farmerOrders, setFarmerOrders] = useState([]);
   const deliveredOnly = useMemo(() => farmerOrders.filter((o) => o.status === "Delivered"), [farmerOrders]);
@@ -29,8 +24,6 @@ export default function FarmerDashboard() {
       setFarmerProfile(JSON.parse(localStorage.getItem("farmerProfile") || "null"));
     }
     setInitialized(true);
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -80,13 +73,6 @@ export default function FarmerDashboard() {
       window.removeEventListener('focus', refreshDashboardData);
     };
   }, []);
-
-  const getGreeting = () => {
-    const hour = currentTime.getHours();
-    if (hour < 12) return t('farmerDashboard.greeting', { greeting: t('goodMorning', 'Good Morning'), name: user?.name || t('farmer') });
-    if (hour < 18) return t('farmerDashboard.greeting', { greeting: t('goodAfternoon', 'Good Afternoon'), name: user?.name || t('farmer') });
-    return t('farmerDashboard.greeting', { greeting: t('goodEvening', 'Good Evening'), name: user?.name || t('farmer') });
-  };
 
   const toNumber = (val) => {
     if (typeof val === "number") return val;
@@ -306,37 +292,9 @@ export default function FarmerDashboard() {
   const [analyticsView, setAnalyticsView] = useState("daily");
   const handleNavigate = (path) => { navigate(path); };
   const toggleAnalytics = () => { setShowAnalytics(!showAnalytics); };
-  const handleDashboardLangChange = (e) => {
-    i18n.changeLanguage(e.target.value);
-    localStorage.setItem("appLanguage", e.target.value);
-    localStorage.setItem("dashboardLangSelected", "1");
-    setShowLangSwitcher(false);
-  };
 
   return (
     <div className="farmer-dashboard">
-      {/* Header Section */}
-      <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div className="header-content">
-          <div className="greeting-section">
-            <h1 className="greeting">{getGreeting()}</h1>
-            <p className="date-time">
-              {currentTime.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              <span className="time-divider">•</span>
-              {currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-            </p>
-          </div>
-          <div className="profile-badge">
-            <div className="profile-icon">
-              {user?.name?.charAt(0).toUpperCase() || "F"}
-            </div>
-          </div>
-        </div>
-        <div style={{ alignSelf: 'flex-start', marginTop: 8 }}>
-          <LanguageSwitcher />
-        </div>
-      </div>
-
       {/* Main Dashboard Content */}
       <div className="dashboard-content">
         
@@ -628,9 +586,6 @@ export default function FarmerDashboard() {
         )}
 
       </div>
-
-      {/* Bottom Navigation */}
-      <FarmerBottomNav />
     </div>
   );
 }

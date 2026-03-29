@@ -32,6 +32,7 @@ import CropChatbot from "./farmer/CropChatbot";
 import FarmerOrders from "./farmer/FarmerOrders";
 import FarmerAccount from "./farmer/FarmerAccount";
 import MyCrops from "./farmer/MyCrops";
+import FarmerLayout from "./farmer/FarmerLayout";
 
 import TransportDealerDashboard from "./transport-dealer/TransportDealerDashboard";
 import TransportDealerAccount from "./transport-dealer/TransportDealerAccount";
@@ -114,14 +115,14 @@ export default function App() {
         <Route path="/support" element={<RequireRole role="customer"><SupportChat /></RequireRole>} />
 
         {/* Farmer Flow */}
-        <Route path="/farmer-dashboard" element={<RequireRole role="farmer"><FarmerDashboard /></RequireRole>} />
-        <Route path="/farmer/add-crop" element={<RequireRole role="farmer"><AddCrop /></RequireRole>} />
-        <Route path="/farmer/orders" element={<RequireRole role="farmer"><FarmerOrders /></RequireRole>} />
-        <Route path="/farmer/chatbot" element={<RequireRole role="farmer"><CropChatbot /></RequireRole>} />
-        <Route path="/farmer/account" element={<RequireRole role="farmer"><FarmerAccount /></RequireRole>} />
-        <Route path="/farmer/my-crops" element={<RequireRole role="farmer"><MyCrops /></RequireRole>} />
-        <Route path="/farmer-account" element={<RequireRole role="farmer"><FarmerAccount /></RequireRole>} />
-        <Route path="/farmer/support" element={<RequireRole role="farmer"><SupportChat /></RequireRole>} />
+        <Route path="/farmer-dashboard" element={<RequireRole role="farmer"><FarmerLayout><FarmerDashboard /></FarmerLayout></RequireRole>} />
+        <Route path="/farmer/add-crop" element={<RequireRole role="farmer"><FarmerLayout><AddCrop /></FarmerLayout></RequireRole>} />
+        <Route path="/farmer/orders" element={<RequireRole role="farmer"><FarmerLayout><FarmerOrders /></FarmerLayout></RequireRole>} />
+        <Route path="/farmer/chatbot" element={<RequireRole role="farmer"><FarmerLayout><CropChatbot /></FarmerLayout></RequireRole>} />
+        <Route path="/farmer/account" element={<RequireRole role="farmer"><FarmerLayout><FarmerAccount /></FarmerLayout></RequireRole>} />
+        <Route path="/farmer/my-crops" element={<RequireRole role="farmer"><FarmerLayout><MyCrops /></FarmerLayout></RequireRole>} />
+        <Route path="/farmer-account" element={<RequireRole role="farmer"><FarmerLayout><FarmerAccount /></FarmerLayout></RequireRole>} />
+        <Route path="/farmer/support" element={<RequireRole role="farmer"><FarmerLayout><SupportChat /></FarmerLayout></RequireRole>} />
 
         {/* Transport Dealer Flow */}
         <Route path="/transport-dealer-dashboard" element={<RequireRole role="transport dealer"><TransportDealerDashboard /></RequireRole>} />

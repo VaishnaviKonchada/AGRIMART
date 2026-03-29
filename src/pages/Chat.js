@@ -14,6 +14,7 @@ export default function Chat() {
   const [chatError, setChatError] = useState("");
   const [offerPrice, setOfferPrice] = useState("");
   const [messageInput, setMessageInput] = useState("");
+  const [activeTab, setActiveTab] = useState("chat"); // "chat" | "transport" | "deal"
 
   const toUiChat = (apiChat, fallback = {}) => {
     const dealerId = apiChat?.dealerId?._id || apiChat?.dealerId || fallback.dealerId;
@@ -382,15 +383,14 @@ export default function Chat() {
 
   if (loading) {
     return (
-      <div className="customer-chat-history-page">
+      <div className="chat-state-page">
         <div className="customer-chat-topbar">
-          <h2>Customer Chats</h2>
-          <button className="back-btn" onClick={() => navigate("/account")}>Back</button>
+          <h2>🌿 Dealer Chats</h2>
+          <button className="back-btn" onClick={() => navigate("/account")}>← Back</button>
         </div>
-        <div className="chat-messages">
-          <div className="empty-state">
-            <p className="empty-text">Loading your dealer chats...</p>
-          </div>
+        <div className="chat-state-body">
+          <div className="chat-spinner"></div>
+          <p className="chat-state-title">Loading your conversations…</p>
         </div>
       </div>
     );
@@ -398,18 +398,21 @@ export default function Chat() {
 
   if (!chat && !loading) {
     return (
-      <div className="customer-chat-history-page">
+      <div className="chat-state-page">
         <div className="customer-chat-topbar">
-          <h2>Customer Chats</h2>
-          <button className="back-btn" onClick={() => navigate("/account")}>Back</button>
+          <h2>🌿 Dealer Chats</h2>
+          <button className="back-btn" onClick={() => navigate("/account")}>← Back</button>
         </div>
-        <div className="chat-messages">
-          <div className="empty-state">
-            <p className="empty-text">No dealer chats found yet.</p>
-            {chatError ? <p className="empty-text">Error: {chatError}</p> : null}
-            <button className="confirm-btn" onClick={() => navigate("/transport-dealers")}>Open Transport Dealers</button>
-            <button className="reject-btn" onClick={() => navigate("/account")}>Back To Account</button>
-          </div>
+        <div className="chat-state-body">
+          <span style={{ fontSize: 52 }}>💬</span>
+          <p className="chat-state-title">No dealer conversations yet</p>
+          {chatError && <p className="chat-state-sub" style={{ color: '#C62828' }}>Error: {chatError}</p>}
+          <button className="chat-state-btn primary" onClick={() => navigate("/transport-dealers")}>
+            Browse Transport Dealers
+          </button>
+          <button className="chat-state-btn ghost" onClick={() => navigate("/account")}>
+            Back to Account
+          </button>
         </div>
       </div>
     );
@@ -418,14 +421,15 @@ export default function Chat() {
   return (
     <div className="customer-chat-history-page">
       <div className="customer-chat-topbar">
-        <h2>Customer Chats</h2>
-        <button className="back-btn" onClick={() => navigate("/account")}>Back</button>
+        <h2>🌿 Dealer Chats</h2>
+        <button className="back-btn" onClick={() => navigate("/account")}>← Back</button>
       </div>
 
       <div className="customer-chat-layout">
+
+        {/* ── SIDEBAR ── */}
         <div className="customer-chat-sidebar">
           <div className="customer-chat-sidebar-header">Conversations ({chatList.length})</div>
-
           {chatList.length === 0 ? (
             <div className="empty-chats">No conversations yet</div>
           ) : (
@@ -449,7 +453,10 @@ export default function Chat() {
           )}
         </div>
 
+        {/* ── MAIN PANEL ── */}
         <div className="customer-chat-main">
+
+          {/* Dealer Header */}
           <div className="chat-header">
             <div className="header-content">
               <div className="dealer-info-header">
@@ -461,165 +468,257 @@ export default function Chat() {
                   </p>
                 </div>
               </div>
-              <button className="close-btn" onClick={cancelChat} title="Close chat">
-                X
-              </button>
+              <button className="close-btn" onClick={cancelChat} title="Close chat">✕</button>
             </div>
           </div>
 
-          <div className="transport-card">
-            <div className="card-header">
-              <h4>Transport Details</h4>
-            </div>
-            <div className="transport-inline-grid">
-              <div className="transport-inline-row"><strong>Farmer:</strong> <span>{chat.farmerName || "-"}</span></div>
-              <div className="transport-inline-row"><strong>Pickup:</strong> <span>{chat.farmerLocation || "-"}</span></div>
-              <div className="transport-inline-row"><strong>Drop:</strong> <span>{chat.drop || "-"}</span></div>
-              <div className="transport-inline-row"><strong>Customer Phone:</strong> <span>{chat.customerAddress?.phone || "-"}</span></div>
-              <div className="transport-inline-row"><strong>Door No:</strong> <span>{chat.customerAddress?.doorNo || "-"}</span></div>
-              <div className="transport-inline-row transport-inline-wide"><strong>Address:</strong> <span>{chat.customerAddress?.fullAddress?.trim() || ""}</span></div>
-              <div className="transport-inline-row"><strong>Vehicle:</strong> <span className="vehicle-badge">{chat.vehicle || "-"}</span></div>
-              <div className="transport-inline-row"><strong>Quantity:</strong> <span>{chat.totalQty || 0} kg</span></div>
-              <div className="transport-inline-row"><strong>Base Delivery:</strong> <span className="price">{resolvedBasePrice ? `Rs.${resolvedBasePrice}` : "Rs.TBD"}</span></div>
-              <div className="transport-inline-row"><strong>Batch Discount:</strong> <span className="price" style={{ color: "#2e7d32" }}>{resolvedDiscount > 0 ? `-Rs.${resolvedDiscount}` : "Rs.0"}</span></div>
-              <div className="transport-inline-row"><strong>Final Delivery:</strong> <span className="price">{resolvedFinalPrice ? `Rs.${resolvedFinalPrice}` : "Rs.TBD"}</span></div>
-            </div>
-            {resolvedDiscount > 0 && (
-              <p style={{ marginTop: "10px", color: "#0f766e", fontWeight: 700 }}>
-                Platform-funded delivery discount applied for this route and order.
-              </p>
-            )}
+          {/* ── TAB BAR ── */}
+          <div className="chat-tab-bar">
+            <button
+              className={`chat-tab-btn ${activeTab === "chat" ? "active" : ""}`}
+              onClick={() => setActiveTab("chat")}
+            >
+              <span className="tab-icon-emoji">💬</span> Chat
+            </button>
+            <button
+              className={`chat-tab-btn ${activeTab === "transport" ? "active" : ""}`}
+              onClick={() => setActiveTab("transport")}
+            >
+              <span className="tab-icon-emoji">🚚</span> Transport
+            </button>
+            <button
+              className={`chat-tab-btn ${activeTab === "deal" ? "active" : ""}`}
+              onClick={() => setActiveTab("deal")}
+            >
+              <span className="tab-icon-emoji">🤝</span> Deal
+              {(chat.negotiation?.dealerDecision === "confirmed" && chat.negotiation?.customerDecision !== "confirmed") && (
+                <span className="tab-alert-dot"></span>
+              )}
+            </button>
           </div>
 
-          <div className="chat-messages">
-            {chat.negotiation?.dealerDecision === "rejected" ? (
-              <div className="decision-section" style={{ marginBottom: "12px", borderColor: "#ef4444" }}>
-                <h4 style={{ color: "#b91c1c" }}>Dealer Rejected The Price</h4>
-                <div className="deal-summary">
-                  <div className="summary-row">
-                    <span>Status:</span>
-                    <strong style={{ color: "#b91c1c" }}>Please send a new counter offer or continue negotiation.</strong>
-                  </div>
+          {/* ══════════════════════════════════
+              TAB 1 – CHAT
+          ══════════════════════════════════ */}
+          {activeTab === "chat" && (
+            <div className="tab-panel">
+              {/* Status banners */}
+              {chat.negotiation?.dealerDecision === "rejected" && (
+                <div className="chat-status-banner rejected">
+                  ❌ Dealer rejected the price — send a new counter offer.
                 </div>
-              </div>
-            ) : null}
-
-            {chat.negotiation?.dealerDecision === "confirmed" && chat.negotiation?.customerDecision !== "confirmed" ? (
-              <div className="decision-section" style={{ marginBottom: "12px", borderColor: "#10b981" }}>
-                <h4 style={{ color: "#047857" }}>Dealer Confirmed The Price</h4>
-                <div className="deal-summary">
-                  <div className="summary-row">
-                    <span>Status:</span>
-                    <strong style={{ color: "#047857" }}>You can now confirm to proceed to payment.</strong>
-                  </div>
+              )}
+              {chat.negotiation?.dealerDecision === "confirmed" && chat.negotiation?.customerDecision !== "confirmed" && (
+                <div className="chat-status-banner confirmed">
+                  ✅ Dealer confirmed! Go to the <button className="inline-tab-link" onClick={() => setActiveTab("deal")}>Deal tab</button> to confirm.
                 </div>
-              </div>
-            ) : null}
+              )}
 
-            {chat.messages && chat.messages.length === 0 ? (
-              <div className="empty-state">
-                <p className="empty-text">Start the conversation with {chat.dealerName}</p>
-              </div>
-            ) : (
-              chat.messages.map((m, i) => (
-                <div key={i} className={`message-group ${m.sender}`}>
-                  <div className="message-item">
-                    {m.sender === "dealer" && <div className="avatar-small">{getDealerInitials()}</div>}
-                    <div className="message-bubble">
-                      <p className="message-text">{m.text}</p>
-                      <span className="message-time">{m.timestamp}</span>
+              {/* Messages */}
+              <div className="chat-messages">
+                {chat.messages && chat.messages.length === 0 ? (
+                  <div className="empty-state">
+                    <p className="empty-text">Start the conversation with {chat.dealerName}</p>
+                  </div>
+                ) : (
+                  chat.messages.map((m, i) => (
+                    <div key={i} className={`message-group ${m.sender}`}>
+                      <div className="message-item">
+                        {m.sender === "dealer" && <div className="avatar-small">{getDealerInitials()}</div>}
+                        <div className="message-bubble">
+                          <p className="message-text">{m.text}</p>
+                          <span className="message-time">{m.timestamp}</span>
+                        </div>
+                        {m.sender === "customer" && <span className="message-status">sent</span>}
+                      </div>
                     </div>
-                    {m.sender === "customer" && <span className="message-status">sent</span>}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          <div className="input-section">
-            <div className="input-wrapper">
-              <input
-                type="text"
-                className="message-input"
-                placeholder="Type your message..."
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && sendMessage(messageInput)}
-              />
-              <button className="send-btn" onClick={() => sendMessage(messageInput)} title="Send message">
-                <span className="send-icon" aria-hidden="true">➤</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="dealer-offer-section">
-            <h4>Counter Offer</h4>
-            <div className="offer-input-wrapper">
-              <div className="input-group">
-                <input
-                  type="number"
-                  className="price-input"
-                  placeholder="Enter your counter offer (Rs.)"
-                  value={offerPrice}
-                  min={MINIMUM_MANUAL_OFFER}
-                  onChange={(e) => setOfferPrice(e.target.value)}
-                />
-                <button className="offer-btn" onClick={sendOffer}>
-                  Send Offer
-                </button>
+                  ))
+                )}
               </div>
-              <p className="offer-hint">This sends your offer to dealer in real time. Minimum manual offer: Rs.15.</p>
-            </div>
-          </div>
 
-          {(chat.negotiation?.finalPrice || chat.finalDealPrice || chat.dealerPrice) && (
-            <div className="decision-section">
-              <h4>Confirm Transport Deal?</h4>
-              <div className="deal-summary">
-                <div className="summary-row">
-                  <span>Route:</span>
-                  <strong>{chat.farmerLocation} to {chat.drop}</strong>
-                </div>
-                <div className="summary-row">
-                  <span>Vehicle:</span>
-                  <strong>{chat.vehicle}</strong>
-                </div>
-                <div className="summary-row">
-                  <span>Base Delivery:</span>
-                  <strong>Rs.{resolvedBasePrice || 0}</strong>
-                </div>
-                <div className="summary-row">
-                  <span>Discount (Platform):</span>
-                  <strong style={{ color: "#2e7d32" }}>-Rs.{resolvedDiscount || 0}</strong>
-                </div>
-                <div className="summary-row">
-                  <span>Final Price:</span>
-                  <strong className="final-price">Rs.{resolvedFinalPrice || 0}</strong>
-                </div>
-                <div className="summary-row">
-                  <span>Customer Decision:</span>
-                  <strong>{chat.negotiation?.customerDecision || "pending"}</strong>
-                </div>
-                <div className="summary-row">
-                  <span>Dealer Decision:</span>
-                  <strong>{chat.negotiation?.dealerDecision || "pending"}</strong>
-                </div>
-              </div>
-              <div className="action-buttons">
-                <button className="confirm-btn" onClick={confirmDeal}>
-                  Confirm Price
-                </button>
-                <button className="reject-btn" onClick={rejectDeal}>
-                  Reject Price
-                </button>
-                {bothSidesConfirmed ? (
-                  <button className="confirm-btn" onClick={proceedToPayment}>
-                    Confirm And Go To Payment Page
+              {/* Input */}
+              <div className="chat-input-section">
+                <div className="chat-input-wrapper">
+                  <input
+                    type="text"
+                    className="message-input"
+                    placeholder="Type your message..."
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && sendMessage(messageInput)}
+                  />
+                  <button className="send-btn" onClick={() => sendMessage(messageInput)} title="Send message">
+                    <span className="send-icon" aria-hidden="true">➤</span>
                   </button>
-                ) : null}
+                </div>
               </div>
             </div>
           )}
+
+          {/* ══════════════════════════════════
+              TAB 2 – TRANSPORT DETAILS
+          ══════════════════════════════════ */}
+          {activeTab === "transport" && (
+            <div className="tab-panel tab-panel-scroll">
+              <div className="tab-card">
+                <div className="tab-card-title">📍 Route & Location</div>
+                <div className="info-grid">
+                  <div className="info-row">
+                    <span className="info-label">Farmer</span>
+                    <span className="info-value">{chat.farmerName || "—"}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Pickup</span>
+                    <span className="info-value">{chat.farmerLocation || "—"}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Drop</span>
+                    <span className="info-value">{chat.drop || "—"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="tab-card">
+                <div className="tab-card-title">👤 Customer Address</div>
+                <div className="info-grid">
+                  <div className="info-row">
+                    <span className="info-label">Phone</span>
+                    <span className="info-value">{chat.customerAddress?.phone || "—"}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Door No</span>
+                    <span className="info-value">{chat.customerAddress?.doorNo || "—"}</span>
+                  </div>
+                  <div className="info-row wide">
+                    <span className="info-label">Full Address</span>
+                    <span className="info-value">{chat.customerAddress?.fullAddress?.trim() || "—"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="tab-card">
+                <div className="tab-card-title">🚛 Vehicle & Pricing</div>
+                <div className="info-grid">
+                  <div className="info-row">
+                    <span className="info-label">Vehicle</span>
+                    <span className="info-value">
+                      {chat.vehicle ? <span className="vehicle-badge">{chat.vehicle}</span> : "—"}
+                    </span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Quantity</span>
+                    <span className="info-value">{chat.totalQty || 0} kg</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Base Delivery</span>
+                    <span className="info-value price">{resolvedBasePrice ? `Rs.${resolvedBasePrice}` : "TBD"}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Batch Discount</span>
+                    <span className="info-value" style={{ color: "#2e7d32", fontWeight: 700 }}>
+                      {resolvedDiscount > 0 ? `-Rs.${resolvedDiscount}` : "Rs.0"}
+                    </span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Final Delivery</span>
+                    <span className="info-value price highlight">{resolvedFinalPrice ? `Rs.${resolvedFinalPrice}` : "TBD"}</span>
+                  </div>
+                </div>
+                {resolvedDiscount > 0 && (
+                  <div className="discount-note">
+                    🎉 Platform-funded delivery discount applied for this route and order.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ══════════════════════════════════
+              TAB 3 – DEAL
+          ══════════════════════════════════ */}
+          {activeTab === "deal" && (
+            <div className="tab-panel tab-panel-scroll">
+
+              {/* Counter Offer Card */}
+              <div className="tab-card">
+                <div className="tab-card-title">💸 Send Counter Offer</div>
+                <div className="offer-input-wrapper">
+                  <div className="input-group">
+                    <input
+                      type="number"
+                      className="price-input"
+                      placeholder="Enter your counter offer (Rs.)"
+                      value={offerPrice}
+                      min={MINIMUM_MANUAL_OFFER}
+                      onChange={(e) => setOfferPrice(e.target.value)}
+                    />
+                    <button className="offer-btn" onClick={sendOffer}>Send Offer</button>
+                  </div>
+                  <p className="offer-hint">Sends your offer to the dealer in real time. Minimum: Rs.15.</p>
+                </div>
+              </div>
+
+              {/* Deal Confirmation Card */}
+              {(chat.negotiation?.finalPrice || chat.finalDealPrice || chat.dealerPrice) && (
+                <div className="tab-card">
+                  <div className="tab-card-title">✅ Confirm Transport Deal</div>
+                  <div className="info-grid">
+                    <div className="info-row">
+                      <span className="info-label">Route</span>
+                      <span className="info-value">{chat.farmerLocation} → {chat.drop}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="info-label">Vehicle</span>
+                      <span className="info-value">{chat.vehicle || "—"}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="info-label">Base Delivery</span>
+                      <span className="info-value">Rs.{resolvedBasePrice || 0}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="info-label">Discount (Platform)</span>
+                      <span className="info-value" style={{ color: "#2e7d32", fontWeight: 700 }}>-Rs.{resolvedDiscount || 0}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="info-label">Final Price</span>
+                      <span className="info-value price highlight final-price">Rs.{resolvedFinalPrice || 0}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="info-label">Your Decision</span>
+                      <span className={`decision-badge ${chat.negotiation?.customerDecision || "pending"}`}>
+                        {chat.negotiation?.customerDecision || "pending"}
+                      </span>
+                    </div>
+                    <div className="info-row">
+                      <span className="info-label">Dealer Decision</span>
+                      <span className={`decision-badge ${chat.negotiation?.dealerDecision || "pending"}`}>
+                        {chat.negotiation?.dealerDecision || "pending"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="action-buttons">
+                    <button className="confirm-btn" onClick={confirmDeal}>✓ Confirm Price</button>
+                    <button className="reject-btn" onClick={rejectDeal}>✗ Reject Price</button>
+                    {bothSidesConfirmed && (
+                      <button className="confirm-btn go-payment-btn" onClick={proceedToPayment}>
+                        🏦 Go to Payment
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* No deal yet */}
+              {!(chat.negotiation?.finalPrice || chat.finalDealPrice || chat.dealerPrice) && (
+                <div className="tab-empty">
+                  <span style={{ fontSize: 40 }}>🤝</span>
+                  <p>No deal price set yet. Chat with the dealer to negotiate.</p>
+                  <button className="chat-tab-link" onClick={() => setActiveTab("chat")}>Go to Chat →</button>
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
       </div>
     </div>

@@ -60,7 +60,6 @@ export default function Home() {
     fetchCrops();
 
     const refreshTimer = setInterval(() => {
-      // Silent refresh to keep UI stable while syncing latest AP mandi references.
       fetchCrops({ silent: true });
     }, AUTO_REFRESH_MS);
 
@@ -71,9 +70,7 @@ export default function Home() {
     const checkPendingDealerRequests = async () => {
       try {
         const pending = JSON.parse(localStorage.getItem(PENDING_DEALER_REQUESTS_KEY) || "[]");
-        if (!Array.isArray(pending) || pending.length === 0) {
-          return;
-        }
+        if (!Array.isArray(pending) || pending.length === 0) return;
 
         for (const req of pending) {
           if (!req?.requestId) continue;
@@ -81,17 +78,12 @@ export default function Home() {
           const statusData = await apiGet(`transport-dealers/request/${req.requestId}`);
 
           if (statusData?.status === "ACCEPTED" && statusData?.chatId) {
-            localStorage.setItem(
-              "activeChat",
-              JSON.stringify({
-                chatId: statusData.chatId,
-                requestId: req.requestId,
-              })
-            );
-
+            localStorage.setItem("activeChat", JSON.stringify({
+              chatId: statusData.chatId,
+              requestId: req.requestId,
+            }));
             const next = pending.filter((item) => String(item.requestId) !== String(req.requestId));
             localStorage.setItem(PENDING_DEALER_REQUESTS_KEY, JSON.stringify(next));
-
             alert("✅ Dealer accepted your request. Opening chat...");
             navigate("/chat");
             return;
@@ -109,26 +101,18 @@ export default function Home() {
 
     const timer = setInterval(checkPendingDealerRequests, 5000);
     checkPendingDealerRequests();
-
     return () => clearInterval(timer);
   }, [navigate]);
 
   const fetchCrops = async ({ silent = false } = {}) => {
     try {
-      if (!silent) {
-        setLoading(true);
-        setError(null);
-      }
-      
+      if (!silent) { setLoading(true); setError(null); }
       const data = await apiGet("crops");
       console.log("✅ Fetched crops from backend:", data.length, "crops");
-      console.log("Sample crop data:", data[0]);
 
-      // Transform backend data to match UI format
       const transformedCrops = data.map(crop => {
         const cropName = crop.cropName || crop.name || "Unknown";
         const farmerName = crop.farmerId?.name || crop.farmerDetails?.name || "Unknown Farmer";
-        
         return {
           id: crop._id,
           name: cropName,
@@ -142,24 +126,12 @@ export default function Home() {
         };
       });
 
-      console.log("✅ Transformed crops:", transformedCrops.length);
-      console.log("First 3 crops:", transformedCrops.slice(0, 3));
-
       setCrops(transformedCrops);
     } catch (err) {
       console.error("❌ Error fetching crops:", err);
-      if (!silent) {
-        setError(err.message);
-      }
-      
-      // Fallback to empty array
-      if (!silent) {
-        setCrops([]);
-      }
+      if (!silent) { setError(err.message); setCrops([]); }
     } finally {
-      if (!silent) {
-        setLoading(false);
-      }
+      if (!silent) setLoading(false);
     }
   };
 
@@ -175,73 +147,84 @@ export default function Home() {
 
   return (
     <div className="home-page">
-      {/* HEADER */}
-      <div className="home-header">
-        <div className="header-content">
-          <span className="logo-icon">🌾</span>
-          <strong>AgriMart</strong>
-          <span className="tagline">Fresh Harvest Daily</span>
-        </div>
-      </div>
 
-      {/* SEARCH */}
-      <div className="search-section">
-        <div className="search-box">
-          <span className="search-icon">🔍</span>
-          <input
-            type="text"
-            placeholder="Search crops, vegetables, fruits..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+      {/* ── HEADER ── */}
+      <header className="home-header">
+        <div className="header-inner">
+          <div className="logo-wrap">
+            <span className="logo-icon">🌾</span>
+            <span className="logo-text">Agri<span>Mart</span></span>
+          </div>
+          <span className="tagline">Fresh from Farmers, Daily</span>
         </div>
-      </div>
+      </header>
 
-      {/* CROPS GRID */}
+      {/* ── SEARCH HERO BANNER ── */}
+      <section className="search-section">
+        <div className="search-section-inner">
+          <h1 className="search-title">Fresh Produce, Direct from Farmers</h1>
+          <p className="search-subtitle">Search vegetables, fruits, grains &amp; more</p>
+          <div className="search-box">
+            <span className="search-icon">🔍</span>
+            <input
+              id="home-search"
+              type="text"
+              placeholder="Search crops, vegetables, fruits..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION HEADER ── */}
+      {!loading && !error && (
+        <div className="section-header">
+          <h2 className="section-title-text">
+            🌿 Available Crops
+          </h2>
+          <span className="section-count">
+            {filteredCrops.length} {filteredCrops.length === 1 ? "listing" : "listings"}
+          </span>
+        </div>
+      )}
+
+      {/* ── CROPS CONTAINER ── */}
       <div className="crops-container">
+
+        {/* Loading */}
         {loading && (
-          <div style={{textAlign: 'center', padding: '40px', color: '#1e8e3e', fontSize: '18px'}}>
-            <div style={{fontSize: '48px', marginBottom: '10px'}}>🌾</div>
-            Loading fresh crops...
+          <div className="state-card">
+            <div className="ag-spinner"></div>
+            <p className="state-message">Loading fresh crops…</p>
           </div>
         )}
 
+        {/* Error */}
         {error && (
-          <div style={{textAlign: 'center', padding: '40px', color: '#dc2626', fontSize: '16px'}}>
-            <div style={{fontSize: '48px', marginBottom: '10px'}}>⚠️</div>
-            {error}
-            <button 
-              onClick={fetchCrops}
-              style={{
-                marginTop: '20px',
-                padding: '10px 20px',
-                background: '#1e8e3e',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer'
-              }}
-            >
-              Retry
-            </button>
+          <div className="state-card">
+            <span className="state-icon">⚠️</span>
+            <p className="error-text">{error}</p>
+            <button className="retry-btn" onClick={fetchCrops}>↻ Retry</button>
           </div>
         )}
 
+        {/* Empty */}
         {!loading && !error && filteredCrops.length === 0 && (
-          <div style={{textAlign: 'center', padding: '40px', color: '#7f8c8d', fontSize: '16px'}}>
-            <div style={{fontSize: '48px', marginBottom: '10px'}}>🔍</div>
-            No crops found. Try a different search term.
+          <div className="state-card">
+            <span className="state-icon">🔍</span>
+            <p className="state-message">No crops found for "{search}"</p>
           </div>
         )}
 
-        {!loading && !error && (
+        {/* Grid */}
+        {!loading && !error && filteredCrops.length > 0 && (
           <div className="crops-grid">
             {filteredCrops.map((crop) => (
               <div
                 key={crop.id}
                 className="crop-card"
-                onClick={() => {
-                  // Pass data via navigation state instead of localStorage
+                onClick={() =>
                   navigate("/crop-details", {
                     state: {
                       crop: {
@@ -253,29 +236,32 @@ export default function Home() {
                         cropName: crop.name
                       }
                     }
-                  });
-                }}
+                  })
+                }
               >
                 <div className="crop-image-wrapper">
                   <img src={crop.image} alt={crop.name} className="crop-image" />
                   <span className={`category-badge ${crop.category.toLowerCase()}`}>
-                    {crop.category.toUpperCase()}
+                    {crop.category}
                   </span>
                 </div>
+
                 <div className="crop-info">
                   <h3 className="crop-name">{crop.name}</h3>
-                  <p className="crop-price">₹{crop.sellingPricePerKg} <span>/kg</span></p>
+                  <p className="crop-price">
+                    ₹{crop.sellingPricePerKg} <span>/kg</span>
+                  </p>
                   <p className="crop-price-note">Farmer selling price</p>
                   {crop.mandiReference && (
-                    <p
+                    <span
                       className="crop-mandi-ref"
                       title="Government mandi wholesale reference. 1 quintal = 100 kg."
                     >
-                      AP mandi ref: ₹{crop.mandiReference.modalPricePerQuintal}/quintal
-                    </p>
+                      🏛 ₹{crop.mandiReference.modalPricePerQuintal}/quintal
+                    </span>
                   )}
                   <p className="crop-farmer">👨‍🌾 {crop.farmer}</p>
-                  <button className="view-details-btn">VIEW DETAILS →</button>
+                  <button className="view-details-btn">View Details →</button>
                 </div>
               </div>
             ))}
@@ -283,25 +269,26 @@ export default function Home() {
         )}
       </div>
 
-      {/* BOTTOM NAVIGATION */}
-      <div className="bottom-nav">
-        <div className="nav-item active" onClick={() => navigate("/home")}>
+      {/* ── BOTTOM NAV ── */}
+      <nav className="bottom-nav">
+        <div id="nav-home" className="nav-item active" onClick={() => navigate("/home")}>
           <span className="nav-icon">🏠</span>
-          <span className="nav-label">HOME</span>
+          <span className="nav-label">Home</span>
         </div>
-        <div className="nav-item" onClick={() => navigate("/cart")}>
+        <div id="nav-cart" className="nav-item" onClick={() => navigate("/cart")}>
           <span className="nav-icon">🛒</span>
-          <span className="nav-label">CART</span>
+          <span className="nav-label">Cart</span>
         </div>
-        <div className="nav-item" onClick={() => navigate("/account")}>
+        <div id="nav-account" className="nav-item" onClick={() => navigate("/account")}>
           <span className="nav-icon">👤</span>
-          <span className="nav-label">ACCOUNT</span>
+          <span className="nav-label">Account</span>
         </div>
-        <div className="nav-item" onClick={handleLogout}>
+        <div id="nav-logout" className="nav-item" onClick={handleLogout}>
           <span className="nav-icon">🚪</span>
-          <span className="nav-label">LOGOUT</span>
+          <span className="nav-label">Logout</span>
         </div>
-      </div>
+      </nav>
+
     </div>
   );
 }

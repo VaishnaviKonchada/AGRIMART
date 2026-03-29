@@ -1,0 +1,92 @@
+{
+  "default": {
+    "disease": "Unknown condition",
+    "severity": "Needs field inspection",
+    "solution": [
+      "Isolate affected plants and avoid spreading tools between plots.",
+      "Capture more close-up images under natural light for better diagnosis.",
+      "Consult local agriculture officer if symptoms spread quickly."
+    ]
+  },
+  "healthy": {
+    "disease": "Healthy plant",
+    "severity": "None",
+    "solution": [
+      "Continue balanced irrigation and avoid water stagnation.",
+      "Maintain weekly field scouting to catch early symptoms.",
+      "Use preventive bio-fungicide spray only when local advisory recommends it."
+    ]
+  },
+  "blight": {
+    "disease": "Leaf blight",
+    "severity": "Moderate to high",
+    "solution": [
+      "Remove infected leaves and destroy away from field.",
+      "Spray recommended fungicide such as mancozeb or chlorothalonil as label says.",
+      "Improve air flow and avoid overhead irrigation in evening."
+    ]
+  },
+  "rust": {
+    "disease": "Rust disease",
+    "severity": "Moderate",
+    "solution": [
+      "Remove highly infected leaves first.",
+      "Apply sulfur or triazole fungicide as per crop advisory.",
+      "Reduce humidity by spacing plants correctly."
+    ]
+  },
+  "powdery_mildew": {
+    "disease": "Powdery mildew",
+    "severity": "Moderate",
+    "solution": [
+      "Spray wettable sulfur or potassium bicarbonate early.",
+      "Avoid excess nitrogen that creates dense canopy.",
+      "Increase sunlight penetration by pruning where possible."
+    ]
+  },
+  "downy_mildew": {
+    "disease": "Downy mildew",
+    "severity": "High",
+    "solution": [
+      "Use disease-free seed and improve drainage immediately.",
+      "Apply systemic fungicide recommended for downy mildew.",
+      "Do not irrigate at night and keep foliage dry."
+    ]
+  },
+  "leaf_spot": {
+    "disease": "Leaf spot",
+    "severity": "Mild to moderate",
+    "solution": [
+      "Remove affected leaves and crop debris.",
+      "Use copper-based fungicide if spread is increasing.",
+      "Rotate crop family in next season."
+    ]
+  },
+  "bacterial": {
+    "disease": "Bacterial disease",
+    "severity": "High",
+    "solution": [
+      "Avoid working in wet fields to reduce spread.",
+      "Use copper bactericide where allowed by local guidance.",
+      "Disinfect tools and remove infected plant parts quickly."
+    ]
+  },
+  "viral": {
+    "disease": "Viral disease",
+    "severity": "High",
+    "solution": [
+      "Rogue infected plants early to protect healthy plants.",
+      "Control vector insects such as whitefly and aphids.",
+      "Use virus-resistant varieties in the next cycle."
+    ]
+  },
+  "scab": {
+    "disease": "Scab",
+    "severity": "Moderate",
+    "solution": [
+      "Prune and destroy infected twigs or leaves.",
+      "Use preventive fungicide during humid weather windows.",
+      "Keep canopy open and avoid prolonged leaf wetness."
+    ]
+  }
+}

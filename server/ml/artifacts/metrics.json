@@ -1,0 +1,204 @@
+{
+  "split": {
+    "train_count": 4914,
+    "val_count": 1053,
+    "test_count": 1054,
+    "train_percent": 69.99,
+    "val_percent": 15.0,
+    "test_percent": 15.01
+  },
+  "data": {
+    "total_images": 7021,
+    "num_classes": 33,
+    "class_distribution": {
+      "tomato_late_blight": 363,
+      "pepper_bell_healthy": 363,
+      "tomato_spider_mites": 363,
+      "potato_early_blight": 363,
+      "potato_late_blight": 363,
+      "tomato_target_spot": 363,
+      "tomato_mosaic_virus": 363,
+      "corn_northern_leaf_blight": 194,
+      "tomato_leaf_mold": 363,
+      "cherry_healthy": 57,
+      "potato_healthy": 304,
+      "tomato_bacterial_spot": 363,
+      "pepper_bell_bacterial_spot": 363,
+      "apple_healthy": 88,
+      "apple_scab": 93,
+      "apple_rust": 106,
+      "tomato_septoria_leaf_spot": 363,
+      "rice_leaf_smut": 40,
+      "tomato_yellow_leaf_curl_virus": 363,
+      "strawberry_healthy": 96,
+      "blueberry_healthy": 117,
+      "grape_healthy": 75,
+      "tomato_early_blight": 363,
+      "squash_powdery_mildew": 130,
+      "raspberry_healthy": 119,
+      "peach_healthy": 112,
+      "corn_common_rust": 117,
+      "tomato_healthy": 363,
+      "soybean_healthy": 65,
+      "rice_bacterial_leaf_blight": 40,
+      "rice_brown_spot": 40,
+      "grape_black_rot": 79,
+      "corn_gray_leaf_spot": 67
+    },
+    "min_class_samples": 25,
+    "dropped_low_sample_classes": [
+      "tomato_two_spotted_spider_mites_leaf"
+    ]
+  },
+  "evaluation": {
+    "test_accuracy": 0.8017078042030334,
+    "test_loss": 0.7288771867752075,
+    "macro_avg_f1": 0.7502343993303028,
+    "weighted_avg_f1": 0.8020008853356447,
+    "top_confusions": [
+      {
+        "true_label": "corn_northern_leaf_blight",
+        "predicted_label": "corn_gray_leaf_spot",
+        "count": 7
+      },
+      {
+        "true_label": "tomato_leaf_mold",
+        "predicted_label": "tomato_spider_mites",
+        "count": 7
+      },
+      {
+        "true_label": "tomato_septoria_leaf_spot",
+        "predicted_label": "tomato_target_spot",
+        "count": 7
+      },
+      {
+        "true_label": "tomato_bacterial_spot",
+        "predicted_label": "tomato_septoria_leaf_spot",
+        "count": 5
+      },
+      {
+        "true_label": "tomato_early_blight",
+        "predicted_label": "tomato_late_blight",
+        "count": 5
+      },
+      {
+        "true_label": "tomato_target_spot",
+        "predicted_label": "tomato_healthy",
+        "count": 5
+      },
+      {
+        "true_label": "apple_scab",
+        "predicted_label": "apple_rust",
+        "count": 4
+      },
+      {
+        "true_label": "corn_northern_leaf_blight",
+        "predicted_label": "corn_common_rust",
+        "count": 4
+      },
+      {
+        "true_label": "tomato_bacterial_spot",
+        "predicted_label": "tomato_target_spot",
+        "count": 4
+      },
+      {
+        "true_label": "tomato_septoria_leaf_spot",
+        "predicted_label": "potato_early_blight",
+        "count": 4
+      },
+      {
+        "true_label": "apple_healthy",
+        "predicted_label": "cherry_healthy",
+        "count": 3
+      },
+      {
+        "true_label": "cherry_healthy",
+        "predicted_label": "blueberry_healthy",
+        "count": 3
+      },
+      {
+        "true_label": "corn_common_rust",
+        "predicted_label": "corn_northern_leaf_blight",
+        "count": 3
+      },
+      {
+        "true_label": "corn_gray_leaf_spot",
+        "predicted_label": "corn_northern_leaf_blight",
+        "count": 3
+      },
+      {
+        "true_label": "grape_healthy",
+        "predicted_label": "raspberry_healthy",
+        "count": 3
+      },
+      {
+        "true_label": "raspberry_healthy",
+        "predicted_label": "strawberry_healthy",
+        "count": 3
+      },
+      {
+        "true_label": "tomato_late_blight",
+        "predicted_label": "tomato_early_blight",
+        "count": 3
+      },
+      {
+        "true_label": "tomato_spider_mites",
+        "predicted_label": "tomato_target_spot",
+        "count": 3
+      },
+      {
+        "true_label": "apple_rust",
+        "predicted_label": "apple_scab",
+        "count": 2
+      },
+      {
+        "true_label": "apple_rust",
+        "predicted_label": "blueberry_healthy",
+        "count": 2
+      },
+      {
+        "true_label": "corn_gray_leaf_spot",
+        "predicted_label": "corn_common_rust",
+        "count": 2
+      },
+      {
+        "true_label": "peach_healthy",
+        "predicted_label": "cherry_healthy",
+        "count": 2
+      },
+      {
+        "true_label": "pepper_bell_bacterial_spot",
+        "predicted_label": "pepper_bell_healthy",
+        "count": 2
+      },
+      {
+        "true_label": "pepper_bell_healthy",
+        "predicted_label": "pepper_bell_bacterial_spot",
+        "count": 2
+      },
+      {
+        "true_label": "potato_early_blight",
+        "predicted_label": "corn_northern_leaf_blight",
+        "count": 2
+      }
+    ]
+  },
+  "reproducibility": {
+    "seed": 42,
+    "data_roots": [
+      "c:/Users/konch/OneDrive/Desktop/agrimart-client/server/ml/datasets/plantdisease",
+      "c:/Users/konch/OneDrive/Desktop/agrimart-client/server/ml/datasets/rice-leaf-diseases",
+      "c:/Users/konch/OneDrive/Desktop/agrimart-client/server/ml/datasets/plantdoc"
+    ],
+    "epochs": 8,
+    "fine_tune_epochs": 3,
+    "batch_size": 32,
+    "image_size": 224,
+    "max_samples": 12000,
+    "min_class_samples": 25
+  },
+  "history": {
+    "stage1_val_accuracy_max": 0.8252611756324768,
+    "stage2_val_accuracy_max": 0.8024691343307495
+  }
+}

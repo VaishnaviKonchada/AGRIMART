@@ -1,0 +1,45 @@
+# 30-SECOND SUMMARY
+
+## Problem You Reported
+After logout as Farmer and login as Transport Dealer → Redirects back to Farmer ❌
+
+## Root Cause
+Render-time redirect check conflicted with login flow, creating race condition.
+
+## Solution Applied
+1. ✅ Moved auto-redirect from render to useEffect (only on mount)
+2. ✅ Added state flag to prevent interference during login
+3. ✅ Clear ALL old localStorage before saving new data
+4. ✅ Use { replace: true } to prevent history issues
+
+## What Changed
+**File 1:** src/pages/Login.js
+- Added useEffect for auto-redirect
+- Added isLoginAttempted state
+- Added atomic localStorage clear
+- Enhanced logging
+
+**File 2:** src/components/RequireRole.js
+- Added detailed logging
+
+**Total:** 2 files, ~80 lines of code (mostly logging)
+
+## Test It Now (3 minutes)
+1. Go to farmer page → Click Logout
+2. At /login: Select "Transport Dealer"
+3. Enter: raju@agrimart.com / password123
+4. Click Login
+5. **Expected:** Should go to /transport-dealer-dashboard ✅ (NOT /farmer-dashboard ❌)
+
+## Success Metrics
+- [ ] logout redirects to /login
+- [ ] login as dealer goes to /transport-dealer-dashboard
+- [ ] localStorage shows only dealer's data
+- [ ] console shows: "🎯 NAVIGATING TO: /transport-dealer-dashboard"
+
+## Current Status
+🟢 **READY TO TEST** - All code is error-free and ready
+
+---
+
+**Test now using TEST_ACTION_PLAN.md and confirm it works!** 🚀

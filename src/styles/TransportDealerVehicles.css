@@ -1,0 +1,481 @@
+/* Transport Dealer Vehicles - Professional UI */
+
+.transport-dealer-vehicles {
+  min-height: 100vh;
+  padding: 20px 14px 90px;
+  background: linear-gradient(135deg, #f3f7ff 0%, #f9f5ff 100%);
+}
+
+.vehicles-header { max-width: 1100px; margin: 0 auto 14px; display: flex; justify-content: space-between; align-items: center; }
+.back-btn { border: 1px solid #e2e8f0; background: #fff; color: #334155; padding: 8px 12px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+.back-btn:hover { background: linear-gradient(135deg,#667eea,#764ba2); color:#fff; border-color: transparent; }
+
+.vehicles-summary { max-width: 1100px; margin: 0 auto 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+.summary-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: 800; color: #0f172a; }
+.summary-item .label { color: #64748b; font-weight: 700; }
+
+.add-vehicle-btn { max-width: 1100px; margin: 0 auto 10px; display: block; width: 100%; background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 900; cursor: pointer; }
+.service-area-btn { background: linear-gradient(135deg, #10b981, #059669); }
+
+.add-vehicle-form { max-width: 1100px; margin: 0 auto 12px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field label { font-weight: 800; color: #475569; }
+.form-field input, .form-field select { padding: 10px 12px; border: 1px solid #dbe2ee; border-radius: 12px; font-size: 15px; }
+.form-field small.recommended-badge { color: #10b981; font-weight: 700; font-size: 12px; }
+.form-checkbox { margin-top: 10px; display: flex; gap: 8px; align-items: center; color: #475569; font-weight: 700; }
+
+/* Distance Calculator */
+.distance-calculator {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  color: white;
+}
+
+.distance-calculator label {
+  color: white !important;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.distance-calculator input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.distance-calculator input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.vehicle-recommendation {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.recommendation-icon {
+  font-size: 24px;
+}
+
+.recommendation-text {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.recommendation-text strong {
+  font-weight: 900;
+  text-decoration: underline;
+}
+
+.vehicle-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.status-badge.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-badge.maintenance {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge.inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+.submit-btn { margin-top: 12px; background: linear-gradient(135deg,#10b981,#059669); color: #fff; border: none; padding: 10px 14px; border-radius: 12px; font-weight: 900; cursor: pointer; }
+
+.vehicles-list { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.vehicle-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+.vehicle-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.vehicle-type-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; background: #eef2ff; color: #4338ca; border-radius: 12px; font-weight: 800; }
+.verified-badge { padding: 6px 10px; background: #d1fae5; color: #065f46; border-radius: 12px; font-weight: 800; }
+.vehicle-info h4 { margin: 6px 0; color: #0f172a; }
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.info-item { display: flex; gap: 8px; align-items: center; }
+.info-item .icon { font-size: 20px; }
+.label { color: #94a3b8; font-weight: 700; margin: 0; }
+.value { margin: 0; font-weight: 800; color: #0f172a; }
+
+.vehicle-actions { display: flex; gap: 10px; margin-top: 10px; }
+.action-btn { border: none; border-radius: 12px; padding: 10px 12px; font-weight: 800; cursor: pointer; }
+.edit-btn { background: linear-gradient(135deg,#06b6d4,#0ea5e9); color: #fff; }
+.delete-btn { background: linear-gradient(135deg,#ef4444,#f97316); color: #fff; }
+
+.empty-state { text-align: center; padding: 16px; color: #64748b; font-weight: 700; }
+.empty-icon { font-size: 32px; margin-bottom: 6px; }
+
+.visible-btn { background: linear-gradient(135deg,#22c55e,#16a34a); color: #fff; }
+.hidden-btn { background: linear-gradient(135deg,#94a3b8,#64748b); color: #fff; }
+
+.vehicle-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.vehicle-modal-content {
+  width: 100%;
+  max-width: 900px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  color: #fff;
+}
+
+.close-btn {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 16px 16px;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+}
+
+/* Locations Section */
+.locations-section {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  overflow: auto;
+  flex: 1;
+}
+
+.locations-section h3 {
+  margin: 0 0 16px 0;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+.location-selector {
+  margin-bottom: 16px;
+}
+
+.location-type-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.location-type-tabs .tab {
+  padding: 8px 16px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.location-type-tabs .tab.active {
+  background: #dbeafe;
+  border-color: #0284c7;
+  color: #0c4a6e;
+}
+
+.location-type-tabs .tab:hover {
+  border-color: #cbd5e1;
+}
+
+.location-input-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  align-items: end;
+}
+
+/* NEW: Parallel Location Selectors with Search */
+.location-input-group-parallel {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-top: 12px;
+}
+
+.selector-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.selector-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.search-input {
+  padding: 8px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #f8fafc;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #0284c7;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+
+.search-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f1f5f9;
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
+}
+
+.location-select {
+  padding: 10px 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.location-select:focus {
+  outline: none;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+}
+
+.location-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.add-location-btn {
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.add-location-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.add-location-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #94a3b8;
+}
+
+.locations-display {
+  margin-top: 12px;
+}
+
+.location-group {
+  margin-bottom: 12px;
+}
+
+.location-group h4 {
+  margin: 0 0 8px 0;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.location-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.location-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 2px solid;
+}
+
+.location-chip.pickup-chip {
+  background: #dbeafe;
+  border-color: #0284c7;
+  color: #0c4a6e;
+}
+
+.location-chip.drop-chip {
+  background: #fef3c7;
+  border-color: #fbbf24;
+  color: #78350f;
+}
+
+.location-chip .remove-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.location-chip .remove-btn:hover {
+  opacity: 1;
+}
+
+/* Dealer Service Areas */
+.dealer-service-areas {
+  background: linear-gradient(135deg, #f0f9ff 0%, #f8f5ff 100%);
+  border: 2px solid #06b6d4;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.dealer-service-areas h4 {
+  color: #0e7490;
+  margin-bottom: 16px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dealer-service-areas .locations-section {
+  margin-bottom: 16px;
+}
+
+.dealer-service-areas .locations-section h5 {
+  color: #0e7490;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.dealer-service-areas .location-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dealer-service-areas .location-item {
+  background: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border-left: 3px solid;
+  font-size: 13px;
+  color: #334155;
+}
+
+.dealer-service-areas .location-item.pickup {
+  border-left-color: #0284c7;
+  background: #f0f9ff;
+}
+
+.dealer-service-areas .location-item.drop {
+  border-left-color: #eab308;
+  background: #fef3c7;
+}
+
+.setup-reminder {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: #7c2d12;
+}
+
+.setup-reminder p {
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.btn-setup {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.btn-setup:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+

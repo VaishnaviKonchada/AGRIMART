@@ -1,0 +1,341 @@
+/* Transport Dealer Payments - Professional UI */
+
+.transport-dealer-payments {
+  min-height: 100vh;
+  padding: 24px 16px 90px;
+  background: radial-gradient(1400px 700px at -10% -20%, #e7f1ff 0%, transparent 60%),
+              radial-gradient(1400px 700px at 110% 120%, #f6e8ff 0%, transparent 60%),
+              linear-gradient(135deg, #f4f7fb 0%, #f9f6ff 100%);
+}
+
+.payments-header {
+  max-width: 1000px;
+  margin: 0 auto 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.payments-header h2 {
+  margin: 0 0 4px 0;
+  font-size: 28px;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.earnings-summary {
+  max-width: 1000px;
+  margin: 0 auto 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.earnings-card {
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+.earnings-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.12);
+}
+
+.earnings-card.primary {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.earnings-card.secondary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.earnings-card.success {
+  background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+  color: white;
+}
+
+.earnings-card.tertiary {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  color: white;
+}
+
+.earnings-icon {
+  font-size: 36px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.earnings-info {
+  flex: 1;
+}
+
+.earnings-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  opacity: 0.9;
+}
+
+.earnings-value {
+  font-size: 24px;
+  font-weight: 900;
+  margin-top: 4px;
+}
+
+.payments-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  gap: 18px;
+}
+
+.payment-card {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.09);
+  transition: all 0.3s ease;
+}
+
+.payment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.12);
+  border-color: rgba(102, 126, 234, 0.2);
+}
+
+.payment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f4f8;
+}
+
+.payment-info-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-number {
+  font-size: 16px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.item-name {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.payment-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.details-section {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid rgba(226, 232, 240, 0.6);
+}
+
+.details-title {
+  margin: 0 0 14px 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.4);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row.divider {
+  border-top: 2px solid #dbe2ee;
+  border-bottom: none;
+  margin-top: 8px;
+  padding-top: 12px;
+  font-weight: 700;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.detail-value {
+  font-size: 14px;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.detail-value.fee {
+  color: #ef4444;
+}
+
+.detail-value.earnings {
+  color: #10b981;
+  font-size: 16px;
+}
+
+.order-details {
+  background: linear-gradient(120deg, rgba(102, 126, 234, 0.08), rgba(54, 209, 220, 0.08));
+  border-radius: 14px;
+  padding: 16px;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  margin-bottom: 24px;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-item .detail-label {
+  font-size: 12px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+}
+
+.detail-item .detail-value {
+  font-size: 14px;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.payment-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  flex: 1;
+  min-width: 150px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(16, 185, 129, 0.4);
+}
+
+.secondary-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.secondary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #94a3b8;
+}
+
+.empty-icon {
+  font-size: 60px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 18px;
+  font-weight: 700;
+  color: #64748b;
+  margin: 0 0 8px 0;
+}
+
+.empty-state small {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+@media (max-width: 768px) {
+  .payments-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .earnings-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .payment-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-actions {
+    flex-direction: column;
+  }
+
+  .action-btn {
+    width: 100%;
+  }
+}

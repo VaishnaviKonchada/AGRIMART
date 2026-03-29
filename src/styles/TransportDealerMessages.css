@@ -1,0 +1,278 @@
+/* Transport Dealer Messages - Professional UI */
+
+.transport-dealer-messages {
+  min-height: 100vh;
+  padding: 20px 14px 90px;
+  background: linear-gradient(135deg, #f4f7fb 0%, #f9f6ff 100%);
+}
+
+.messages-header { max-width: 1100px; margin: 0 auto 14px; display: flex; justify-content: space-between; align-items: center; }
+.back-btn { border: 1px solid #e2e8f0; background: #fff; color: #334155; padding: 8px 12px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+.back-btn:hover { background: linear-gradient(135deg,#667eea,#764ba2); color:#fff; border-color: transparent; }
+
+.messages-container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 12px; }
+.chats-list { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+.chats-header { margin-bottom: 10px; }
+.chat-item { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px; border-radius: 12px; cursor: pointer; border: 1px solid transparent; }
+.chat-item:hover { background: #f8fafc; }
+.chat-item.active { background: linear-gradient(135deg,#eef2ff,#f5f3ff); border-color: #cbd5e1; }
+.chat-avatar { width: 42px; height: 42px; border-radius: 12px; background: #eef2ff; display: grid; place-items: center; font-weight: 900; color: #4338ca; }
+.chat-name { font-weight: 900; color: #0f172a; }
+.chat-preview { color: #94a3b8; font-weight: 700; }
+.chat-time { color: #cbd5e1; font-weight: 700; font-size: 12px; }
+.empty-chats { text-align: center; padding: 12px; color: #64748b; font-weight: 700; }
+
+.chat-window { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: flex; flex-direction: column; min-height: 76vh; }
+.chat-header { border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.chat-header-info h3 { margin: 0; color: #0f172a; }
+.chat-header-info p { margin: 2px 0 0; color: #94a3b8; font-weight: 700; }
+.price-negotiate-btn { background: linear-gradient(135deg, #f59e0b, #f97316); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: all 0.3s ease; }
+.price-negotiate-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); }
+
+/* Price Negotiation Panel */
+.price-negotiation-panel {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #fbbf24;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 20px rgba(251, 191, 36, 0.2);
+}
+
+.negotiation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.negotiation-header h4 {
+  margin: 0;
+  color: #78350f;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.close-panel-btn {
+  background: rgba(120, 53, 15, 0.1);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  color: #78350f;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.close-panel-btn:hover {
+  background: rgba(120, 53, 15, 0.2);
+}
+
+.price-info {
+  background: white;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.price-item:last-child {
+  margin-bottom: 0;
+}
+
+.price-label {
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.price-amount {
+  font-size: 18px;
+  font-weight: 900;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.customer-price {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.dealer-price {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.price-status {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.status-indicator {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-indicator.status-confirmed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-indicator.status-dealer_offered {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-indicator.status-pending {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.price-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirm-customer-price-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.confirm-customer-price-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+.final-price-input-group {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.final-price-input {
+  padding: 10px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.final-price-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.send-price-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.send-price-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.reject-price-btn {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.reject-price-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.35);
+}
+
+.messages-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px; min-height: 380px; max-height: 760px; }
+.message { max-width: 70%; padding: 10px 12px; border-radius: 12px; font-weight: 700; position: relative; }
+.message.sent { align-self: flex-end; background: linear-gradient(135deg,#667eea,#764ba2); color: #fff; }
+.message.received { align-self: flex-start; background: #f1f5f9; color: #0f172a; }
+
+/* Price Messages Special Styling */
+.message.price-offer-message {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  border: 2px solid #f97316;
+  padding: 14px;
+  font-size: 15px;
+}
+
+.message.price-confirm-message {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: 2px solid #065f46;
+  padding: 14px;
+  font-size: 15px;
+}
+
+.price-offer-icon,
+.price-confirm-icon {
+  font-size: 20px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.message-content {
+  word-wrap: break-word;
+}
+
+.message-time { font-size: 11px; color: #e2e8f0; margin-top: 4px; text-align: right; }
+.message.received .message-time { color: #94a3b8; }
+
+.message-input { display: grid; grid-template-columns: 1fr auto; gap: 8px; border-top: 1px solid #e5e7eb; padding-top: 10px; }
+.message-input input { padding: 12px; border: 1px solid #dbe2ee; border-radius: 12px; font-size: 15px; }
+.message-input button { background: linear-gradient(135deg,#10b981,#059669); color: #fff; border: none; padding: 0 16px; border-radius: 12px; font-weight: 900; cursor: pointer; }
+
+.decision-inline-panel {
+  background: linear-gradient(135deg, #ecfeff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe;
+}
+
+.decision-inline-panel .send-price-btn:disabled,
+.decision-inline-panel .close-panel-btn:disabled,
+.decision-inline-panel .reject-price-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.no-chat-selected { flex: 1; display: grid; place-items: center; color: #94a3b8; font-weight: 700; }
+.no-chat-selected .icon { font-size: 36px; margin-bottom: 6px; }
+
+@media (max-width: 900px) {
+  .messages-container { grid-template-columns: 1fr; }
+  .chat-item { grid-template-columns: auto 1fr; }
+  .message { max-width: 100%; }
+}

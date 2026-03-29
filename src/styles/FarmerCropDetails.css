@@ -1,0 +1,155 @@
+.farmer-crop-details-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f5f8ff 0%, #eef3f2 100%);
+  padding: 20px;
+}
+
+.farmer-crop-details-header {
+  max-width: 1100px;
+  margin: 0 auto 16px;
+}
+
+.header-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.language-toggle {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.language-btn {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1e3a8a;
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.language-btn.active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+
+.farmer-crop-details-header h1 {
+  margin: 10px 0 4px;
+  color: #1f2937;
+}
+
+.farmer-crop-details-header p {
+  margin: 0;
+  color: #4b5563;
+}
+
+.back-btn {
+  border: none;
+  background: #1d4ed8;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.farmer-crop-details-card,
+.farmer-info-box,
+.crop-item-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  padding: 16px;
+}
+
+.farmer-crop-details-card {
+  max-width: 600px;
+  margin: 50px auto;
+  text-align: center;
+}
+
+.farmer-info-box {
+  max-width: 1100px;
+  margin: 0 auto 16px;
+}
+
+.info-grid,
+.crop-item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.crop-list {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+}
+
+.crop-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.crop-item-header h3 {
+  margin: 0;
+  color: #111827;
+}
+
+.crop-item-header span {
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.crop-description {
+  margin-top: 10px;
+  color: #374151;
+}
+
+.crop-image-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.crop-preview-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.crop-image-note {
+  margin-top: 10px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .farmer-crop-details-page {
+    padding: 12px;
+  }
+
+  .header-top-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .crop-image-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,14 @@
+/* GLOBAL FULL PAGE BACKGROUND FOR ALL PAGES */
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-image: url("https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1920&q=80");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}

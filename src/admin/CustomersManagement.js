@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiGet, apiPost, apiPut, apiDelete, apiPatch } from "../utils/api";
+import { useTranslation } from 'react-i18next';
+import { apiGet, apiPut } from "../utils/api";
 import './styles/ManagementPages.css';
 
-
-
 const CustomersManagement = () => {
+  const { t } = useTranslation();
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -43,7 +43,6 @@ const CustomersManagement = () => {
       };
     };
 
-    // Fetch customers from backend
     const fetchCustomers = async () => {
       const token = localStorage.getItem("accessToken");
       if (!token) {
@@ -59,27 +58,14 @@ const CustomersManagement = () => {
           setCustomers(data.users.map(normalizeCustomer));
         }
       } catch (error) {
-        console.error("❌ Error fetching customer summary, trying fallback:", error);
-        try {
-          const fallback = await apiGet('admin/users?role=customer');
-          if (Array.isArray(fallback)) {
-            setCustomers(fallback.map(normalizeCustomer));
-          } else if (fallback?.users) {
-            setCustomers(fallback.users.map(normalizeCustomer));
-          } else {
-            setError('Failed to load customer data');
-          }
-        } catch (fallbackError) {
-          console.error('❌ Fallback customer fetch failed:', fallbackError);
-          setError('Failed to load customer data');
-        }
+        setError(t('admin.customers.noCustomers'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchCustomers();
-  }, []);
+  }, [t]);
 
   const toggleCustomerBlock = async (customerId) => {
     const token = localStorage.getItem("accessToken");
@@ -120,36 +106,38 @@ const CustomersManagement = () => {
   return (
     <div className="management-page">
       <button className="back-btn" onClick={goBack}>
-        <span>←</span> Back
+        <span>←</span> {t('common.back', 'Back')}
       </button>
 
       <div className="management-header">
-        <h1>Customers Management</h1>
-        <p>Monitor and manage customer accounts</p>
+        <h1>{t('admin.customers.title', 'Customers Management')}</h1>
+        <p>{t('admin.customers.subtitle', 'Monitor and manage customer accounts')}</p>
       </div>
 
       <div className="list-container">
         {error && <div className="warning-message">⚠️ {error}</div>}
-        {loading && <div className="no-dealers"><p>Loading customers...</p></div>}
-        {!loading && !customers.length && !error && <div className="no-dealers"><p>No customers found</p></div>}
+        {loading && <div className="no-dealers"><p>{t('admin.customers.loading', 'Loading customers...')}</p></div>}
+        {!loading && !customers.length && !error && <div className="no-dealers"><p>{t('admin.customers.noCustomers', 'No customers found')}</p></div>}
         {customers.map(customer => (
           <div key={customer.id || customer._id} className={`card ${customer.blocked ? 'blocked' : ''}`}>
             <div className="card-avatar">{customer.name.charAt(0)}</div>
             <div className="card-info">
               <h3>{customer.name}</h3>
               <p className="location">📍 {customer.location}</p>
-              <p className="meta">Orders: {customer.orders} | Spent: ₹{customer.totalSpent}</p>
+              <p className="meta">{t('admin.customers.orders')}: {customer.orders} | {t('admin.customers.spent')}: ₹{customer.totalSpent}</p>
             </div>
             <div className="card-status">
-              <span className={`badge ${customer.status.toLowerCase()}`}>{customer.status}</span>
+              <span className={`badge ${customer.status.toLowerCase()}`}>
+                {t(`admin.farmers.status${customer.status}`, customer.status)}
+              </span>
             </div>
             <div className="card-actions">
-              <button className="view-btn" onClick={() => viewDetails(customer)}>View</button>
+              <button className="view-btn" onClick={() => viewDetails(customer)}>{t('admin.customers.view')}</button>
               <button 
                 className={`toggle-btn ${customer.blocked ? 'unblock' : 'block'}`}
                 onClick={() => toggleCustomerBlock(customer.id)}
               >
-                {customer.blocked ? '🔓 Unblock' : '🔒 Block'}
+                {customer.blocked ? `🔓 ${t('admin.customers.unblock')}` : `🔒 ${t('admin.customers.block')}`}
               </button>
             </div>
           </div>
@@ -166,69 +154,69 @@ const CustomersManagement = () => {
 
             <div className="modal-body">
               <section className="info-section">
-                <h3>Contact Information</h3>
+                <h3>{t('admin.customers.contactInfo')}</h3>
                 <div className="info-rows">
                   <div className="info-row">
-                    <label>Email</label>
+                    <label>{t('admin.customers.email')}</label>
                     <span>{selectedCustomer.email}</span>
                   </div>
                   <div className="info-row">
-                    <label>Phone</label>
+                    <label>{t('admin.customers.phone')}</label>
                     <span>{selectedCustomer.phone}</span>
                   </div>
                   <div className="info-row">
-                    <label>Full Address</label>
-                    <span>{selectedCustomer.profile?.fullAddress && String(selectedCustomer.profile.fullAddress).trim().length > 0 ? String(selectedCustomer.profile.fullAddress).trim() : ""}</span>
+                    <label>{t('admin.customers.address')}</label>
+                    <span>{selectedCustomer.profile?.fullAddress || ""}</span>
                   </div>
                   <div className="info-row">
-                    <label>Member Since</label>
+                    <label>{t('admin.customers.memberSince')}</label>
                     <span>{formatDate(selectedCustomer.joinDate)}</span>
                   </div>
                   <div className="info-row">
-                    <label>Customer ID</label>
+                    <label>{t('admin.customers.id')}</label>
                     <span>{selectedCustomer.id || selectedCustomer._id || 'N/A'}</span>
                   </div>
                   <div className="info-row">
-                    <label>Mandal / District</label>
+                    <label>{t('admin.customers.mandalDistrict')}</label>
                     <span>{[selectedCustomer.profile?.mandal, selectedCustomer.profile?.district].filter(Boolean).join(', ') || 'N/A'}</span>
                   </div>
                   <div className="info-row">
-                    <label>State / Pincode</label>
+                    <label>{t('admin.customers.statePincode')}</label>
                     <span>{[selectedCustomer.profile?.state, selectedCustomer.profile?.pincode].filter(Boolean).join(' - ') || 'N/A'}</span>
                   </div>
                 </div>
               </section>
 
               <section className="info-section">
-                <h3>Order History</h3>
+                <h3>{t('admin.customers.orderHistory')}</h3>
                 <div className="stats-grid">
                   <div className="stat-card">
-                    <span className="stat-label">Total Orders</span>
+                    <span className="stat-label">{t('admin.customers.orders')}</span>
                     <span className="stat-value">{selectedCustomer.orders}</span>
                   </div>
                   <div className="stat-card">
-                    <span className="stat-label">Total Spent</span>
+                    <span className="stat-label">{t('admin.customers.totalSpent')}</span>
                     <span className="stat-value">₹{selectedCustomer.totalSpent}</span>
                   </div>
                   <div className="stat-card">
-                    <span className="stat-label">Last Order</span>
+                    <span className="stat-label">{t('admin.customers.lastOrder')}</span>
                     <span className="stat-value">{formatDate(selectedCustomer.lastOrder)}</span>
                   </div>
                 </div>
               </section>
 
               <section className="info-section">
-                <h3>Account Status</h3>
+                <h3>{t('admin.customers.accountStatus')}</h3>
                 <div className="status-display">
                   <span className={`large-badge ${selectedCustomer.status.toLowerCase()}`}>
-                    {selectedCustomer.status}
+                    {t(`admin.farmers.status${selectedCustomer.status}`, selectedCustomer.status)}
                   </span>
                 </div>
               </section>
             </div>
 
             <div className="modal-footer">
-              <button className="modal-close-btn" onClick={() => setShowModal(false)}>Close</button>
+              <button className="modal-close-btn" onClick={() => setShowModal(false)}>{t('common.close')}</button>
             </div>
           </div>
         </div>

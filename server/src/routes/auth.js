@@ -87,7 +87,6 @@ router.post('/register', async (req, res) => {
         message: 'Invalid role. Must be one of: customer, farmer, dealer, admin' 
       });
     }
-
     if (role === 'admin') {
       return res.status(403).json({ message: 'Admin self-registration is restricted.' });
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import FarmerDetailsModal from "../components/FarmerDetailsModal";
 import BottomNav from "../components/BottomNav";
+import CustomerHeader from "../components/CustomerHeader";
 import { readCartItems, writeCartItems } from "../utils/cartStorage";
 import { apiGet } from "../utils/api";
 import "../styles/CropDetails.css";
@@ -242,12 +243,7 @@ export default function CropDetails() {
 
   return (
     <div className="crop-details-page">
-
-      {/* ✅ TOP RIGHT ICONS */}
-      <div className="top-icons">
-        <span onClick={() => navigate("/home")} title="Home">🏠</span>
-        <span onClick={() => navigate("/cart")} title="Cart">🛒</span>
-      </div>
+      <CustomerHeader />
 
       <div className="page-header">
         <h2>🌾 {crop.cropName || crop.name}</h2>

@@ -1,8 +1,10 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import "../styles/BottomNav.css";
+import { useTranslation } from "react-i18next";
 
 export default function BottomNav() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,22 +27,22 @@ export default function BottomNav() {
     <div className="bottom-nav">
       <Link to="/home" className={`nav-item${location.pathname === "/home" ? " active" : ""}`}>
         🏠
-        <span>Home</span>
+        <span>{t('Home', 'Home')}</span>
       </Link>
 
       <Link to="/cart" className={`nav-item${location.pathname === "/cart" ? " active" : ""}`}>
         🛒
-        <span>Cart</span>
+        <span>{t('Cart', 'Cart')}</span>
       </Link>
 
       <Link to="/account" className={`nav-item${location.pathname === "/account" ? " active" : ""}`}>
         👤
-        <span>Account</span>
+        <span>{t('Account', 'Account')}</span>
       </Link>
 
       <button className="nav-item logout-btn" onClick={handleLogout}>
         🚪
-        <span>Logout</span>
+        <span>{t('logout', 'Logout')}</span>
       </button>
     </div>
   );

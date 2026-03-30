@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiGet } from "../utils/api";
 import SessionManager from "../utils/SessionManager";
 import { readCartItems, writeCartItems } from "../utils/cartStorage";
 import "../styles/MyOrders.css";
 import BottomNav from "../components/BottomNav";
-
-
+import CustomerHeader from "../components/CustomerHeader";
 
 export default function MyOrders() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [filterType, setFilterType] = useState("all");
   const [orders, setOrders] = useState([]);
@@ -30,7 +31,7 @@ export default function MyOrders() {
       .map((part) => String(part || "").trim())
       .filter(Boolean);
 
-    return parts.length ? parts.join(", ") : "Not specified";
+    return parts.length ? parts.join(", ") : t('notSet', 'Not specified');
   };
 
   const formatCompleteDeliveryAddress = (order = {}) => {
@@ -114,7 +115,7 @@ export default function MyOrders() {
 
   const deleteOrder = async (orderId, e) => {
     e.stopPropagation();
-    if (window.confirm("Are you sure you want to delete this order?")) {
+    if (window.confirm(t('myOrders.deleteConfirm', "Are you sure you want to delete this order?"))) {
       // Remove from UI immediately
       const updatedOrders = orders.filter((order) => (order.orderId || order.id) !== orderId);
       setOrders(updatedOrders);
@@ -171,7 +172,11 @@ export default function MyOrders() {
     }
     
     // Show success message
-    alert(`✓ ${order.items.length} item(s) added to cart!${order.dealerName ? `\n\nYour previous transport dealer "${order.dealerName}" will be preselected.` : ''}`);
+    alert(t('myOrders.reorderSuccess', { 
+      defaultValue: `✓ {{count}} item(s) added to cart!{{dealerMsg}}`, 
+      count: order.items.length,
+      dealerMsg: order.dealerName ? `\n\n${t('myOrders.dealerPreselected', 'Your previous transport dealer "{{name}}" will be preselected.', { name: order.dealerName })}` : ''
+    }));
     
     // Navigate to cart
     navigate("/cart");
@@ -258,9 +263,10 @@ export default function MyOrders() {
 
   return (
     <div className="myorders-container">
+      <CustomerHeader />
       {orderNotice ? (
         <div className="order-placed-notice">
-          ✅ Order placed successfully: <strong>{orderNotice.orderId}</strong>
+          ✅ {t('payment.orderConfirmed', 'Order placed successfully')}: <strong>{orderNotice.orderId}</strong>
           {orderNotice.cropName ? ` (${orderNotice.cropName})` : ""}
         </div>
       ) : null}
@@ -268,12 +274,9 @@ export default function MyOrders() {
       {/* HEADER */}
       <div className="orders-header">
         <div className="header-content">
-          <h1>📦 My Orders</h1>
-          <p className="subtitle">Track and manage all your orders</p>
+          <h1>📦 {t('myOrders.title', 'My Orders')}</h1>
+          <p className="subtitle">{t('myOrders.subtitle', 'Track and manage all your orders')}</p>
         </div>
-        <button className="back-home-btn" onClick={() => navigate("/home")}>
-          🏠 Back to Home
-        </button>
       </div>
 
       {/* FILTER TABS */}
@@ -285,7 +288,7 @@ export default function MyOrders() {
               onClick={() => setFilterType("all")}
             >
               <span className="tab-icon">📋</span>
-              <span className="tab-label">All Orders</span>
+              <span className="tab-label">{t('myOrders.allOrders', 'All Orders')}</span>
               <span className="tab-count">{orders.length}</span>
             </button>
             <button
@@ -293,7 +296,7 @@ export default function MyOrders() {
               onClick={() => setFilterType("recent")}
             >
               <span className="tab-icon">🕐</span>
-              <span className="tab-label">Recent</span>
+              <span className="tab-label">{t('myOrders.recent', 'Recent')}</span>
               <span className="tab-count">
                 {getRecentOrdersCount(orders)}
               </span>
@@ -303,7 +306,7 @@ export default function MyOrders() {
               onClick={() => setFilterType("past")}
             >
               <span className="tab-icon">📅</span>
-              <span className="tab-label">Past Orders</span>
+              <span className="tab-label">{t('myOrders.pastOrders', 'Past Orders')}</span>
               <span className="tab-count">
                 {getPastOrdersCount(orders)}
               </span>
@@ -313,7 +316,7 @@ export default function MyOrders() {
               onClick={() => setFilterType("pending")}
             >
               <span className="tab-icon">⏳</span>
-              <span className="tab-label">Pending</span>
+              <span className="tab-label">{t('myOrders.pending', 'Pending')}</span>
               <span className="tab-count">
                 {orders.filter((order) => order.status !== "Delivered" && order.status !== "Cancelled").length}
               </span>
@@ -327,8 +330,8 @@ export default function MyOrders() {
         {loading ? (
           <div className="empty-state">
             <div className="empty-icon">⏳</div>
-            <h2>Loading Orders...</h2>
-            <p>Please wait while we fetch your orders.</p>
+            <h2>{t('myOrders.loadingOrders', 'Loading Orders...')}</h2>
+            <p>{t('myOrders.pleaseWait', 'Please wait while we fetch your orders.')}</p>
           </div>
         ) : filteredOrders.length > 0 ? (
           <div className="orders-list">
@@ -417,34 +420,34 @@ export default function MyOrders() {
                   <div className="order-details-expanded">
                     {/* FARMER SECTION */}
                     <div className="detail-section farmer-detail">
-                      <h4 className="section-title">👨‍🌾 Farmer Information</h4>
+                      <h4 className="section-title">👨‍🌾 {t('myOrders.farmerInfo', 'Farmer Information')}</h4>
                       <div className="farmer-grid">
                         <div className="farmer-info-item">
-                          <span className="label">Customer ID</span>
+                          <span className="label">{t('orders.customerId', 'Customer ID')}</span>
                           <span className="value">{String(customerId)}</span>
                         </div>
                         <div className="farmer-info-item">
-                          <span className="label">Farmer Name</span>
+                          <span className="label">{t('orders.name', 'Farmer Name')}</span>
                           <span className="value">{farmerName}</span>
                         </div>
                         <div className="farmer-info-item">
-                          <span className="label">Farmer ID</span>
+                          <span className="label">{t('orders.farmerId', 'Farmer ID')}</span>
                           <span className="value">{String(farmerId)}</span>
                         </div>
                         <div className="farmer-info-item">
-                          <span className="label">Pickup Location</span>
+                          <span className="label">{t('orders.dropAddress', 'Pickup Location')}</span>
                           <span className="value">{formatOrderLocation(order.delivery, "pickup")}</span>
                         </div>
                         <div className="farmer-info-item">
-                          <span className="label">Full Delivery Address</span>
-                          <span className="value full-address">{formatCompleteDeliveryAddress(order) || "Not specified"}</span>
+                          <span className="label">{t('customerAccount.fullLocation', 'Full Delivery Address')}</span>
+                          <span className="value full-address">{formatCompleteDeliveryAddress(order) || t('notSet', "Not specified")}</span>
                         </div>
                         <div className="farmer-info-item">
-                          <span className="label">Pickup Coordinates</span>
+                          <span className="label">{t('customerAccount.addressCoords', 'Pickup Coordinates')}</span>
                           <span className="value">{formatCoordinates(order.delivery?.pickupCoordinates)}</span>
                         </div>
                         <div className="farmer-info-item">
-                          <span className="label">Drop Coordinates</span>
+                          <span className="label">{t('customerAccount.addressCoords', 'Drop Coordinates')}</span>
                           <span className="value">{formatCoordinates(order.delivery?.dropCoordinates)}</span>
                         </div>
                       </div>
@@ -452,13 +455,13 @@ export default function MyOrders() {
 
                     {/* ITEMS SECTION */}
                     <div className="detail-section items-detail">
-                      <h4 className="section-title">🛒 Items Ordered</h4>
+                      <h4 className="section-title">🛒 {t('myOrders.itemsOrdered', 'Items Ordered')}</h4>
                       <div className="items-grid">
                         {order.items.map((item, idx) => (
                           <div key={idx} className="item-detail-card">
                             <div className="item-detail-name">{item.cropName || item.name}</div>
                             <div className="item-detail-qty">
-                              {item.quantity} kg @ farmer selling price ₹{item.pricePerKg}/kg
+                              {item.quantity} kg @ {t('cart.farmerSellingPrice', 'farmer selling price')} ₹{item.pricePerKg}/kg
                             </div>
                             <div className="item-detail-price">
                               ₹{(item.pricePerKg * item.quantity).toLocaleString()}
@@ -470,38 +473,38 @@ export default function MyOrders() {
 
                     {/* TRANSPORT SECTION */}
                     <div className="detail-section transport-detail">
-                      <h4 className="section-title">🚚 Transport Info</h4>
+                      <h4 className="section-title">🚚 {t('myOrders.transportInfo', 'Transport Info')}</h4>
                       <div className="transport-grid">
                         <div className="transport-info-item">
-                          <span className="label">Dealer</span>
+                          <span className="label">{t('orders.name', 'Dealer')}</span>
                           <span className="value">{dealerName}</span>
                         </div>
                         <div className="transport-info-item">
-                          <span className="label">Dealer ID</span>
+                          <span className="label">{t('orders.dealerId', 'Dealer ID')}</span>
                           <span className="value">{String(dealerId)}</span>
                         </div>
                         <div className="transport-info-item">
-                          <span className="label">Dealer Contact Number</span>
+                          <span className="label">{t('orders.contact', 'Dealer Contact Number')}</span>
                           <span className="value">{dealerPhone}</span>
                         </div>
                         <div className="transport-info-item">
-                          <span className="label">Vehicle</span>
+                          <span className="label">{t('transportDealers.vehicle', 'Vehicle')}</span>
                           <span className="value badge">
-                            {order.transport?.vehicle || "N/A"}
+                            {order.transport?.vehicle || t('notSet', "N/A")}
                           </span>
                         </div>
                         <div className="transport-info-item">
-                          <span className="label">Transport Fee</span>
+                          <span className="label">{t('myOrders.finalDeliveryCharge', 'Transport Fee')}</span>
                           <span className="value">
                             ₹{transportFinalFee.toLocaleString()}
                           </span>
                         </div>
                         <div className="transport-info-item">
-                          <span className="label">Door-to-door Distance</span>
-                          <span className="value">{Number.isFinite(routeDistance) ? `${routeDistance} km` : "N/A"}</span>
+                          <span className="label">{t('transportDealers.distance', 'Door-to-door Distance')}</span>
+                          <span className="value">{Number.isFinite(routeDistance) ? `${routeDistance} km` : t('notSet', "N/A")}</span>
                         </div>
                         <div className="transport-info-item">
-                          <span className="label">Distance Source</span>
+                          <span className="label">{t('myOrders.distanceSource', 'Distance Source')}</span>
                           <span className="value">{distanceSource}</span>
                         </div>
                       </div>
@@ -509,61 +512,61 @@ export default function MyOrders() {
 
                     {/* PRICE BREAKDOWN */}
                     <div className="detail-section price-breakdown-detail">
-                      <h4 className="section-title">💰 Price Summary</h4>
+                      <h4 className="section-title">💰 {t('myOrders.priceSummary', 'Price Summary')}</h4>
                       <div className="price-summary-grid">
                         <div className="summary-row">
-                          <span className="summary-label">Items Total</span>
+                          <span className="summary-label">{t('myOrders.itemsTotal', 'Items Total')}</span>
                           <span className="summary-value">
                             ₹{itemsTotal.toLocaleString()}
                           </span>
                         </div>
                         <div className="summary-row">
-                          <span className="summary-label">Base Delivery</span>
+                          <span className="summary-label">{t('myOrders.baseDelivery', 'Base Delivery')}</span>
                           <span className="summary-value">
                             ₹{transportBaseFee.toLocaleString()}
                           </span>
                         </div>
                         <div className="summary-row">
-                          <span className="summary-label">Batch Discount</span>
+                          <span className="summary-label">{t('myOrders.batchDiscount', 'Batch Discount')}</span>
                           <span className="summary-value" style={{ color: "#2e7d32" }}>
                             -₹{batchDiscount.toLocaleString()}
                           </span>
                         </div>
                         <div className="summary-row">
-                          <span className="summary-label">Final Delivery Charge</span>
+                          <span className="summary-label">{t('myOrders.finalDeliveryCharge', 'Final Delivery Charge')}</span>
                           <span className="summary-value">
                             ₹{transportFinalFee.toLocaleString()}
                           </span>
                         </div>
                         <div className="summary-row">
                           <span className="summary-label" style={{ fontSize: "0.95em", color: "#1976d2" }}>
-                            Note
+                            {t('myOrders.note', 'Note')}
                           </span>
                           <span className="summary-value" style={{ fontSize: "0.95em", color: "#1976d2" }}>
-                            Delivery charge shown is the final backend-confirmed value after all discounts and batching. This matches the dealer and order summary.
+                            {t('myOrders.finalFeeNote', 'Delivery charge shown is the final backend-confirmed value after all discounts and batching. This matches the dealer and order summary.')}
                           </span>
                         </div>
                         <div className="summary-row">
-                          <span className="summary-label">Delivery Distance</span>
+                          <span className="summary-label">{t('transportDealers.distance', 'Delivery Distance')}</span>
                           <span className="summary-value">
-                            {Number.isFinite(routeDistance) ? `${routeDistance} km` : "N/A"}
+                            {Number.isFinite(routeDistance) ? `${routeDistance} km` : t('notSet', "N/A")}
                           </span>
                         </div>
                         <div className="summary-row">
-                          <span className="summary-label">Platform Fee</span>
+                          <span className="summary-label">{t('myOrders.platformFee', 'Platform Fee')}</span>
                           <span className="summary-value">
                             ₹{platformFee.toLocaleString()}
                           </span>
                         </div>
                         <div className="summary-row">
-                          <span className="summary-label">Price Formula</span>
+                          <span className="summary-label">{t('orders.priceFormula', 'Price Formula')}</span>
                           <span className="summary-value">
                             ₹{itemsTotal.toLocaleString()} + ₹{transportFinalFee.toLocaleString()} + ₹{platformFee.toLocaleString()}
                           </span>
                         </div>
                         <div className="summary-divider"></div>
                         <div className="summary-row total-summary-row">
-                          <span className="summary-label">Total Paid</span>
+                          <span className="summary-label">{t('myOrders.totalPaid', 'Total Paid')}</span>
                           <span className="total-summary-value">
                             ₹{total.toLocaleString()}
                           </span>
@@ -580,19 +583,19 @@ export default function MyOrders() {
                           navigate(`/delivery-status/${encodeURIComponent(orderId)}`);
                         }}
                       >
-                        🚚 Delivery Status
+                        🚚 {t('myOrders.deliveryStatus', 'Delivery Status')}
                       </button>
                       <button 
                         className="reorder-btn"
                         onClick={(e) => handleReorder(order, e)}
                       >
-                        🔄 Reorder
+                        🔄 {t('myOrders.reorder', 'Reorder')}
                       </button>
                       <button 
                         className="support-btn"
                         onClick={handleContactSupport}
                       >
-                        💬 Contact Support
+                        💬 {t('myOrders.contactSupport', 'Contact Support')}
                       </button>
                     </div>
                   </div>
@@ -604,18 +607,18 @@ export default function MyOrders() {
         ) : (
           <div className="empty-state">
             <div className="empty-icon">📭</div>
-            <h2>{filterType === "all" ? "No Orders Yet" : `No ${filterType.charAt(0).toUpperCase() + filterType.slice(1)} Orders`}</h2>
+            <h2>{filterType === "all" ? t('myOrders.noOrdersYet', "No Orders Yet") : t('myOrders.noFilteredOrders', { type: t(`myOrders.${filterType}`, filterType) })}</h2>
             <p>
               {filterType === "all"
-                ? "You haven't placed any orders yet. Start shopping now!"
-                : `You don't have any ${filterType} orders at the moment.`}
+                ? t('myOrders.startShoppingMsg', "You haven't placed any orders yet. Start shopping now!")
+                : t('myOrders.noFilteredMsg', { type: t(`myOrders.${filterType}`, filterType) })}
             </p>
             {filterType === "all" && (
               <button
                 className="start-shopping-btn"
                 onClick={() => navigate("/")}
               >
-                🛍️ Start Shopping
+                🛍️ {t('myOrders.startShoppingBtn', 'Start Shopping')}
               </button>
             )}
           </div>
@@ -629,7 +632,7 @@ export default function MyOrders() {
             <div className="summary-stat">
               <span className="stat-icon">📦</span>
               <div className="stat-content">
-                <span className="stat-label">Total Orders</span>
+                <span className="stat-label">{t('customerAccount.totalOrders', 'Total Orders')}</span>
                 <span className="stat-value">{orders.length}</span>
               </div>
             </div>
@@ -637,7 +640,7 @@ export default function MyOrders() {
             <div className="summary-stat">
               <span className="stat-icon">💰</span>
               <div className="stat-content">
-                <span className="stat-label">Total Spent</span>
+                <span className="stat-label">{t('myOrders.totalSpent', 'Total Spent')}</span>
                 <span className="stat-value">
                   ₹{orders.reduce((sum, o) => sum + (o.summary?.total || o.total || 0), 0).toLocaleString()}
                 </span>
@@ -647,7 +650,7 @@ export default function MyOrders() {
             <div className="summary-stat">
               <span className="stat-icon">✅</span>
               <div className="stat-content">
-                <span className="stat-label">Completed</span>
+                <span className="stat-label">{t('myOrders.completed', 'Completed')}</span>
                 <span className="stat-value">
                   {orders.filter((o) => o.status === "Delivered").length}
                 </span>

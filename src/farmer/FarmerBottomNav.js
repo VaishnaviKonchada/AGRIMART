@@ -62,7 +62,7 @@ export default function FarmerBottomNav() {
         onClick={() => navigate("/farmer/chatbot")}
       >
         🤖
-        <span>{t("chatbot", "Chatbot")}</span>
+        <span>{t("chatbotLabel", "Chatbot")}</span>
       </div>
 
       <div

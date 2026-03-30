@@ -1,11 +1,12 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiPost, API_BASE_URL } from "../utils/api";
 import { calculateTransportPricing } from "../utils/transportCharges";
 import { geocodeAddress } from "../utils/geocode";
 import "../styles/TransportDealers.css";
 import BottomNav from "../components/BottomNav";
+import CustomerHeader from "../components/CustomerHeader";
 
 // Strict India bounds (approximate)
 function isIndiaCoordinates(lat, lng) {
@@ -23,6 +24,7 @@ function isIndiaCoordinates(lat, lng) {
 const PENDING_DEALER_REQUESTS_KEY = "pendingDealerRequests";
 
 export default function TransportDealers() {
+  const { t } = useTranslation();
   // All state hooks must be declared at the very top before any useEffect or function
   const [fetchingCoords, setFetchingCoords] = useState(false);
   // NEW: Full Address (free text, independent)
@@ -96,9 +98,8 @@ export default function TransportDealers() {
       if (typeof address !== 'string') address = String(address || '');
       console.log('[DEBUG] handleFetchCoordinates: address used for geocoding:', address);
       if (!address || address.replace(/[\,\s]/g, "").length < 8) {
-        setCoordsError("Please enter a valid address. Attempted: " + address);
+        setCoordsError(t('customerAccount.validAddressError', "Please enter a valid address."));
         setFetchingCoords(false);
-        console.warn('[DEBUG] Address too short for geocoding:', address);
         return;
       }
       let usedFallback = false;
@@ -114,7 +115,7 @@ export default function TransportDealers() {
           if (typeof fallbackAddress !== 'string') fallbackAddress = String(fallbackAddress || '');
           console.warn('[DEBUG] Geocoding failed for full address, trying fallback:', fallbackAddress);
           if (!fallbackAddress || fallbackAddress.replace(/[\,\s]/g, "").length < 8) {
-            setCoordsError("Please enter a valid pincode, state, and country. Attempted: " + fallbackAddress);
+            setCoordsError(t('transportDealers.fallbackAddressError', "Please enter a valid pincode, state, and country."));
             setDropCoordinates(null);
             return;
           }
@@ -135,12 +136,7 @@ export default function TransportDealers() {
             return;
           }
         } else {
-          let errorMsg = "Could not fetch coordinates for this address.\n";
-          if (err1 && err1.message) {
-            errorMsg += "Reason: " + err1.message + "\n";
-          }
-          errorMsg += "Attempted: " + address;
-          setCoordsError(errorMsg);
+          setCoordsError(t('customerAccount.coordsFetchError', "Could not fetch coordinates for this address."));
           setDropCoordinates(null);
           console.error('[DEBUG] Geocoding error (full address):', err1);
           return;
@@ -149,16 +145,11 @@ export default function TransportDealers() {
       // Validate India bounds
       if (!coords || !isIndiaCoordinates(coords.lat, coords.lon)) {
         setDropCoordinates(null);
-        setCoordsError(
-          "❌ Could not find valid Indian coordinates for this address.\n" +
-          "Please check the address, pincode, and state.\n" +
-          (coords ? `Received: ${coords.lat}, ${coords.lon}` : "") +
-          "\nIf you see a location in the US or outside India, please re-enter the address or try a different pincode."
-        );
+        setCoordsError(t('transportDealers.indiaBoundsError', "Could not find valid Indian coordinates for this address."));
         return;
       }
       setDropCoordinates({ lat: coords.lat, lng: coords.lon });
-      setCoordsError(usedFallback ? 'Warning: Used pincode-level coordinates for "' + address + '", may be less accurate.' : "");
+      setCoordsError(usedFallback ? t('transportDealers.pincodeFallbackWarning', 'Warning: Used pincode-level coordinates, may be less accurate.') : "");
     } finally {
       setFetchingCoords(false);
     }
@@ -202,7 +193,7 @@ export default function TransportDealers() {
   };
 
   const formatCoordinates = (coords) => {
-    if (!hasCoordinates(coords)) return "N/A";
+    if (!hasCoordinates(coords)) return t('notSet', "N/A");
     return `${Number(coords.lat).toFixed(6)}, ${Number(coords.lng).toFixed(6)}`;
   };
 
@@ -294,7 +285,11 @@ export default function TransportDealers() {
       return {
         type: 'warning',
         showAlert: true,
-        message: `Heads up! Delivery charge can be higher than crop value for this route (Delivery: Rs.${highestCharge}, Crop: Rs.${cropPrice}). You can reduce cost per item by increasing quantity or selecting a closer dealer.`
+        message: t('transportDealers.highChargeWarning', {
+          defaultValue: 'Heads up! Delivery charge can be higher than crop value for this route (Delivery: Rs.{{charge}}, Crop: Rs.{{price}}). You can reduce cost per item by increasing quantity or selecting a closer dealer.',
+          charge: highestCharge,
+          price: cropPrice
+        })
       };
     }
 
@@ -313,7 +308,7 @@ export default function TransportDealers() {
 
   const getDropLiveLocation = async () => {
     if (!navigator.geolocation) {
-      alert("Geolocation not supported");
+      alert(t('transportDealers.geoNotSupported', "Geolocation not supported"));
       return;
     }
 
@@ -372,7 +367,7 @@ export default function TransportDealers() {
       },
       () => {
         setLoadingDropLocation(false);
-        alert("Location access denied");
+        alert(t('transportDealers.locationDenied', "Location access denied"));
       }
     );
   };
@@ -559,13 +554,13 @@ export default function TransportDealers() {
       !dropLocationText.trim() ||
       !isValidPhone(customerPhone)
     ) {
-      alert("⚠️ Please fill all mandatory fields and enter a valid Indian mobile number (+91 9XXXXXXXXX) before requesting this vehicle.");
+      alert(t('transportDealers.fillFieldsWarning', "⚠️ Please fill all mandatory fields and enter a valid Indian mobile number (+91 9XXXXXXXXX) before requesting this vehicle."));
       return;
     }
 
     const currentRole = localStorage.getItem("userRole");
     if (currentRole !== "customer") {
-      alert("⚠️ Please login with a customer account to request a vehicle.");
+      alert(t('transportDealers.customerLoginWarning', "⚠️ Please login with a customer account to request a vehicle."));
       return;
     }
 
@@ -668,7 +663,7 @@ export default function TransportDealers() {
       startRequestTimer(requestKey, requestId, data.expiresAt, dealer.dealerId, dealer.dealerName, vehicle);
     } catch (err) {
       console.error("❌ Error sending request:", err.message);
-      alert(`Error: ${err.message || "Failed to send request"}`);
+      alert(t('transportDealers.requestError', "Failed to send request"));
     } finally {
       setLoading(false);
     }
@@ -749,8 +744,8 @@ export default function TransportDealers() {
           if (shouldAlertRejected) {
             setTopRejectionNotice({
               requestKey,
-              dealerName: dealerName || "Dealer",
-              message: "Request was declined. Dealer may be busy. Please try again in 5-10 minutes or choose another dealer.",
+              dealerName: dealerName || t('transportDealers.dealer', "Dealer"),
+              message: t('transportDealers.rejectedMsg', "Request was declined. Dealer may be busy. Please try again in 5-10 minutes or choose another dealer."),
               timestamp: Date.now(),
             });
             window.scrollTo({ top: 0, behavior: "smooth" });
@@ -863,7 +858,7 @@ export default function TransportDealers() {
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  if (!order) return <h3>No transport order found</h3>;
+  if (!order) return <h3>{t('transportDealers.noOrderFound', 'No transport order found')}</h3>;
 
   const totalProductPrice = getTotalProductPrice(order);
   // Only show distance if both pickup and drop coordinates are present
@@ -876,16 +871,11 @@ export default function TransportDealers() {
 
   return (
     <div className="transport-page">
-      {/* 🏠 HOME ICON */}
-      <div className="top-icons">
-        <span onClick={() => navigate("/home")} title="Home">
-          🏠
-        </span>
-      </div>
+      <CustomerHeader />
 
       <div className="page-header">
-        <h2>🚚 Transport Dealers</h2>
-        <p className="subtitle">Find the perfect transport partner for your delivery</p>
+        <h2>🚚 {t('transportDealers.title', 'Transport Dealers')}</h2>
+        <p className="subtitle">{t('transportDealers.selectDealer', 'Find the perfect transport partner for your delivery')}</p>
       </div>
 
       {effectivePriceAlert?.showAlert && (
@@ -905,7 +895,7 @@ export default function TransportDealers() {
             type="button"
             className="alert-close-btn"
             onClick={() => setTopRejectionNotice(null)}
-            aria-label="Dismiss rejection notice"
+            aria-label={t('common.dismiss', "Dismiss")}
           >
             ×
           </button>
@@ -915,32 +905,32 @@ export default function TransportDealers() {
       {/* 📦 ORDER SUMMARY */}
       <div className="summary-card">
         <div className="summary-header">
-          <h3>📦 Order Summary</h3>
+          <h3>📦 {t('payment.orderItems', 'Order Summary')}</h3>
         </div>
         <div className="summary-content">
           <div className="summary-item">
-            <span className="label">👨‍🌾 Farmer:</span>
+            <span className="label">👨‍🌾 {t('orders.name', 'Farmer')}:</span>
             <span className="value">{order.farmerName}</span>
           </div>
           <div className="summary-item">
-            <span className="label">📍 Pickup Location:</span>
+            <span className="label">📍 {t('transportDealers.pickup', 'Pickup Location')}:</span>
             <span className="value">{order.farmerLocation}</span>
           </div>
           <div className="summary-item">
-            <span className="label">⚖️ Total Quantity:</span>
+            <span className="label">⚖️ {t('cart.totalQuantity', 'Total Quantity')}:</span>
             <span className="value">{order.totalQty} kg</span>
           </div>
           <div className="summary-item">
-            <span className="label">💵 Crop Price:</span>
+            <span className="label">💵 {t('cart.totalSellingPrice', 'Crop Price')}:</span>
             <span className="value">Rs.{totalProductPrice}</span>
           </div>
           <div className="summary-item">
-            <span className="label">📍 Pickup Coordinates:</span>
+            <span className="label">📍 {t('customerAccount.addressCoords', 'Pickup Coordinates')}:</span>
             <span className="value">{formatCoordinates(order?.farmerCoordinates)}</span>
           </div>
           <div className="summary-item">
-            <span className="label">🚛 Selected Vehicle:</span>
-            <span className="value vehicle-badge">{vehicleType || "Loading..."}</span>
+            <span className="label">🚛 {t('transportDealers.vehicle', 'Selected Vehicle')}:</span>
+            <span className="value vehicle-badge">{vehicleType || t('customerAccount.fetching', "Loading...")}</span>
           </div>
         </div>
       </div>
@@ -948,29 +938,29 @@ export default function TransportDealers() {
       {/* 📍 DROP LOCATION - DISTRICT & MANDAL SELECTORS */}
       <div className="location-section">
         <div className="input-wrapper">
-          <label className="input-label">📍 Delivery Address Details</label>
+          <label className="input-label">📍 {t('transportDealers.deliveryAddress', 'Delivery Address Details')}</label>
 
           {/* NEW: Full Address (free text, independent) */}
           <div className="location-selectors">
             <div className="selector-group" style={{ width: '100%' }}>
-              <label htmlFor="full-address">Full Address (optional, free text)</label>
+              <label htmlFor="full-address">{t('customerAccount.fullLocation', 'Full Address')} ({t('common.optional', 'optional')})</label>
               <textarea
                 id="full-address"
                 className="location-select"
                 style={{ minHeight: 48, resize: 'vertical', width: '100%' }}
                 value={fullAddress}
                 onChange={e => setFullAddress(e.target.value)}
-                placeholder="Enter full delivery address (if available). This will be saved as-is, and does NOT affect geocoding or vehicle selection."
+                placeholder={t('transportDealers.fullAddressPlaceholder', "Enter full delivery address (if available).")}
               />
               <span className="input-hint" style={{ fontSize: 13, color: '#666' }}>
-                This field is for your reference only. It will be saved with the order, but does not affect map location, coordinates, or vehicle selection.
+                {t('transportDealers.fullAddressHint', 'This field is for your reference only.')}
               </span>
             </div>
           </div>
 
           <div className="location-selectors">
             <div className="selector-group">
-              <label htmlFor="customer-phone">Phone Number * (+91)</label>
+              <label htmlFor="customer-phone">{t('customerAccount.phone', 'Phone Number')} *</label>
               <input
                 id="customer-phone"
                 className="location-select"
@@ -981,44 +971,44 @@ export default function TransportDealers() {
             </div>
 
             <div className="selector-group">
-              <label htmlFor="drop-door">Door/House No (Optional)</label>
+              <label htmlFor="drop-door">{t('customerAccount.doorNo', 'Door/House No')} ({t('common.optional', 'Optional')})</label>
               <input
                 id="drop-door"
                 className="location-select"
                 value={dropDoorNo}
                 onChange={(e) => setDropDoorNo(e.target.value)}
-                placeholder="Door/House No"
+                placeholder={t('customerAccount.doorNo', "Door/House No")}
               />
             </div>
           </div>
           
           <div className="location-selectors">
             <div className="selector-group">
-              <label htmlFor="drop-country">Country *</label>
+              <label htmlFor="drop-country">{t('customerAccount.country', 'Country')} *</label>
               <input
                 id="drop-country"
                 className="location-select"
                 value={dropCountry}
                 onChange={(e) => setDropCountry(e.target.value)}
-                placeholder="Country"
+                placeholder={t('customerAccount.country', "Country")}
               />
             </div>
 
             <div className="selector-group">
-              <label htmlFor="drop-state">State *</label>
+              <label htmlFor="drop-state">{t('customerAccount.state', 'State')} *</label>
               <input
                 id="drop-state"
                 className="location-select"
                 value={dropState}
                 onChange={(e) => setDropState(e.target.value)}
-                placeholder="State"
+                placeholder={t('customerAccount.state', "State")}
               />
             </div>
           </div>
 
           <div className="location-selectors">
             <div className="selector-group">
-              <label htmlFor="district">District:</label>
+              <label htmlFor="district">{t('customerAccount.district', 'District')}:</label>
               <select
                 id="district"
                 className="location-select"
@@ -1031,7 +1021,7 @@ export default function TransportDealers() {
                 }}
                 disabled={districtsLoading || loading}
               >
-                <option value="">Select District...</option>
+                <option value="">{t('customerAccount.selectDistrict', "Select District...")}</option>
                 {districts.map((dist) => (
                   <option key={dist.code} value={dist.district}>
                     {dist.district} ({dist.mandalCount} mandals)
@@ -1041,7 +1031,7 @@ export default function TransportDealers() {
             </div>
 
             <div className="selector-group">
-              <label htmlFor="mandal">Mandal *</label>
+              <label htmlFor="mandal">{t('customerAccount.mandal', 'Mandal')} *</label>
               <select
                 id="mandal"
                 className="location-select"
@@ -1058,7 +1048,7 @@ export default function TransportDealers() {
                 }}
                 disabled={!selectedDistrict || mandals.length === 0 || loading}
               >
-                <option value="">Select Mandal...</option>
+                <option value="">{t('customerAccount.selectMandal', "Select Mandal...")}</option>
                 {mandals.map((mandal) => (
                   <option key={mandal.name} value={mandal.name}>
                     {mandal.name}
@@ -1071,13 +1061,13 @@ export default function TransportDealers() {
 
           <div className="location-selectors">
             <div className="selector-group">
-              <label htmlFor="drop-pincode">Pincode *</label>
+              <label htmlFor="drop-pincode">{t('customerAccount.pincode', 'Pincode')} *</label>
               <input
                 id="drop-pincode"
                 className="location-select"
                 value={dropPincode}
                 onChange={(e) => setDropPincode(e.target.value)}
-                placeholder="Pincode"
+                placeholder={t('customerAccount.pincode', "Pincode")}
                 autoComplete="postal-code"
               />
             </div>
@@ -1086,7 +1076,7 @@ export default function TransportDealers() {
           {/* Coordinates row (below pincode, like Account page) */}
           <div className="location-selectors">
             <div className="selector-group">
-              <label htmlFor="drop-coordinates">Address Coordinates</label>
+              <label htmlFor="drop-coordinates">{t('customerAccount.addressCoords', 'Address Coordinates')}</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#1a4d2e', fontSize: '15px' }}>
                   {dropCoordinates && dropCoordinates.lat && dropCoordinates.lng
@@ -1109,7 +1099,7 @@ export default function TransportDealers() {
                     cursor: fetchingCoords ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  {fetchingCoords ? 'Fetching...' : 'Fetch from Address'}
+                  {fetchingCoords ? t('customerAccount.fetching', 'Fetching...') : t('customerAccount.fetchFromAddress', 'Fetch from Address')}
                 </button>
                 {coordsError && (
                   <span style={{ color: 'red', marginLeft: 8, fontSize: '13px' }}>{coordsError}</span>
@@ -1121,14 +1111,14 @@ export default function TransportDealers() {
           {/* Location row (no Address Coordinator button here) */}
           <div className="location-selectors">
             <div className="selector-group">
-              <label htmlFor="drop-location-text">Location *</label>
+              <label htmlFor="drop-location-text">{t('customerAccount.location', 'Location')} *</label>
               <div style={{ display: "flex", gap: "8px" }}>
                 <input
                   id="drop-location-text"
                   className="location-select"
                   value={dropLocationText}
                   onChange={(e) => setDropLocationText(e.target.value)}
-                  placeholder="Type manually or tap location icon"
+                  placeholder={t('transportDealers.locationPlaceholder', "Type manually or tap location icon")}
                   autoComplete="address-line2"
                 />
                 <button
@@ -1136,7 +1126,7 @@ export default function TransportDealers() {
                   className="location-pin-btn"
                   onClick={getDropLiveLocation}
                   disabled={loadingDropLocation}
-                  title="Use current location"
+                  title={t('customerAccount.useCurrentLocation', "Use current location")}
                 >
                   {loadingDropLocation ? "..." : "📍"}
                 </button>
@@ -1157,7 +1147,7 @@ export default function TransportDealers() {
               )}
               {famousNearby.length > 0 && (
                 <div className="famous-nearby">
-                  <span className="famous-title">Nearby famous place(s):</span>
+                  <span className="famous-title">{t('customerAccount.nearbyFamousPlaces', 'Nearby famous place(s):')}</span>
                   <span className="famous-value">
                     {famousNearby.map((place, idx) => (
                       <button
@@ -1182,16 +1172,28 @@ export default function TransportDealers() {
 
           <p className="input-hint">
             {selectedMandal && hasCoordinates(order?.farmerCoordinates) && hasCoordinates(dropCoordinates)
-              ? `Door-to-door distance: ${distance}km | Showing ${vehicleType} dealers from ${order.farmerLocation} to ${selectedMandal}, ${selectedDistrict}`
+              ? t('transportDealers.distanceInfo', {
+                  defaultValue: 'Door-to-door distance: {{distance}}km | Showing {{type}} dealers from {{pickup}} to {{drop}}',
+                  distance,
+                  type: vehicleType,
+                  pickup: order.farmerLocation,
+                  drop: `${selectedMandal}, ${selectedDistrict}`
+                })
               : selectedMandal
-                ? `⚠️ Please fetch coordinates for both pickup and drop locations to show accurate distance. Currently showing dealers who can pickup from: ${order.farmerLocation}`
-                : `⚠️ Fill mandatory fields and select drop location to see route-specific dealers. Currently showing dealers who can pickup from: ${order.farmerLocation}`}
+                ? t('transportDealers.coordsWarning', {
+                    defaultValue: '⚠️ Please fetch coordinates for both pickup and drop locations to show accurate distance. Currently showing dealers who can pickup from: {{pickup}}',
+                    pickup: order.farmerLocation
+                  })
+                : t('transportDealers.mandalWarning', {
+                    defaultValue: '⚠️ Fill mandatory fields and select drop location to see route-specific dealers. Currently showing dealers who can pickup from: {{pickup}}',
+                    pickup: order.farmerLocation
+                  })}
           </p>
           <p className="input-hint">
-            Distance source: {distanceSource} | Drop coordinates: {formatCoordinates(dropCoordinates)}
+            {t('myOrders.distanceSource', 'Distance Source')}: {distanceSource} | {t('transportDealers.dropCoords', 'Drop coordinates')}: {formatCoordinates(dropCoordinates)}
             {!hasCoordinates(order?.farmerCoordinates) || !hasCoordinates(dropCoordinates) ? (
               <span style={{ color: 'red', fontWeight: 600, marginLeft: 8 }}>
-                ⚠️ Please use "Fetch from Address" or location pin for both pickup and drop to enable accurate distance and transport charge calculation.
+                {t('transportDealers.preciseLocationWarning', '⚠️ Please use "Fetch from Address" or location pin for both pickup and drop to enable accurate distance and transport charge calculation.')}
               </span>
             ) : null}
           </p>
@@ -1208,27 +1210,21 @@ export default function TransportDealers() {
             lineHeight: 1.7,
             boxShadow: '0 2px 8px rgba(33,150,243,0.04)'
           }}>
-            <strong>How Delivery Charges Are Calculated:</strong>
+            <strong>{t('transportDealers.howCalculatedTitle', 'How Delivery Charges Are Calculated')}:</strong>
             <ul style={{ margin: '8px 0 0 18px', padding: 0 }}>
               <li>
-                <b>Distance</b> is calculated using the exact coordinates you provide (via "Fetch from Address" or location pin). If coordinates are missing, the system falls back to area/mandal names, which may be less accurate.
+                <b>{t('transportDealers.distance', 'Distance')}</b> {t('transportDealers.distanceExpl', 'is calculated using coordinates.')}
               </li>
               <li>
-                <b>Delivery charge</b> = <b>Base fare</b> (minimum) + <b>Distance charge</b> (distance × per-km rate) + any applicable discounts or batch pricing.
+                <b>{t('myOrders.finalDeliveryCharge', 'Delivery charge')}</b> = <b>{t('myOrders.baseDelivery', 'Base fare')}</b> + {t('transportDealers.chargeExpl', 'Distance charge + discounts.')}
               </li>
               <li>
-                <b>Per-kilometer rates</b> (updated): Bike ₹6/km, Auto ₹12/km, Truck ₹20/km. Minimum charge applies for short distances.
+                <b>{t('transportDealers.perKmRates', 'Per-kilometer rates')}</b>: {t('transportDealers.ratesList', 'Bike ₹6/km, Auto ₹12/km, Truck ₹20/km.')}
               </li>
               <li>
-                <b>Batch Discount</b> applies when multiple orders are grouped for the same route.
-              </li>
-              <li>
-                All calculations are shown in the dealer card breakdown below.
+                <b>{t('myOrders.batchDiscount', 'Batch Discount')}</b> {t('transportDealers.batchExpl', 'applies for grouped orders.')}
               </li>
             </ul>
-            <div style={{ fontSize: '13px', color: '#4d6b58', marginTop: '8px' }}>
-              For best accuracy and lowest price, always use the "Fetch from Address" button to set your exact delivery location.
-            </div>
           </div>
         </div>
       </div>
@@ -1245,11 +1241,22 @@ export default function TransportDealers() {
         <div className="section-header">
           <h3>
             {dropLocation
-              ? `🔍 ${vehicleType} Dealers: ${order.farmerLocation} → ${dropLocation}`
-              : `🚛 Dealers Available for Pickup from ${order.farmerLocation}`}
+              ? `🔍 ${t('transportDealers.dealersForRoute', { 
+                  defaultValue: '{{type}} Dealers: {{pickup}} → {{drop}}',
+                  type: vehicleType,
+                  pickup: order.farmerLocation,
+                  drop: dropLocation
+                })}`
+              : `🚛 ${t('transportDealers.pickupDealers', { 
+                  defaultValue: 'Dealers Available for Pickup from {{pickup}}',
+                  pickup: order.farmerLocation
+                })}`}
           </h3>
           <span className="dealer-count">
-            {loading ? "Loading..." : `${filteredDealers.length} Dealer${filteredDealers.length !== 1 ? "s" : ""} Found`}
+            {loading ? t('customerAccount.fetching', 'Loading...') : t('transportDealers.dealersFound', { 
+              defaultValue: '{{count}} Dealer Found', 
+              count: filteredDealers.length 
+            })}
           </span>
         </div>
 
@@ -1257,14 +1264,17 @@ export default function TransportDealers() {
           <div className="pricing-info-banner">
             <span className="info-icon">ℹ️</span>
             <span className="info-text">
-              <strong>Delivery Price</strong> shows Base Delivery, Batch Discount (when nearby orders are grouped), and Final Delivery for the pickup-to-drop route. For routes up to 5km, Final Delivery is never below <strong>Rs.15</strong> (no zero-charge display). Crop value: <strong>Rs.{totalProductPrice}</strong>. Platform fee is calculated separately at checkout.
+              {t('transportDealers.pricingExplBanner', 'Delivery price shows Base Delivery, Batch Discount, and Final Delivery. This matches the dealer and order summary.')}
             </span>
           </div>
         )}
 
         {showLocationWarning && (
           <div className="warning-message">
-            ⚠️ No dealers available for "{dropLocation}". Try a different location.
+            ⚠️ {t('transportDealers.noDealersForLocation', { 
+              defaultValue: 'No dealers available for "{{location}}". Try a different location.',
+              location: dropLocation
+            })}
           </div>
         )}
 
@@ -1275,7 +1285,7 @@ export default function TransportDealers() {
                 <div className="dealer-header">
                   <h4>{dealer.dealerName}</h4>
                   {dealer.dealerVerified && (
-                    <span className="verified-badge">✅ Verified</span>
+                    <span className="verified-badge">✅ {t('customerAccount.verified', 'Verified')}</span>
                   )}
                 </div>
 
@@ -1291,11 +1301,11 @@ export default function TransportDealers() {
                     <div key={vehicle._id} className="dealer-vehicle-card">
                       <div className="dealer-info">
                         <div className="info-row">
-                          <span className="info-label">Vehicle:</span>
+                          <span className="info-label">{t('transportDealers.vehicle', 'Vehicle')}:</span>
                           <span className="info-value">{vehicle.vehicleType}</span>
                         </div>
                         <div className="info-row">
-                          <span className="info-label">Name:</span>
+                          <span className="info-label">{t('orders.name', 'Name')}:</span>
                           <span className="info-value">{vehicle.vehicleName || "-"}</span>
                         </div>
                         <div className="info-row">
@@ -1303,11 +1313,11 @@ export default function TransportDealers() {
                           <span className="info-value">{vehicle.licensePlate}</span>
                         </div>
                         <div className="info-row">
-                          <span className="info-label">Capacity:</span>
+                          <span className="info-label">{t('transportDealers.capacity', 'Capacity')}:</span>
                           <span className="info-value">{vehicle.capacity} kg</span>
                         </div>
                         <div className="info-row price-row">
-                          <span className="info-label">💰 {dropLocation ? 'Transport Charge:' : 'Quote:'}</span>
+                          <span className="info-label">💰 {dropLocation ? t('myOrders.finalDeliveryCharge', 'Transport Charge:') : t('transportDealers.quote', 'Quote:')}</span>
                           <span className="info-value price">
                             {hasRouteDistance ? (
                               <>
@@ -1319,16 +1329,16 @@ export default function TransportDealers() {
                             ) : (
                               <span style={{ color: "#888" }}>
                                 {(!hasCoordinates(order?.farmerCoordinates) || !hasCoordinates(dropCoordinates))
-                                  ? "Fetch coordinates for both pickup and drop to see price and distance"
-                                  : "Select drop location to see price"}
+                                  ? t('transportDealers.fetchCoordsInstruction', "Fetch coordinates for both pickup and drop to see price and distance")
+                                  : t('transportDealers.selectDropInstruction', "Select drop location to see price")}
                               </span>
                             )}
                           </span>
                         </div>
-
+@/c:\Users\konch\OneDrive\Desktop\agrimart-client\src\pages\TransportDealers.js:1323
                         {hasRouteDistance && Number(transportCharges[vehicle._id]?.batchDiscount || 0) > 0 && (
                           <div className="info-row">
-                            <span className="info-label">Batch Discount:</span>
+                            <span className="info-label">{t('myOrders.batchDiscount', 'Batch Discount')}:</span>
                             <span className="info-value" style={{ color: "#2e7d32", fontWeight: 700 }}>
                               -₹{Number(transportCharges[vehicle._id]?.batchDiscount || 0).toLocaleString()}
                             </span>
@@ -1348,49 +1358,49 @@ export default function TransportDealers() {
                                 ))}
                               </div>
                             )}
-                            <div className="transport-breakdown">
-                              <div className="breakdown-row">
-                                <span>Base Fare (Minimum):</span>
-                                <span>₹{Number(transportCharges[vehicle._id].breakdown.minimumBaseCharge).toFixed(2)} <span style={{fontSize:'12px',color:'#888'}}>(Minimum charge)</span></span>
-                              </div>
-                              <div className="breakdown-row">
-                                <span>Distance Charge:</span>
-                                <span>
-                                  ₹{Number(transportCharges[vehicle._id].breakdown.slabDistanceTotal).toFixed(2)}
-                                  <span style={{fontSize:'12px',color:'#888',marginLeft:'4px'}}>
-                                    ({Number(transportCharges[vehicle._id].breakdown.distance).toFixed(1)} km × ₹6/km)
-                                  </span>
-                                </span>
-                              </div>
-                              <div className="breakdown-row">
-                                <span>Applied Fare:</span>
-                                <span>
-                                  ₹{Number(transportCharges[vehicle._id].breakdown.baseCharge).toFixed(2)}
-                                  <span style={{fontSize:'12px',color:'#888',marginLeft:'4px'}}>
-                                    (Higher of minimum or distance charge)
-                                  </span>
-                                </span>
-                              </div>
-                              {transportCharges[vehicle._id].breakdown.loadCharge > 0 && (
-                                <div className="breakdown-row">
-                                  <span>Load Charge:</span>
-                                  <span>₹{Number(transportCharges[vehicle._id].breakdown.loadCharge).toFixed(2)}</span>
-                                </div>
-                              )}
-                              {Number(transportCharges[vehicle._id].breakdown.batchDiscount || 0) > 0 && (
-                                <div className="breakdown-row">
-                                  <span>Batch Discount:</span>
-                                  <span>-₹{Number(transportCharges[vehicle._id].breakdown.batchDiscount).toFixed(2)}</span>
-                                </div>
-                              )}
-                              <div className="breakdown-row total">
-                                <span>Final Transport Charge:</span>
-                                <span>
-                                  ₹{Number(transportCharges[vehicle._id].breakdown.finalCharge || transportCharges[vehicle._id].breakdown.totalCharge).toFixed(2)}
-                                  <span style={{fontSize:'12px',color:'#888',marginLeft:'4px'}}>(Applied fare minus any discounts)</span>
-                                </span>
-                              </div>
-                            </div>
+                             <div className="transport-breakdown">
+                               <div className="breakdown-row">
+                                 <span>{t('myOrders.baseDelivery', 'Base Fare')} ({t('common.minimum', 'Minimum')}):</span>
+                                 <span>₹{Number(transportCharges[vehicle._id].breakdown.minimumBaseCharge).toFixed(2)} <span style={{fontSize:'12px',color:'#888'}}>({t('common.minimumCharge', 'Minimum charge')})</span></span>
+                               </div>
+                               <div className="breakdown-row">
+                                 <span>{t('transportDealers.distanceCharge', 'Distance Charge')}:</span>
+                                 <span>
+                                   ₹{Number(transportCharges[vehicle._id].breakdown.slabDistanceTotal).toFixed(2)}
+                                   <span style={{fontSize:'12px',color:'#888',marginLeft:'4px'}}>
+                                     ({Number(transportCharges[vehicle._id].breakdown.distance).toFixed(1)} km × ₹6/km)
+                                   </span>
+                                 </span>
+                               </div>
+                               <div className="breakdown-row">
+                                 <span>{t('transportDealers.appliedFare', 'Applied Fare')}:</span>
+                                 <span>
+                                   ₹{Number(transportCharges[vehicle._id].breakdown.baseCharge).toFixed(2)}
+                                   <span style={{fontSize:'12px',color:'#888',marginLeft:'4px'}}>
+                                     ({t('transportDealers.higherOfMsg', 'Higher of minimum or distance charge')})
+                                   </span>
+                                 </span>
+                               </div>
+                               {transportCharges[vehicle._id].breakdown.loadCharge > 0 && (
+                                 <div className="breakdown-row">
+                                   <span>{t('transportDealers.loadCharge', 'Load Charge')}:</span>
+                                   <span>₹{Number(transportCharges[vehicle._id].breakdown.loadCharge).toFixed(2)}</span>
+                                 </div>
+                               )}
+                               {Number(transportCharges[vehicle._id].breakdown.batchDiscount || 0) > 0 && (
+                                 <div className="breakdown-row">
+                                   <span>{t('myOrders.batchDiscount', 'Batch Discount')}:</span>
+                                   <span>-₹{Number(transportCharges[vehicle._id].breakdown.batchDiscount).toFixed(2)}</span>
+                                 </div>
+                               )}
+                               <div className="breakdown-row total">
+                                 <span>{t('myOrders.finalDeliveryCharge', 'Final Transport Charge')}:</span>
+                                 <span>
+                                   ₹{Number(transportCharges[vehicle._id].breakdown.finalCharge || transportCharges[vehicle._id].breakdown.totalCharge).toFixed(2)}
+                                   <span style={{fontSize:'12px',color:'#888',marginLeft:'4px'}}>({t('transportDealers.afterDiscounts', 'Applied fare minus any discounts')})</span>
+                                 </span>
+                               </div>
+                             </div>
                           </>
                         )}
 
@@ -1407,8 +1417,8 @@ export default function TransportDealers() {
                         </div>
                       </div>
 
-                      <div className="service-locations">
-                        <span className="locations-label">🎯 Drop:</span>
+                       <div className="service-locations">
+                        <span className="locations-label">🎯 {t('transportDealers.drop', 'Drop')}:</span>
                         <div className="locations-chips">
                           {vehicle.dropLocations.slice(0, 3).map((loc, idx) => (
                             <span key={`${vehicle._id}-drop-${idx}`} className="location-chip">
@@ -1417,28 +1427,28 @@ export default function TransportDealers() {
                           ))}
                         </div>
                       </div>
-
-                      <div className="action-buttons">
-                        <button
-                          className={`initiate-btn ${isRequestSent ? "sent" : ""} ${isAccepted ? "accepted" : ""} ${isExpired ? "expired" : ""} ${!dropLocation ? "disabled-hint" : ""}`}
-                          onClick={() => initiateChat(dealer, vehicle)}
-                          disabled={isRequestSent || isAccepted || isExpired || loading}
-                        >
-                          {isAccepted ? (
-                            "✅ Dealer Accepted!"
-                          ) : isRejected ? (
-                            "📬 Request Again"
-                          ) : isExpired ? (
-                            "❌ Request Expired"
-                          ) : isRequestSent ? (
-                            `⏳ ${formatTimeRemaining(timeRemaining)}`
-                          ) : !dropLocation ? (
-                            "📍 Select Drop Location First"
-                          ) : (
-                            "📬 Request This Vehicle"
-                          )}
-                        </button>
-                      </div>
+@/c:\Users\konch\OneDrive\Desktop\agrimart-client\src\pages\TransportDealers.js:1414
+                       <div className="action-buttons">
+                         <button
+                           className={`initiate-btn ${isRequestSent ? "sent" : ""} ${isAccepted ? "accepted" : ""} ${isExpired ? "expired" : ""} ${!dropLocation ? "disabled-hint" : ""}`}
+                           onClick={() => initiateChat(dealer, vehicle)}
+                           disabled={isRequestSent || isAccepted || isExpired || loading}
+                         >
+                           {isAccepted ? (
+                             t('transportDealers.acceptedBtn', "✅ Dealer Accepted!")
+                           ) : isRejected ? (
+                             t('transportDealers.requestAgainBtn', "📬 Request Again")
+                           ) : isExpired ? (
+                             t('transportDealers.expiredBtn', "❌ Request Expired")
+                           ) : isRequestSent ? (
+                             `⏳ ${formatTimeRemaining(timeRemaining)}`
+                           ) : !dropLocation ? (
+                             t('transportDealers.selectDropFirstHint', "📍 Select Drop Location First")
+                           ) : (
+                             t('transportDealers.requestVehicle', "📬 Request This Vehicle")
+                           )}
+                         </button>
+                       </div>
                     </div>
                   );
                 })}
@@ -1449,13 +1459,13 @@ export default function TransportDealers() {
 
         {filteredDealers.length === 0 && !showLocationWarning && !loading && (
           <div className="no-dealers">
-            <p>No dealers available</p>
+            <p>{t('transportDealers.noDealers', 'No dealers available')}</p>
           </div>
         )}
 
         {loading && (
           <div className="no-dealers">
-            <p>Loading dealers...</p>
+            <p>{t('customerAccount.fetching', 'Loading dealers...')}</p>
           </div>
         )}
       </div>

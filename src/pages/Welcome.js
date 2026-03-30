@@ -1,14 +1,20 @@
-﻿import React from "react";
+import React from "react";
 import "./Welcome.css";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 
 export default function Welcome() {
+  const { t } = useTranslation();
 
   return (
     <div className="welcome-container">
       <div className="welcome-box">
+        <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
+          <LanguageSwitcher />
+        </div>
         <h1 className="welcome-title">🌾 AgriMart</h1>
         <p className="welcome-subtitle">
-          Your trusted marketplace for crops, vegetables & fruits
+          {t('Your trusted marketplace for crops, vegetables & fruits', 'Your trusted marketplace for crops, vegetables & fruits')}
         </p>
 
         <img
@@ -25,7 +31,7 @@ export default function Welcome() {
               window.location.assign("/login");
             }}
           >
-            Login
+            {t('Login', 'Login')}
           </button>
 
           <button
@@ -35,7 +41,7 @@ export default function Welcome() {
               window.location.assign("/register");
             }}
           >
-            Register
+            {t('Register', 'Register')}
           </button>
         </div>
       </div>

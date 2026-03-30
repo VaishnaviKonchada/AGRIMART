@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiGet, apiPut } from "../utils/api";
 import { getCurrentLocationDetails } from "../utils/locationHelpers";
 import { geocodeAddress } from "../utils/geocode";
 import "../styles/Account.css";
 import BottomNav from "../components/BottomNav";
+import CustomerHeader from "../components/CustomerHeader";
 import "../styles/TransportDealerAccount.css";
 
 const PENDING_DEALER_REQUESTS_KEY = "pendingDealerRequests";
 
-
-
 export default function Account() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const storedUser = JSON.parse(localStorage.getItem("registeredUser") || "null");
 
   const [user, setUser] = useState(null);
@@ -63,7 +64,7 @@ export default function Account() {
     try {
       const address = getFullAddress();
       if (!address || address.replace(/[,\s]/g, "").length < 8) {
-        setCoordsError("Please enter a valid address");
+        setCoordsError(t('customerAccount.validAddressError', 'Please enter a valid address'));
         setFetchingCoords(false);
         return;
       }
@@ -71,7 +72,7 @@ export default function Account() {
       setAddressCoords(coords);
       setCoordsError("");
     } catch (err) {
-      setCoordsError("Could not fetch coordinates for this address");
+      setCoordsError(t('customerAccount.coordsFetchError', 'Could not fetch coordinates for this address'));
       setAddressCoords(null);
     } finally {
       setFetchingCoords(false);
@@ -107,7 +108,7 @@ export default function Account() {
             const next = pending.filter((item) => String(item.requestId) !== String(req.requestId));
             localStorage.setItem(PENDING_DEALER_REQUESTS_KEY, JSON.stringify(next));
 
-            alert("✅ Dealer accepted your request. Opening chat...");
+            alert(t('customerAccount.dealerAcceptedToast', "✅ Dealer accepted your request. Opening chat..."));
             navigate("/chat");
             return;
           }
@@ -125,7 +126,7 @@ export default function Account() {
     const timer = setInterval(checkPendingDealerRequests, 5000);
     checkPendingDealerRequests();
     return () => clearInterval(timer);
-  }, [navigate]);
+  }, [navigate, t]);
 
   const fetchUserProfile = async () => {
     const token = localStorage.getItem("accessToken");
@@ -206,7 +207,7 @@ export default function Account() {
       applyLocation(payload);
     } catch (error) {
       console.error("Current location fetch failed:", error);
-      alert("Unable to fetch your current location.");
+      alert(t('customerAccount.locationFetchError', "Unable to fetch your current location."));
     } finally {
       setLoadingLocation(false);
     }
@@ -237,14 +238,14 @@ export default function Account() {
         // Update only name and role in localStorage, keep original login data
         const storedUser = JSON.parse(localStorage.getItem("registeredUser") || '{}');
         localStorage.setItem("registeredUser", JSON.stringify({...storedUser, name: data.user.name, role: data.user.role}));
-        alert("Profile updated successfully ✅");
+        alert(t('customerAccount.profileUpdatedToast', "Profile updated successfully ✅"));
         setEditMode(false);
         // Refresh profile from backend
         fetchUserProfile();
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("Error updating profile: " + error.message);
+      alert(t('customerAccount.profileUpdateError', "Error updating profile: ") + error.message);
       setSaving(false);
     }
   };
@@ -264,7 +265,7 @@ export default function Account() {
     localStorage.removeItem("adminProfile");
     
     console.log("✅ Customer logged out successfully");
-    alert("Logged out successfully. You can now login with a different role.");
+    alert(t('logoutSuccess', "Logged out successfully. You can now login with a different role."));
     navigate("/login");
   };
 
@@ -273,7 +274,7 @@ export default function Account() {
       <div className="account-page">
         <div className="loading-container">
           <div className="spinner"></div>
-          <p>Loading your profile...</p>
+          <p>{t('customerAccount.loadingProfile', 'Loading your profile...')}</p>
         </div>
       </div>
     );
@@ -284,11 +285,11 @@ export default function Account() {
       <div className="account-page">
         <div className="account-hero">
           <div>
-            <p className="eyebrow">Account</p>
-            <h2>Please log in to view your account</h2>
-            <p className="muted">We could not find your profile in this session.</p>
+            <p className="eyebrow">{t('Account', 'Account')}</p>
+            <h2>{t('customerAccount.pleaseLogin', 'Please log in to view your account')}</h2>
+            <p className="muted">{t('customerAccount.couldNotFindProfile', 'We could not find your profile in this session.')}</p>
           </div>
-          <button className="ghost-btn" onClick={() => navigate("/login")}>🔐 Go to Login</button>
+          <button className="ghost-btn" onClick={() => navigate("/login")}>🔐 {t('customerAccount.goToLogin', 'Go to Login')}</button>
         </div>
       </div>
     );
@@ -304,21 +305,22 @@ export default function Account() {
 
   return (
     <div className="transport-dealer-account">
+      <CustomerHeader />
       <div className="account-header">
         <div className="title-wrap">
-          <h2>👤 Customer Account</h2>
-          <p className="subtitle">Manage your profile and delivery details</p>
+          <h2>👤 {t('customerAccount.title', 'Customer Account')}</h2>
+          <p className="subtitle">{t('customerAccount.subtitle', 'Manage your profile and delivery details')}</p>
         </div>
         <div className="header-actions">
           <button className="dashboard-btn" onClick={() => navigate("/home")}
-            title="Go to Home">
+            title={t('customerAccount.home', 'Home')}>
             <span className="dash-icon">🏠</span>
-            <span className="dash-label">Home</span>
+            <span className="dash-label">{t('customerAccount.home', 'Home')}</span>
           </button>
           <button className="dashboard-btn" onClick={() => navigate("/orders")}
-            title="View Orders">
+            title={t('customerAccount.orders', 'Orders')}>
             <span className="dash-icon">📦</span>
-            <span className="dash-label">Orders</span>
+            <span className="dash-label">{t('customerAccount.orders', 'Orders')}</span>
           </button>
         </div>
       </div>
@@ -326,19 +328,19 @@ export default function Account() {
       <div className="profile-card">
         <div className="avatar">{(user.name || "C").charAt(0).toUpperCase()}</div>
         <div className="info">
-          <div className="name">{user.name || "Customer"}</div>
+          <div className="name">{user.name || t('customer', 'Customer')}</div>
           <div className="email">{user.email || "email@example.com"}</div>
           <div className="location">
-            📍 {user.mandal || "Mandal"}, {user.district || "District"}, {user.state || "State"}
+            📍 {user.mandal || t('customerAccount.mandal', 'Mandal')}, {user.district || t('customerAccount.district', 'District')}, {user.state || t('customerAccount.state', 'State')}
             {user.pincode ? ` - ${user.pincode}` : ""}
           </div>
           <div className="location" style={{ fontSize: "12px", opacity: 0.8 }}>
-            {user.location || "Full location"} • {user.country || "Country"}
+            {user.location || t('customerAccount.fullLocation', "Full location")} • {user.country || t('customerAccount.country', "Country")}
           </div>
         </div>
         <div className="badges">
-          <span className="badge verified">Verified</span>
-          <span className="badge active">Active</span>
+          <span className="badge verified">{t('customerAccount.verified', 'Verified')}</span>
+          <span className="badge active">{t('customerAccount.active', 'Active')}</span>
         </div>
       </div>
 
@@ -346,14 +348,14 @@ export default function Account() {
         <div className="stat">
           <div className="icon">🧾</div>
           <div className="content">
-            <div className="label">Total Orders</div>
+            <div className="label">{t('customerAccount.totalOrders', 'Total Orders')}</div>
             <div className="value">{totalOrders}</div>
           </div>
         </div>
         <div className="stat">
           <div className="icon">✅</div>
           <div className="content">
-            <div className="label">Delivered</div>
+            <div className="label">{t('customerAccount.delivered', 'Delivered')}</div>
             <div className="value">{deliveredOrders}</div>
           </div>
         </div>
@@ -363,30 +365,30 @@ export default function Account() {
         <button className="nav-btn orders-btn" onClick={() => navigate("/orders")}
           type="button">
           <span className="nav-icon">📦</span>
-          <span className="nav-label">My Orders</span>
+          <span className="nav-label">{t('customerAccount.myOrders', 'My Orders')}</span>
         </button>
         <button className="nav-btn payments-btn" onClick={() => navigate("/cart")}
           type="button">
           <span className="nav-icon">🛒</span>
-          <span className="nav-label">My Cart</span>
+          <span className="nav-label">{t('customerAccount.myCart', 'My Cart')}</span>
         </button>
         <button className="nav-btn" onClick={() => navigate("/chat")}
           type="button">
           <span className="nav-icon">💬</span>
-          <span className="nav-label">Dealer Chats</span>
+          <span className="nav-label">{t('customerAccount.dealerChats', 'Dealer Chats')}</span>
         </button>
         <button className="nav-btn" onClick={() => navigate("/support")}
           type="button">
           <span className="nav-icon">⚠️</span>
-          <span className="nav-label">Complaints</span>
+          <span className="nav-label">{t('customerAccount.complaints', 'Complaints')}</span>
         </button>
       </div>
 
       <div className="form-section">
-        <h3 className="section-title">📋 Personal Information</h3>
+        <h3 className="section-title">📋 {t('customerAccount.personalInfo', 'Personal Information')}</h3>
         <div className="form-grid">
           <div className="field">
-            <label>Full Name</label>
+            <label>{t('customerAccount.fullName', 'Full Name')}</label>
             <input
               name="name"
               value={formData.name}
@@ -395,11 +397,11 @@ export default function Account() {
             />
           </div>
           <div className="field">
-            <label>Email</label>
+            <label>{t('email', 'Email')}</label>
             <input value={user.email || ""} disabled />
           </div>
           <div className="field">
-            <label>Phone Number</label>
+            <label>{t('customerAccount.phone', 'Phone Number')}</label>
             <input
               name="phone"
               value={formData.phone}
@@ -412,10 +414,10 @@ export default function Account() {
       </div>
 
       <div className="form-section">
-        <h3 className="section-title">🏠 Address Information</h3>
+        <h3 className="section-title">🏠 {t('customerAccount.addressInfo', 'Address Information')}</h3>
         <div className="form-grid">
           <div className="field">
-            <label>Country</label>
+            <label>{t('customerAccount.country', 'Country')}</label>
             <input
               name="country"
               value={formData.country}
@@ -424,7 +426,7 @@ export default function Account() {
             />
           </div>
           <div className="field">
-            <label>State</label>
+            <label>{t('customerAccount.state', 'State')}</label>
             <input
               name="state"
               value={formData.state}
@@ -433,7 +435,7 @@ export default function Account() {
             />
           </div>
           <div className="field">
-            <label>District</label>
+            <label>{t('customerAccount.district', 'District')}</label>
             <input
               name="district"
               value={formData.district}
@@ -442,7 +444,7 @@ export default function Account() {
             />
           </div>
           <div className="field">
-            <label>Mandal</label>
+            <label>{t('customerAccount.mandal', 'Mandal')}</label>
             <input
               name="mandal"
               value={formData.mandal}
@@ -451,7 +453,7 @@ export default function Account() {
             />
           </div>
           <div className="field">
-            <label>Door No/House No</label>
+            <label>{t('customerAccount.doorNo', 'Door No/House No')}</label>
             <input
               name="doorNo"
               value={formData.doorNo}
@@ -461,7 +463,7 @@ export default function Account() {
             />
           </div>
           <div className="field">
-            <label>Pincode</label>
+            <label>{t('customerAccount.pincode', 'Pincode')}</label>
             <input
               name="pincode"
               value={formData.pincode}
@@ -470,7 +472,7 @@ export default function Account() {
             />
           </div>
           <div className="field full">
-            <label>Full Location/Address</label>
+            <label>{t('customerAccount.fullLocation', 'Full Location/Address')}</label>
             <div className="account-location-row">
               <input
                 name="location"
@@ -484,7 +486,7 @@ export default function Account() {
                   className="account-location-pin-btn"
                   onClick={handleUseCurrentLocation}
                   disabled={loadingLocation}
-                  title="Use current location"
+                  title={t('customerAccount.useCurrentLocation', "Use current location")}
                 >
                   {loadingLocation ? "..." : "📍"}
                 </button>
@@ -493,7 +495,7 @@ export default function Account() {
           </div>
           {/* Address Coordinates Field - moved below address */}
           <div className="field full">
-            <label>Address Coordinates</label>
+            <label>{t('customerAccount.addressCoords', 'Address Coordinates')}</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#1a4d2e', fontSize: '15px' }}>
                 {addressCoords ? `${addressCoords.lat.toFixed(6)}, ${addressCoords.lon.toFixed(6)}` : '--'}
@@ -518,7 +520,7 @@ export default function Account() {
                   marginLeft: '4px'
                 }}
               >
-                {fetchingCoords ? 'Fetching...' : 'Fetch from Address'}
+                {fetchingCoords ? t('customerAccount.fetching', 'Fetching...') : t('customerAccount.fetchFromAddress', 'Fetch from Address')}
               </button>
               {coordsError && (
                 <span style={{ color: 'red', marginLeft: 8, fontSize: '13px' }}>{coordsError}</span>
@@ -532,14 +534,14 @@ export default function Account() {
         <div className="account-location-modal-overlay" onClick={() => setShowLocationModal(false)}>
           <div className="account-location-modal" onClick={(e) => e.stopPropagation()}>
             <div className="account-location-modal-header">
-              <h3>Pick Current Location</h3>
+              <h3>{t('customerAccount.pickCurrentLocation', 'Pick Current Location')}</h3>
               <button type="button" className="account-location-modal-close" onClick={() => setShowLocationModal(false)}>
                 ✕
               </button>
             </div>
 
             {locationPayload?.baseLocation && (
-              <p className="account-location-modal-text">Detected: {locationPayload.baseLocation}</p>
+              <p className="account-location-modal-text">{t('customerAccount.detected', 'Detected')}: {locationPayload.baseLocation}</p>
             )}
 
             {locationSuggestions.length > 0 && (
@@ -559,7 +561,7 @@ export default function Account() {
 
             {famousNearby.length > 0 && (
               <div className="account-famous-nearby">
-                <span className="account-famous-title">Nearby famous place(s):</span>
+                <span className="account-famous-title">{t('customerAccount.nearbyFamousPlaces', 'Nearby famous place(s):')}</span>
                 <div className="account-famous-list">
                   {famousNearby.map((place, idx) => (
                     <button
@@ -582,22 +584,22 @@ export default function Account() {
         {!editMode ? (
           <>
             <button className="save-btn" type="button" onClick={() => setEditMode(true)}>
-              ✏️ Edit Details
+              ✏️ {t('customerAccount.editDetails', 'Edit Details')}
             </button>
             <button className="logout-btn" type="button" onClick={handleLogout}>
-              🚪 Logout
+              🚪 {t('customerAccount.logout', 'Logout')}
             </button>
           </>
         ) : (
           <>
             <button className="save-btn" type="button" onClick={saveProfile} disabled={saving}>
-              {saving ? "💾 Saving..." : "💾 Save Changes"}
+              {saving ? `💾 ${t('customerAccount.saving', "Saving...")}` : `💾 ${t('customerAccount.saveChanges', "Save Changes")}`}
             </button>
             <button className="cancel-btn" type="button" onClick={() => setEditMode(false)} disabled={saving}>
-              Cancel
+              {t('customerAccount.cancel', 'Cancel')}
             </button>
             <button className="logout-btn" type="button" onClick={handleLogout} disabled={saving}>
-              🚪 Logout
+              🚪 {t('customerAccount.logout', 'Logout')}
             </button>
           </>
         )}

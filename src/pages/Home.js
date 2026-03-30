@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiGet } from "../utils/api";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import CustomerHeader from "../components/CustomerHeader";
+import BottomNav from "../components/BottomNav";
+import { useTranslation } from "react-i18next";
 import "../styles/Home.css";
 
 const PENDING_DEALER_REQUESTS_KEY = "pendingDealerRequests";
 
 export default function Home() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const AUTO_REFRESH_MS = 5 * 60 * 1000;
   const [search, setSearch] = useState("");
@@ -84,7 +89,7 @@ export default function Home() {
             }));
             const next = pending.filter((item) => String(item.requestId) !== String(req.requestId));
             localStorage.setItem(PENDING_DEALER_REQUESTS_KEY, JSON.stringify(next));
-            alert("✅ Dealer accepted your request. Opening chat...");
+            alert("✅ " + t("Dealer accepted your request. Opening chat...", "Dealer accepted your request. Opening chat..."));
             navigate("/chat");
             return;
           }
@@ -147,29 +152,19 @@ export default function Home() {
 
   return (
     <div className="home-page">
-
-      {/* ── HEADER ── */}
-      <header className="home-header">
-        <div className="header-inner">
-          <div className="logo-wrap">
-            <span className="logo-icon">🌾</span>
-            <span className="logo-text">Agri<span>Mart</span></span>
-          </div>
-          <span className="tagline">Fresh from Farmers, Daily</span>
-        </div>
-      </header>
+      <CustomerHeader />
 
       {/* ── SEARCH HERO BANNER ── */}
       <section className="search-section">
         <div className="search-section-inner">
-          <h1 className="search-title">Fresh Produce, Direct from Farmers</h1>
-          <p className="search-subtitle">Search vegetables, fruits, grains &amp; more</p>
+          <h1 className="search-title">{t('Fresh Produce, Direct from Farmers', 'Fresh Produce, Direct from Farmers')}</h1>
+          <p className="search-subtitle">{t('Search vegetables, fruits, grains & more', 'Search vegetables, fruits, grains & more')}</p>
           <div className="search-box">
             <span className="search-icon">🔍</span>
             <input
               id="home-search"
               type="text"
-              placeholder="Search crops, vegetables, fruits..."
+              placeholder={t("Search crops, vegetables, fruits...", "Search crops, vegetables, fruits...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -181,10 +176,10 @@ export default function Home() {
       {!loading && !error && (
         <div className="section-header">
           <h2 className="section-title-text">
-            🌿 Available Crops
+            🌿 {t('Available Crops', 'Available Crops')}
           </h2>
           <span className="section-count">
-            {filteredCrops.length} {filteredCrops.length === 1 ? "listing" : "listings"}
+            {filteredCrops.length} {filteredCrops.length === 1 ? t('listing', 'listing') : t('listings', 'listings')}
           </span>
         </div>
       )}
@@ -196,7 +191,7 @@ export default function Home() {
         {loading && (
           <div className="state-card">
             <div className="ag-spinner"></div>
-            <p className="state-message">Loading fresh crops…</p>
+            <p className="state-message">{t('Loading fresh crops…', 'Loading fresh crops…')}</p>
           </div>
         )}
 
@@ -205,7 +200,7 @@ export default function Home() {
           <div className="state-card">
             <span className="state-icon">⚠️</span>
             <p className="error-text">{error}</p>
-            <button className="retry-btn" onClick={fetchCrops}>↻ Retry</button>
+            <button className="retry-btn" onClick={fetchCrops}>↻ {t('Retry', 'Retry')}</button>
           </div>
         )}
 
@@ -213,7 +208,7 @@ export default function Home() {
         {!loading && !error && filteredCrops.length === 0 && (
           <div className="state-card">
             <span className="state-icon">🔍</span>
-            <p className="state-message">No crops found for "{search}"</p>
+            <p className="state-message">{t('No crops found for', 'No crops found for')} "{search}"</p>
           </div>
         )}
 
@@ -242,26 +237,26 @@ export default function Home() {
                 <div className="crop-image-wrapper">
                   <img src={crop.image} alt={crop.name} className="crop-image" />
                   <span className={`category-badge ${crop.category.toLowerCase()}`}>
-                    {crop.category}
+                    {t(crop.category, crop.category)}
                   </span>
                 </div>
 
                 <div className="crop-info">
-                  <h3 className="crop-name">{crop.name}</h3>
+                  <h3 className="crop-name">{t(crop.name, crop.name)}</h3>
                   <p className="crop-price">
-                    ₹{crop.sellingPricePerKg} <span>/kg</span>
+                    ₹{crop.sellingPricePerKg} <span>/{t('kg', 'kg')}</span>
                   </p>
-                  <p className="crop-price-note">Farmer selling price</p>
+                  <p className="crop-price-note">{t('Farmer selling price', 'Farmer selling price')}</p>
                   {crop.mandiReference && (
                     <span
                       className="crop-mandi-ref"
-                      title="Government mandi wholesale reference. 1 quintal = 100 kg."
+                      title={t("Government mandi wholesale reference. 1 quintal = 100 kg.", "Government mandi wholesale reference. 1 quintal = 100 kg.")}
                     >
-                      🏛 ₹{crop.mandiReference.modalPricePerQuintal}/quintal
+                      🏛 ₹{crop.mandiReference.modalPricePerQuintal}/{t('quintal', 'quintal')}
                     </span>
                   )}
                   <p className="crop-farmer">👨‍🌾 {crop.farmer}</p>
-                  <button className="view-details-btn">View Details →</button>
+                  <button className="view-details-btn">{t('View Details →', 'View Details →')}</button>
                 </div>
               </div>
             ))}
@@ -269,25 +264,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* ── BOTTOM NAV ── */}
-      <nav className="bottom-nav">
-        <div id="nav-home" className="nav-item active" onClick={() => navigate("/home")}>
-          <span className="nav-icon">🏠</span>
-          <span className="nav-label">Home</span>
-        </div>
-        <div id="nav-cart" className="nav-item" onClick={() => navigate("/cart")}>
-          <span className="nav-icon">🛒</span>
-          <span className="nav-label">Cart</span>
-        </div>
-        <div id="nav-account" className="nav-item" onClick={() => navigate("/account")}>
-          <span className="nav-icon">👤</span>
-          <span className="nav-label">Account</span>
-        </div>
-        <div id="nav-logout" className="nav-item" onClick={handleLogout}>
-          <span className="nav-icon">🚪</span>
-          <span className="nav-label">Logout</span>
-        </div>
-      </nav>
+      <BottomNav />
 
     </div>
   );

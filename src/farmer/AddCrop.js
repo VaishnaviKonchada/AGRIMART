@@ -502,14 +502,14 @@ export default function AddCrop() {
 
   const validate = () => {
     const e = {};
-    if (!cropName.trim()) e.cropName = "Crop name is required";
-    if (!category) e.category = "Category is required";
-    if (!quantity || Number(quantity) <= 0) e.quantity = "Enter a valid quantity";
-    if (!pricePerKg || Number(pricePerKg) <= 0) e.pricePerKg = "Enter a valid price";
+    if (!cropName.trim()) e.cropName = t("addCrop.validation.cropNameRequired");
+    if (!category) e.category = t("addCrop.validation.categoryRequired");
+    if (!quantity || Number(quantity) <= 0) e.quantity = t("addCrop.validation.quantityRequired");
+    if (!pricePerKg || Number(pricePerKg) <= 0) e.pricePerKg = t("addCrop.validation.priceRequired");
     if (!harvestDate) {
-      e.harvestDate = "Enter harvest date in DD-MM-YYYY format";
+      e.harvestDate = t("addCrop.validation.dateRequired");
     } else if (!parseDDMMYYYY(harvestDate)) {
-      e.harvestDate = "Invalid date. Use DD-MM-YYYY";
+      e.harvestDate = t("addCrop.validation.dateInvalid");
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -523,7 +523,7 @@ export default function AddCrop() {
       // Get JWT token from localStorage
       const token = localStorage.getItem('authToken');
       if (!token) {
-        alert('Authentication token not found. Please login again.');
+        alert(t("addCrop.validation.authError"));
         navigate('/login');
         return;
       }
@@ -585,7 +585,7 @@ export default function AddCrop() {
       setBaseLang(null);
 
       // Optional: Show success message and redirect
-      alert('✅ Crop added successfully! Your crop is now visible to customers.');
+      alert(t("addCrop.validation.success"));
       // navigate('/farmer-dashboard'); // Uncomment to auto-redirect
 
     } catch (error) {
@@ -767,23 +767,23 @@ export default function AddCrop() {
                   </div>
                   {errors.pricePerKg && <span className="field-error">{errors.pricePerKg}</span>}
                   {mandiInfo.loading && (
-                    <small style={{ color: '#999', marginTop: '4px', display: 'block' }}>⏳ Fetching govt mandi price...</small>
+                    <small style={{ color: '#999', marginTop: '4px', display: 'block' }}>⏳ {t("addCrop.fetchingMandi")}</small>
                   )}
                   {!mandiInfo.loading && mandiInfo.found && (
                     <div className="mandi-suggestion">
                       <span className="mandi-icon">🏛️</span>
                       <div className="mandi-details">
-                        <span className="mandi-price">Govt Suggestion: ₹{mandiInfo.suggestedPricePerKg}/kg</span>
-                        <span className="mandi-range">Mandi wholesale: ₹{mandiInfo.modalPricePerQuintal}/quintal</span>
-                        <span className="mandi-range">Range: ₹{mandiInfo.minPricePerQuintal} - ₹{mandiInfo.maxPricePerQuintal}/quintal</span>
-                        <span className="mandi-range" title="Government mandi rates are wholesale values. 1 quintal = 100 kg.">1 quintal = 100 kg</span>
+                        <span className="mandi-price">{t("addCrop.mandiSuggestion")}: ₹{mandiInfo.suggestedPricePerKg}/kg</span>
+                        <span className="mandi-range">{t("addCrop.mandiWholesale")}: ₹{mandiInfo.modalPricePerQuintal}/quintal</span>
+                        <span className="mandi-range">{t("addCrop.mandiRange")}: ₹{mandiInfo.minPricePerQuintal} - ₹{mandiInfo.maxPricePerQuintal}/quintal</span>
+                        <span className="mandi-range" title={t("addCrop.mandiRatesNote")}>{t("addCrop.mandiConversion")}</span>
                         {mandiInfo.market && <span className="mandi-market">{mandiInfo.market}{mandiInfo.state ? `, ${mandiInfo.state}` : ''}{mandiInfo.arrivalDate ? ` • ${mandiInfo.arrivalDate}` : ''}</span>}
                       </div>
                       <button
                         type="button"
                         className="mandi-use-btn"
                         onClick={() => setPricePerKg(String(mandiInfo.suggestedPricePerKg))}
-                      >Use ₹/kg</button>
+                      >{t("addCrop.usePricePerKg")}</button>
                     </div>
                   )}
                 </div>

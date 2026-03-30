@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { apiGet, apiDelete } from "../utils/api";
 import "../styles/OrderHistory.css";
 import BottomNav from "../components/BottomNav";
+import CustomerHeader from "../components/CustomerHeader";
 
 export default function OrderHistory() {
   const navigate = useNavigate();
@@ -55,10 +56,7 @@ export default function OrderHistory() {
 
   return (
     <div className="order-history-page">
-      <div className="order-header">
-        <h2>📦 My Orders</h2>
-        <button onClick={() => navigate("/home")}>🏠 Home</button>
-      </div>
+      <CustomerHeader />
 
       {loading ? (
         <p className="no-orders">Loading orders...</p>

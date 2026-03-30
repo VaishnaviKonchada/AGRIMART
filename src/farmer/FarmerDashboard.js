@@ -208,10 +208,10 @@ export default function FarmerDashboard() {
   }, [farmerOrders]);
   const weatherData = {
     temp: "28°C",
-    condition: "Partly Cloudy",
+    condition: t('farmerDashboard.weather.partlyCloudy'),
     humidity: "65%",
     rainfall: "Light",
-    windSpeed: "12 km/h"
+    windSpeed: `12 ${t('farmerDashboard.wind')}`
   };
   const buildAnalytics = () => {
     const getTimestamp = (createdAt) => {

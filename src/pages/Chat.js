@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiGet, apiPost } from "../utils/api";
+import CustomerHeader from "../components/CustomerHeader";
+import BottomNav from "../components/BottomNav";
 import "../styles/Chat.css";
 
 const MINIMUM_MANUAL_OFFER = 15;
 
 export default function Chat() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [chat, setChat] = useState(null);
   const [chatList, setChatList] = useState([]);
   const [selectedChatId, setSelectedChatId] = useState("");
@@ -47,7 +51,7 @@ export default function Chat() {
       pickupCoordinates: fallback?.pickupCoordinates || null,
       requestId: apiChat?.dealerRequestId?._id || fallback?.requestId,
       finalDealPrice: negotiatedPrice || fallback.finalDealPrice || fallback.offeredPrice || fallback.dealerPrice,
-      dealerName: apiChat?.dealerId?.name || fallback.dealerName || "Dealer",
+      dealerName: apiChat?.dealerId?.name || fallback.dealerName || t('common.dealer', "Dealer"),
       dealerEmail: apiChat?.dealerId?.email || fallback.dealerEmail || "",
       farmerLocation: pickupLocation,
       pickup: pickupLocation,
@@ -144,7 +148,7 @@ export default function Chat() {
         setChat(null);
       } catch (err) {
         console.error("Failed to load chat:", err.message);
-        setChatError(err.message || "Unable to load chats");
+        setChatError(err.message || t('chat.unableToLoad', "Unable to load chats"));
       } finally {
         setLoading(false);
       }
@@ -172,7 +176,7 @@ export default function Chat() {
       await fetchChatById(nextChatId, chat || {});
     } catch (err) {
       console.error("Failed to switch conversation:", err.message);
-      alert(`Unable to open conversation: ${err.message}`);
+      alert(`${t('chat.unableToOpen', 'Unable to open conversation')}: ${err.message}`);
     }
   };
 
@@ -185,23 +189,23 @@ export default function Chat() {
       await fetchChatById(chat.chatId, chat);
     } catch (err) {
       console.error("Error sending message:", err.message);
-      alert(`Failed to send message: ${err.message}`);
+      alert(`${t('chat.failedToSend', 'Failed to send message')}: ${err.message}`);
     }
   };
 
   const sendOffer = async () => {
     if (!offerPrice) {
-      alert("Enter offer price");
+      alert(t('chat.enterOffer', "Enter offer price"));
       return;
     }
 
     const priceAmount = Number(offerPrice);
     if (!Number.isFinite(priceAmount) || priceAmount < MINIMUM_MANUAL_OFFER) {
-      alert(`Counter offer must be at least Rs.${MINIMUM_MANUAL_OFFER}.`);
+      alert(`${t('chat.offerMinError', 'Counter offer must be at least Rs.')}${MINIMUM_MANUAL_OFFER}.`);
       return;
     }
 
-    const text = `Customer counter-offer: Rs.${priceAmount}`;
+    const text = `${t('chat.customerOfferMsg', 'Customer counter-offer: Rs.')}${priceAmount}`;
     await sendMessage(text);
     setOfferPrice("");
   };
@@ -212,7 +216,7 @@ export default function Chat() {
 
       const finalPrice = chat.negotiation?.finalPrice || chat.finalDealPrice || chat.dealerPrice;
       if (!finalPrice) {
-        alert("Dealer final price is not set yet.");
+        alert(t('chat.priceNotSet', "Dealer final price is not set yet."));
         return;
       }
 
@@ -223,14 +227,14 @@ export default function Chat() {
       await fetchChatById(chat.chatId, chat);
 
       if (!decision?.bothConfirmed) {
-        alert("Your confirmation is saved. Waiting for dealer confirmation.");
+        alert(t('chat.waitingDealer', "Your confirmation is saved. Waiting for dealer confirmation."));
         return;
       }
 
-      alert("Both parties confirmed the negotiated price. You can now go to payment.");
+      alert(t('chat.bothConfirmed', "Both parties confirmed the negotiated price. You can now go to payment."));
     } catch (err) {
       console.error("Confirm failed:", err.message);
-      alert(`Unable to confirm deal: ${err.message}`);
+      alert(`${t('chat.unableToConfirm', 'Unable to confirm deal')}: ${err.message}`);
     }
   };
 
@@ -244,7 +248,7 @@ export default function Chat() {
         chat.negotiation?.dealerDecision === "confirmed";
 
       if (!bothConfirmed) {
-        alert("Both customer and dealer must confirm the price before payment.");
+        alert(t('chat.confirmBothFirst', "Both customer and dealer must confirm the price before payment."));
         return;
       }
 
@@ -324,11 +328,11 @@ export default function Chat() {
       );
 
       localStorage.removeItem("activeChat");
-      alert("Both parties confirmed. Redirecting to payment page.");
+      alert(t('chat.redirectingPayment', "Both parties confirmed. Redirecting to payment page."));
       navigate("/payment");
     } catch (err) {
       console.error("Proceed to payment failed:", err.message);
-      alert(`Unable to go to payment: ${err.message}`);
+      alert(`${t('chat.unableToPayment', 'Unable to go to payment')}: ${err.message}`);
     }
   };
 
@@ -337,22 +341,22 @@ export default function Chat() {
       if (!chat.chatId) return;
       await apiPost(`chats/${chat.chatId}/price-decision`, { decision: "reject" });
       await fetchChatById(chat.chatId, chat);
-      alert("You rejected this price. Ask dealer for a new offer.");
+      alert(t('chat.rejectedMsg', "You rejected this price. Ask dealer for a new offer."));
     } catch (err) {
       console.error("Reject failed:", err.message);
-      alert(`Unable to reject price: ${err.message}`);
+      alert(`${t('chat.unableToReject', 'Unable to reject price')}: ${err.message}`);
     }
   };
 
   const cancelChat = () => {
-    if (window.confirm("Are you sure you want to close this chat?")) {
+    if (window.confirm(t('chat.closeConfirm', "Are you sure you want to close this chat?"))) {
       localStorage.removeItem("activeChat");
       navigate("/account");
     }
   };
 
   const getDealerInitials = () => {
-    const name = chat.dealerName || "Dealer";
+    const name = chat.dealerName || t('common.dealer', "Dealer");
     return name
       .split(" ")
       .map((n) => n[0])
@@ -372,7 +376,7 @@ export default function Chat() {
 
   const getLastMessageText = (chatItem) => {
     const lastMsg = chatItem?.messages?.[chatItem.messages.length - 1]?.text;
-    if (!lastMsg) return "No messages yet";
+    if (!lastMsg) return t('chat.noMessages', "No messages yet");
     return lastMsg.length > 44 ? `${lastMsg.slice(0, 44)}...` : lastMsg;
   };
 
@@ -384,14 +388,12 @@ export default function Chat() {
   if (loading) {
     return (
       <div className="chat-state-page">
-        <div className="customer-chat-topbar">
-          <h2>🌿 Dealer Chats</h2>
-          <button className="back-btn" onClick={() => navigate("/account")}>← Back</button>
-        </div>
+        <CustomerHeader />
         <div className="chat-state-body">
           <div className="chat-spinner"></div>
-          <p className="chat-state-title">Loading your conversations…</p>
+          <p className="chat-state-title">{t('chat.loadingConvo', 'Loading your conversations…')}</p>
         </div>
+        <BottomNav />
       </div>
     );
   }
@@ -399,42 +401,37 @@ export default function Chat() {
   if (!chat && !loading) {
     return (
       <div className="chat-state-page">
-        <div className="customer-chat-topbar">
-          <h2>🌿 Dealer Chats</h2>
-          <button className="back-btn" onClick={() => navigate("/account")}>← Back</button>
-        </div>
+        <CustomerHeader />
         <div className="chat-state-body">
           <span style={{ fontSize: 52 }}>💬</span>
-          <p className="chat-state-title">No dealer conversations yet</p>
-          {chatError && <p className="chat-state-sub" style={{ color: '#C62828' }}>Error: {chatError}</p>}
+          <p className="chat-state-title">{t('chat.noConvo', 'No dealer conversations yet')}</p>
+          {chatError && <p className="chat-state-sub" style={{ color: '#C62828' }}>{t('common.error', 'Error')}: {chatError}</p>}
           <button className="chat-state-btn primary" onClick={() => navigate("/transport-dealers")}>
-            Browse Transport Dealers
+            {t('chat.browseDealers', 'Browse Transport Dealers')}
           </button>
           <button className="chat-state-btn ghost" onClick={() => navigate("/account")}>
-            Back to Account
+            {t('chat.backToAccount', 'Back to Account')}
           </button>
         </div>
+        <BottomNav />
       </div>
     );
   }
 
   return (
     <div className="customer-chat-history-page">
-      <div className="customer-chat-topbar">
-        <h2>🌿 Dealer Chats</h2>
-        <button className="back-btn" onClick={() => navigate("/account")}>← Back</button>
-      </div>
+      <CustomerHeader />
 
       <div className="customer-chat-layout">
 
         {/* ── SIDEBAR ── */}
         <div className="customer-chat-sidebar">
-          <div className="customer-chat-sidebar-header">Conversations ({chatList.length})</div>
+          <div className="customer-chat-sidebar-header">{t('chat.conversations', 'Conversations')} ({chatList.length})</div>
           {chatList.length === 0 ? (
-            <div className="empty-chats">No conversations yet</div>
+            <div className="empty-chats">{t('chat.noConversations', 'No conversations yet')}</div>
           ) : (
             chatList.map((item) => {
-              const dealerName = item?.dealerId?.name || "Dealer";
+              const dealerName = item?.dealerId?.name || t('common.dealer', "Dealer");
               return (
                 <div
                   key={item._id}
@@ -464,11 +461,11 @@ export default function Chat() {
                 <div className="header-text">
                   <h3>{chat.dealerName}</h3>
                   <p className="status-text">
-                    <span className="online-badge"></span> Active now
+                    <span className="online-badge"></span> {t('chat.activeNow', 'Active now')}
                   </p>
                 </div>
               </div>
-              <button className="close-btn" onClick={cancelChat} title="Close chat">✕</button>
+              <button className="close-btn" onClick={cancelChat} title={t('common.close', "Close chat")}>✕</button>
             </div>
           </div>
 
@@ -478,19 +475,19 @@ export default function Chat() {
               className={`chat-tab-btn ${activeTab === "chat" ? "active" : ""}`}
               onClick={() => setActiveTab("chat")}
             >
-              <span className="tab-icon-emoji">💬</span> Chat
+              <span className="tab-icon-emoji">💬</span> {t('chat.tabChat', 'Chat')}
             </button>
             <button
               className={`chat-tab-btn ${activeTab === "transport" ? "active" : ""}`}
               onClick={() => setActiveTab("transport")}
             >
-              <span className="tab-icon-emoji">🚚</span> Transport
+              <span className="tab-icon-emoji">🚚</span> {t('chat.tabTransport', 'Transport')}
             </button>
             <button
               className={`chat-tab-btn ${activeTab === "deal" ? "active" : ""}`}
               onClick={() => setActiveTab("deal")}
             >
-              <span className="tab-icon-emoji">🤝</span> Deal
+              <span className="tab-icon-emoji">🤝</span> {t('chat.tabDeal', 'Deal')}
               {(chat.negotiation?.dealerDecision === "confirmed" && chat.negotiation?.customerDecision !== "confirmed") && (
                 <span className="tab-alert-dot"></span>
               )}
@@ -505,12 +502,12 @@ export default function Chat() {
               {/* Status banners */}
               {chat.negotiation?.dealerDecision === "rejected" && (
                 <div className="chat-status-banner rejected">
-                  ❌ Dealer rejected the price — send a new counter offer.
+                  ❌ {t('chat.dealerRejectedBanner', 'Dealer rejected the price — send a new counter offer.')}
                 </div>
               )}
               {chat.negotiation?.dealerDecision === "confirmed" && chat.negotiation?.customerDecision !== "confirmed" && (
                 <div className="chat-status-banner confirmed">
-                  ✅ Dealer confirmed! Go to the <button className="inline-tab-link" onClick={() => setActiveTab("deal")}>Deal tab</button> to confirm.
+                  ✅ {t('chat.dealerConfirmedBanner', 'Dealer confirmed! Go to the ')} <button className="inline-tab-link" onClick={() => setActiveTab("deal")}>{t('chat.tabDeal', 'Deal tab')}</button> {t('chat.toConfirm', 'to confirm.')}
                 </div>
               )}
 
@@ -518,7 +515,7 @@ export default function Chat() {
               <div className="chat-messages">
                 {chat.messages && chat.messages.length === 0 ? (
                   <div className="empty-state">
-                    <p className="empty-text">Start the conversation with {chat.dealerName}</p>
+                    <p className="empty-text">{t('chat.startMessage', { defaultValue: 'Start the conversation with {{name}}', name: chat.dealerName })}</p>
                   </div>
                 ) : (
                   chat.messages.map((m, i) => (
@@ -529,7 +526,7 @@ export default function Chat() {
                           <p className="message-text">{m.text}</p>
                           <span className="message-time">{m.timestamp}</span>
                         </div>
-                        {m.sender === "customer" && <span className="message-status">sent</span>}
+                        {m.sender === "customer" && <span className="message-status">{t('common.sent', 'sent')}</span>}
                       </div>
                     </div>
                   ))
@@ -542,12 +539,12 @@ export default function Chat() {
                   <input
                     type="text"
                     className="message-input"
-                    placeholder="Type your message..."
+                    placeholder={t('chat.placeholder', "Type your message...")}
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && sendMessage(messageInput)}
                   />
-                  <button className="send-btn" onClick={() => sendMessage(messageInput)} title="Send message">
+                  <button className="send-btn" onClick={() => sendMessage(messageInput)} title={t('chat.send', "Send message")}>
                     <span className="send-icon" aria-hidden="true">➤</span>
                   </button>
                 </div>
@@ -561,72 +558,72 @@ export default function Chat() {
           {activeTab === "transport" && (
             <div className="tab-panel tab-panel-scroll">
               <div className="tab-card">
-                <div className="tab-card-title">📍 Route & Location</div>
+                <div className="tab-card-title">📍 {t('chat.routeLocation', 'Route & Location')}</div>
                 <div className="info-grid">
                   <div className="info-row">
-                    <span className="info-label">Farmer</span>
+                    <span className="info-label">{t('orders.name', 'Farmer')}</span>
                     <span className="info-value">{chat.farmerName || "—"}</span>
                   </div>
                   <div className="info-row">
-                    <span className="info-label">Pickup</span>
+                    <span className="info-label">{t('transportDealers.pickup', 'Pickup')}</span>
                     <span className="info-value">{chat.farmerLocation || "—"}</span>
                   </div>
                   <div className="info-row">
-                    <span className="info-label">Drop</span>
+                    <span className="info-label">{t('transportDealers.drop', 'Drop')}</span>
                     <span className="info-value">{chat.drop || "—"}</span>
                   </div>
                 </div>
               </div>
 
               <div className="tab-card">
-                <div className="tab-card-title">👤 Customer Address</div>
+                <div className="tab-card-title">👤 {t('chat.customerAddress', 'Customer Address')}</div>
                 <div className="info-grid">
                   <div className="info-row">
-                    <span className="info-label">Phone</span>
+                    <span className="info-label">{t('customerAccount.phone', 'Phone')}</span>
                     <span className="info-value">{chat.customerAddress?.phone || "—"}</span>
                   </div>
                   <div className="info-row">
-                    <span className="info-label">Door No</span>
+                    <span className="info-label">{t('customerAccount.doorNo', 'Door No')}</span>
                     <span className="info-value">{chat.customerAddress?.doorNo || "—"}</span>
                   </div>
                   <div className="info-row wide">
-                    <span className="info-label">Full Address</span>
+                    <span className="info-label">{t('customerAccount.fullLocation', 'Full Address')}</span>
                     <span className="info-value">{chat.customerAddress?.fullAddress?.trim() || "—"}</span>
                   </div>
                 </div>
               </div>
 
               <div className="tab-card">
-                <div className="tab-card-title">🚛 Vehicle & Pricing</div>
+                <div className="tab-card-title">🚛 {t('chat.vehiclePricing', 'Vehicle & Pricing')}</div>
                 <div className="info-grid">
                   <div className="info-row">
-                    <span className="info-label">Vehicle</span>
+                    <span className="info-label">{t('transportDealers.vehicle', 'Vehicle')}</span>
                     <span className="info-value">
                       {chat.vehicle ? <span className="vehicle-badge">{chat.vehicle}</span> : "—"}
                     </span>
                   </div>
                   <div className="info-row">
-                    <span className="info-label">Quantity</span>
+                    <span className="info-label">{t('cart.totalQuantity', 'Quantity')}</span>
                     <span className="info-value">{chat.totalQty || 0} kg</span>
                   </div>
                   <div className="info-row">
-                    <span className="info-label">Base Delivery</span>
-                    <span className="info-value price">{resolvedBasePrice ? `Rs.${resolvedBasePrice}` : "TBD"}</span>
+                    <span className="info-label">{t('myOrders.baseDelivery', 'Base Delivery')}</span>
+                    <span className="info-value price">{resolvedBasePrice ? `Rs.${resolvedBasePrice}` : t('chat.tbd', "TBD")}</span>
                   </div>
                   <div className="info-row">
-                    <span className="info-label">Batch Discount</span>
+                    <span className="info-label">{t('myOrders.batchDiscount', 'Batch Discount')}</span>
                     <span className="info-value" style={{ color: "#2e7d32", fontWeight: 700 }}>
                       {resolvedDiscount > 0 ? `-Rs.${resolvedDiscount}` : "Rs.0"}
                     </span>
                   </div>
                   <div className="info-row">
-                    <span className="info-label">Final Delivery</span>
-                    <span className="info-value price highlight">{resolvedFinalPrice ? `Rs.${resolvedFinalPrice}` : "TBD"}</span>
+                    <span className="info-label">{t('myOrders.finalDeliveryCharge', 'Final Delivery')}</span>
+                    <span className="info-value price highlight">{resolvedFinalPrice ? `Rs.${resolvedFinalPrice}` : t('chat.tbd', "TBD")}</span>
                   </div>
                 </div>
                 {resolvedDiscount > 0 && (
                   <div className="discount-note">
-                    🎉 Platform-funded delivery discount applied for this route and order.
+                    🎉 {t('chat.platformDiscountNote', 'Platform-funded delivery discount applied for this route and order.')}
                   </div>
                 )}
               </div>
@@ -641,67 +638,67 @@ export default function Chat() {
 
               {/* Counter Offer Card */}
               <div className="tab-card">
-                <div className="tab-card-title">💸 Send Counter Offer</div>
+                <div className="tab-card-title">💸 {t('chat.sendCounterOffer', 'Send Counter Offer')}</div>
                 <div className="offer-input-wrapper">
                   <div className="input-group">
                     <input
                       type="number"
                       className="price-input"
-                      placeholder="Enter your counter offer (Rs.)"
+                      placeholder={t('chat.enterOfferPlaceholder', "Enter your counter offer (Rs.)")}
                       value={offerPrice}
                       min={MINIMUM_MANUAL_OFFER}
                       onChange={(e) => setOfferPrice(e.target.value)}
                     />
-                    <button className="offer-btn" onClick={sendOffer}>Send Offer</button>
+                    <button className="offer-btn" onClick={sendOffer}>{t('chat.sendOfferBtn', 'Send Offer')}</button>
                   </div>
-                  <p className="offer-hint">Sends your offer to the dealer in real time. Minimum: Rs.15.</p>
+                  <p className="offer-hint">{t('chat.offerHint', 'Sends your offer to the dealer in real time. Minimum: Rs.15.')}</p>
                 </div>
               </div>
 
               {/* Deal Confirmation Card */}
               {(chat.negotiation?.finalPrice || chat.finalDealPrice || chat.dealerPrice) && (
                 <div className="tab-card">
-                  <div className="tab-card-title">✅ Confirm Transport Deal</div>
+                  <div className="tab-card-title">✅ {t('chat.confirmDealTitle', 'Confirm Transport Deal')}</div>
                   <div className="info-grid">
                     <div className="info-row">
-                      <span className="info-label">Route</span>
+                      <span className="info-label">{t('chat.route', 'Route')}</span>
                       <span className="info-value">{chat.farmerLocation} → {chat.drop}</span>
                     </div>
                     <div className="info-row">
-                      <span className="info-label">Vehicle</span>
+                      <span className="info-label">{t('transportDealers.vehicle', 'Vehicle')}</span>
                       <span className="info-value">{chat.vehicle || "—"}</span>
                     </div>
                     <div className="info-row">
-                      <span className="info-label">Base Delivery</span>
+                      <span className="info-label">{t('myOrders.baseDelivery', 'Base Delivery')}</span>
                       <span className="info-value">Rs.{resolvedBasePrice || 0}</span>
                     </div>
                     <div className="info-row">
-                      <span className="info-label">Discount (Platform)</span>
+                      <span className="info-label">{t('chat.discountPlatform', 'Discount (Platform)')}</span>
                       <span className="info-value" style={{ color: "#2e7d32", fontWeight: 700 }}>-Rs.{resolvedDiscount || 0}</span>
                     </div>
                     <div className="info-row">
-                      <span className="info-label">Final Price</span>
+                      <span className="info-label">{t('payment.finalPrice', 'Final Price')}</span>
                       <span className="info-value price highlight final-price">Rs.{resolvedFinalPrice || 0}</span>
                     </div>
                     <div className="info-row">
-                      <span className="info-label">Your Decision</span>
+                      <span className="info-label">{t('chat.yourDecision', 'Your Decision')}</span>
                       <span className={`decision-badge ${chat.negotiation?.customerDecision || "pending"}`}>
-                        {chat.negotiation?.customerDecision || "pending"}
+                        {t(`chat.decision.${chat.negotiation?.customerDecision || "pending"}`, chat.negotiation?.customerDecision || "pending")}
                       </span>
                     </div>
                     <div className="info-row">
-                      <span className="info-label">Dealer Decision</span>
+                      <span className="info-label">{t('chat.dealerDecision', 'Dealer Decision')}</span>
                       <span className={`decision-badge ${chat.negotiation?.dealerDecision || "pending"}`}>
-                        {chat.negotiation?.dealerDecision || "pending"}
+                        {t(`chat.decision.${chat.negotiation?.dealerDecision || "pending"}`, chat.negotiation?.dealerDecision || "pending")}
                       </span>
                     </div>
                   </div>
                   <div className="action-buttons">
-                    <button className="confirm-btn" onClick={confirmDeal}>✓ Confirm Price</button>
-                    <button className="reject-btn" onClick={rejectDeal}>✗ Reject Price</button>
+                    <button className="confirm-btn" onClick={confirmDeal}>✓ {t('chat.confirmPriceBtn', 'Confirm Price')}</button>
+                    <button className="reject-btn" onClick={rejectDeal}>✗ {t('chat.rejectPriceBtn', 'Reject Price')}</button>
                     {bothSidesConfirmed && (
                       <button className="confirm-btn go-payment-btn" onClick={proceedToPayment}>
-                        🏦 Go to Payment
+                        🏦 {t('chat.goPaymentBtn', 'Go to Payment')}
                       </button>
                     )}
                   </div>
@@ -712,8 +709,8 @@ export default function Chat() {
               {!(chat.negotiation?.finalPrice || chat.finalDealPrice || chat.dealerPrice) && (
                 <div className="tab-empty">
                   <span style={{ fontSize: 40 }}>🤝</span>
-                  <p>No deal price set yet. Chat with the dealer to negotiate.</p>
-                  <button className="chat-tab-link" onClick={() => setActiveTab("chat")}>Go to Chat →</button>
+                  <p>{t('chat.noDealPrice', 'No deal price set yet. Chat with the dealer to negotiate.')}</p>
+                  <button className="chat-tab-link" onClick={() => setActiveTab("chat")}>{t('chat.goToChatBtn', 'Go to Chat →')}</button>
                 </div>
               )}
             </div>
@@ -721,6 +718,7 @@ export default function Chat() {
 
         </div>
       </div>
+      <BottomNav />
     </div>
   );
 }

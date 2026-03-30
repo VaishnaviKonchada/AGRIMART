@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiPost } from "../utils/api";
 import { clearCartItems, readCartItems, writeCartItems } from "../utils/cartStorage";
 import "../styles/Payment.css";
 import BottomNav from "../components/BottomNav";
+import CustomerHeader from "../components/CustomerHeader";
 
 export default function Payment() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [placedOrderId, setPlacedOrderId] = useState("");
@@ -51,7 +54,7 @@ export default function Payment() {
       district: finalPrice?.customerAddress?.district || currentUser?.profile?.district || "",
       mandal: finalPrice?.customerAddress?.mandal || currentUser?.profile?.mandal || "",
       pincode: finalPrice?.customerAddress?.pincode || currentUser?.profile?.pincode || "",
-      locationText: finalPrice?.customerAddress?.locationText || finalPrice?.drop || transportOrder.deliveryAddress || "Not specified",
+      locationText: finalPrice?.customerAddress?.locationText || finalPrice?.drop || transportOrder.deliveryAddress || t('notSet', "Not specified"),
       coordinates: finalPrice?.customerAddress?.coordinates || null,
       // Add fullAddress from deliveryAddress (if available), fallback to locationText
       fullAddress: transportOrder.deliveryAddress || finalPrice?.customerAddress?.fullAddress || finalPrice?.customerAddress?.locationText || finalPrice?.drop || transportOrder.deliveryAddress || "",
@@ -118,7 +121,7 @@ export default function Payment() {
 
     try {
       if (!acceptedTerms) {
-        alert("Please accept the terms and conditions before payment.");
+        alert(t('payment.acceptTermsError', "Please accept the terms and conditions before payment."));
         setIsProcessing(false);
         return;
       }
@@ -198,7 +201,7 @@ export default function Payment() {
         savedOrder = await apiPost("orders", orderData);
         console.log('✅ Order saved to backend:', savedOrder.orderId);
       } else {
-        throw new Error("Please login to place order");
+        throw new Error(t('payment.loginRequired', "Please login to place order"));
       }
 
       // Also save to localStorage for immediate UI update
@@ -270,19 +273,20 @@ export default function Payment() {
       
     } catch (error) {
       console.error("❌ Error placing order:", error);
-      alert(`Failed to place order: ${error.message}`);
+      alert(`${t('payment.orderError', 'Failed to place order')}: ${error.message}`);
       setIsProcessing(false);
     }
   };
 
   return (
     <div className="payment-container">
+      <CustomerHeader />
       {!showSuccess ? (
         <>
           <div className="payment-header">
             <div className="header-content">
-              <h1>💳 Payment Summary</h1>
-              <p className="subtitle">Review and confirm your order</p>
+              <h1>💳 {t('payment.title', 'Payment Summary')}</h1>
+              <p className="subtitle">{t('payment.subtitle', 'Review and confirm your order')}</p>
             </div>
           </div>
 
@@ -291,11 +295,11 @@ export default function Payment() {
             <div className="payment-section transport-section">
               <div className="section-header">
                 <span className="section-icon">🆔</span>
-                <h3>Order ID</h3>
+                <h3>{t('orders.id', 'Order ID')}</h3>
               </div>
               <div className="transport-info">
                 <div className="transport-row">
-                  <span className="label">Order ID</span>
+                  <span className="label">{t('orders.id', 'Order ID')}</span>
                   <span className="value mono-id">{previewOrderId}</span>
                 </div>
               </div>
@@ -305,23 +309,23 @@ export default function Payment() {
             <div className="payment-section transport-section">
               <div className="section-header">
                 <span className="section-icon">📍</span>
-                <h3>Customer Delivery Details</h3>
+                <h3>{t('transportDealers.deliveryAddress', 'Customer Delivery Details')}</h3>
               </div>
               <div className="transport-info">
                 <div className="transport-row">
-                  <span className="label">Customer</span>
-                  <span className="value">{deliveryDetails?.customerName || "Customer"}</span>
+                  <span className="label">{t('common.customer', 'Customer')}</span>
+                  <span className="value">{deliveryDetails?.customerName || t('common.customer', "Customer")}</span>
                 </div>
                 <div className="transport-row">
-                  <span className="label">Customer Contact</span>
+                  <span className="label">{t('orders.contact', 'Customer Contact')}</span>
                   <span className="value">{deliveryDetails?.customerEmail} | {deliveryDetails?.customerPhone}</span>
                 </div>
                 <div className="transport-row">
-                  <span className="label">Full Delivery Address</span>
-                  <span className="value">{customerAddress?.fullAddress?.trim() ? customerAddress.fullAddress : deliveryDetails?.destinationAddress || "Not specified"}</span>
+                  <span className="label">{t('customerAccount.fullLocation', 'Full Delivery Address')}</span>
+                  <span className="value">{customerAddress?.fullAddress?.trim() ? customerAddress.fullAddress : deliveryDetails?.destinationAddress || t('notSet', "Not specified")}</span>
                 </div>
                 <div className="transport-row">
-                  <span className="label">Door No</span>
+                  <span className="label">{t('customerAccount.doorNo', 'Door No')}</span>
                   <span className="value">{customerAddress?.doorNo || "-"}</span>
                 </div>
               </div>
@@ -331,7 +335,7 @@ export default function Payment() {
             <div className="payment-section items-section">
               <div className="section-header">
                 <span className="section-icon">🛒</span>
-                <h3>Order Items</h3>
+                <h3>{t('payment.orderItems', 'Order Items')}</h3>
               </div>
               <div className="items-list">
                   {items.length > 0 ? (
@@ -339,7 +343,7 @@ export default function Payment() {
                     <div key={i} className="item-row">
                       <div className="item-info">
                         <span className="item-name">{item.cropName || item.name}</span>
-                        <span className="item-qty">{item.quantity} kg @ farmer selling price ₹{item.pricePerKg}/kg</span>
+                        <span className="item-qty">{item.quantity} kg @ {t('cart.farmerSellingPrice', 'farmer selling price')} ₹{item.pricePerKg}/kg</span>
                       </div>
                       <span className="item-price">
                         ₹{(item.pricePerKg * item.quantity).toLocaleString()}
@@ -347,7 +351,7 @@ export default function Payment() {
                     </div>
                   ))
                 ) : (
-                  <p className="no-items">No items in cart</p>
+                  <p className="no-items">{t('cart.emptyCart', 'No items in cart')}</p>
                 )}
               </div>
             </div>
@@ -356,28 +360,28 @@ export default function Payment() {
             <div className="payment-section transport-section">
               <div className="section-header">
                 <span className="section-icon">🚚</span>
-                <h3>Transport Details</h3>
+                <h3>{t('myOrders.transportInfo', 'Transport Details')}</h3>
               </div>
               <div className="transport-info">
                 <div className="transport-row">
-                  <span className="label">✅ Price Confirmation</span>
-                  <span className="value">Dealer Confirmed + Customer Confirmed</span>
+                  <span className="label">✅ {t('payment.priceConfirmation', 'Price Confirmation')}</span>
+                  <span className="value">{t('payment.bothConfirmed', 'Dealer Confirmed + Customer Confirmed')}</span>
                 </div>
                 <div className="transport-row">
-                  <span className="label">👤 Dealer Name</span>
-                  <span className="value">{paymentData.dealer?.name || "Not Selected"}</span>
+                  <span className="label">👤 {t('orders.name', 'Dealer Name')}</span>
+                  <span className="value">{paymentData.dealer?.name || t('common.notSelected', "Not Selected")}</span>
                 </div>
                 <div className="transport-row">
-                  <span className="label">🚗 Vehicle Type</span>
-                  <span className="value badge">{paymentData.dealer?.vehicle || "N/A"}</span>
+                  <span className="label">🚗 {t('transportDealers.vehicle', 'Vehicle Type')}</span>
+                  <span className="value badge">{paymentData.dealer?.vehicle || t('notSet', "N/A")}</span>
                 </div>
                 <div className="transport-row">
-                  <span className="label">📍 Pickup Location</span>
-                  <span className="value">{farmer?.location || "Not specified"}</span>
+                  <span className="label">📍 {t('transportDealers.pickup', 'Pickup Location')}</span>
+                  <span className="value">{farmer?.location || t('notSet', "Not specified")}</span>
                 </div>
                 <div className="transport-row">
-                  <span className="label">🎯 Delivery Location</span>
-                  <span className="value">{deliveryDetails?.destinationAddress || "Not specified"}</span>
+                  <span className="label">🎯 {t('transportDealers.drop', 'Delivery Location')}</span>
+                  <span className="value">{deliveryDetails?.destinationAddress || t('notSet', "Not specified")}</span>
                 </div>
               </div>
             </div>
@@ -386,46 +390,46 @@ export default function Payment() {
             <div className="payment-section price-section">
               <div className="section-header">
                 <span className="section-icon">💰</span>
-                <h3>Price Breakdown</h3>
+                <h3>{t('myOrders.priceSummary', 'Price Breakdown')}</h3>
               </div>
               <div className="price-breakdown">
                 <div className="price-row">
-                  <span className="price-label">Items Total</span>
+                  <span className="price-label">{t('myOrders.itemsTotal', 'Items Total')}</span>
                   <span className="price-value">₹{itemsTotal.toLocaleString()}</span>
                 </div>
                 <div className="price-row">
-                  <span className="price-label">Base Delivery Charge</span>
+                  <span className="price-label">{t('myOrders.baseDelivery', 'Base Delivery Charge')}</span>
                   <span className="price-value">₹{transportBaseFee.toLocaleString()}</span>
                 </div>
                 {batchDiscount > 0 && (
                   <div className="price-row">
-                    <span className="price-label">Batch Discount (Platform-funded)</span>
+                    <span className="price-label">{t('myOrders.batchDiscount', 'Batch Discount')} ({t('transportDealers.platformFunded', 'Platform-funded')})</span>
                     <span className="price-value" style={{ color: "#2e7d32" }}>-₹{batchDiscount.toLocaleString()}</span>
                   </div>
                 )}
                 <div className="price-row">
-                  <span className="price-label">Final Delivery Charge</span>
+                  <span className="price-label">{t('myOrders.finalDeliveryCharge', 'Final Delivery Charge')}</span>
                   <span className="price-value">₹{transportFinalFee.toLocaleString()}</span>
                 </div>
                 <div className="price-row">
-                  <span className="price-label" style={{ fontSize: "0.95em", color: "#1976d2" }}>Note</span>
+                  <span className="price-label" style={{ fontSize: "0.95em", color: "#1976d2" }}>{t('myOrders.note', 'Note')}</span>
                   <span className="price-value" style={{ fontSize: "0.95em", color: "#1976d2" }}>
-                    Delivery charge shown is the final backend-confirmed value after all discounts and batching. This matches the dealer and order summary.
+                    {t('myOrders.finalFeeNote', 'Delivery charge shown is the final backend-confirmed value after all discounts and batching. This matches the dealer and order summary.')}
                   </span>
                 </div>
                 <div className="price-row">
-                  <span className="price-label">Platform Fee (2%, max ₹100)</span>
+                  <span className="price-label">{t('myOrders.platformFee', 'Platform Fee')} (2%, max ₹100)</span>
                   <span className="price-value">₹{platformFee.toLocaleString()}</span>
                 </div>
                 {incentivePreview?.eligible && (
                   <div className="price-row">
-                    <span className="price-label">Admin Bonus Pool (Dealer + Farmer)</span>
+                    <span className="price-label">{t('payment.bonusPool', 'Admin Bonus Pool (Dealer + Farmer)')}</span>
                     <span className="price-value">₹{toNumber(incentivePreview.totalBonus).toLocaleString()}</span>
                   </div>
                 )}
                 <div className="price-divider"></div>
                 <div className="price-row total-row">
-                  <span className="price-label">Total Payable</span>
+                  <span className="price-label">{t('payment.totalPayable', 'Total Payable')}</span>
                   <span className="total-price">₹{total.toLocaleString()}</span>
                 </div>
               </div>
@@ -435,14 +439,14 @@ export default function Payment() {
             <div className="payment-section method-section">
               <div className="section-header">
                 <span className="section-icon">💳</span>
-                <h3>Payment Method</h3>
+                <h3>{t('payment.method', 'Payment Method')}</h3>
               </div>
               <div className="payment-methods">
                 <div className={`method ${selectedPaymentMethod === "UPI" ? "active" : ""}`}>
                   <input type="radio" id="upi" name="payment" checked={selectedPaymentMethod === "UPI"} onChange={() => setSelectedPaymentMethod("UPI")} />
                   <label htmlFor="upi">
                     <span className="method-icon">📱</span>
-                    <span className="method-name">UPI Payment</span>
+                    <span className="method-name">{t('payment.upi', 'UPI Payment')}</span>
                   </label>
                 </div>
                 <div className={`method ${selectedPaymentMethod === "Google Pay" ? "active" : ""}`}>
@@ -465,7 +469,7 @@ export default function Payment() {
             <div className="payment-section method-section">
               <div className="section-header">
                 <span className="section-icon">☑️</span>
-                <h3>Terms &amp; Conditions</h3>
+                <h3>{t('payment.termsTitle', 'Terms & Conditions')}</h3>
               </div>
               <label className="terms-check">
                 <input
@@ -474,8 +478,7 @@ export default function Payment() {
                   onChange={(e) => setAcceptedTerms(e.target.checked)}
                 />
                 <span>
-                  By continuing with the order, you confirm that you are above
-                  18 years of age, and you agree to AgriMart's{" "}
+                  {t('payment.termsText', 'By continuing with the order, you confirm that you are above 18 years of age, and you agree to AgriMart\'s ')}
                   <a
                     href="/terms-conditions"
                     target="_blank"
@@ -483,9 +486,9 @@ export default function Payment() {
                     className="policy-link"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    Terms of Use
+                    {t('payment.termsOfUse', 'Terms of Use')}
                   </a>{" "}
-                  and{" "}
+                  {t('common.and', 'and')}{" "}
                   <a
                     href="/privacy-policy"
                     target="_blank"
@@ -493,7 +496,7 @@ export default function Payment() {
                     className="policy-link"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    Privacy Policy
+                    {t('payment.privacyPolicy', 'Privacy Policy')}
                   </a>
                   .
                 </span>
@@ -508,7 +511,7 @@ export default function Payment() {
               onClick={() => navigate("/cart")}
               disabled={isProcessing}
             >
-              ← Back to Cart
+              ← {t('payment.backToCart', 'Back to Cart')}
             </button>
             <button
               className={`pay-btn ${isProcessing ? "processing" : ""}`}
@@ -518,10 +521,10 @@ export default function Payment() {
               {isProcessing ? (
                 <>
                   <span className="spinner"></span>
-                  Processing...
+                  {t('common.processing', 'Processing...')}
                 </>
               ) : (
-                "💰 Pay & Place Order"
+                `💰 ${t('payment.payPlaceOrder', 'Pay & Place Order')}`
               )}
             </button>
           </div>
@@ -533,12 +536,12 @@ export default function Payment() {
               <div className="check-icon">✓</div>
             </div>
           </div>
-          <h2>Order Confirmed!</h2>
+          <h2>{t('payment.orderConfirmed', 'Order Confirmed!')}</h2>
           <p className="success-message">
-            Your order has been placed successfully.
+            {t('payment.successMsg', 'Your order has been placed successfully.')}
           </p>
-          {placedOrderId ? <p className="redirect-message">Order ID: {placedOrderId}</p> : null}
-          <p className="redirect-message">Redirecting to My Orders...</p>
+          {placedOrderId ? <p className="redirect-message">{t('orders.id', 'Order ID')}: {placedOrderId}</p> : null}
+          <p className="redirect-message">{t('payment.redirecting', 'Redirecting to My Orders...')}</p>
         </div>
       )}
       <BottomNav />

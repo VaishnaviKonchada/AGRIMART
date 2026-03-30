@@ -5,8 +5,11 @@ import { clearCartItems, readCartItems, writeCartItems } from "../utils/cartStor
 import { apiGet } from "../utils/api";
 import { BULK_DISCOUNT_LABEL, BULK_ORDER_MIN_QTY } from "../constants/pricingRules";
 import BottomNav from "../components/BottomNav";
+import CustomerHeader from "../components/CustomerHeader";
+import { useTranslation } from "react-i18next";
 
 export default function Cart() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
 
@@ -95,18 +98,12 @@ export default function Cart() {
   return (
 
     <div className="cart-page">
+      <CustomerHeader />
 
-      {/* 🔝 HOME ICON ONLY */}
-      <div className="top-icons">
-        <button className="nav-home" onClick={() => navigate("/home")} title="Home">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M3 12L12 4l9 8" stroke="#1b8f3a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/><rect x="7" y="12" width="10" height="8" rx="2" fill="#e8f5e9" stroke="#1b8f3a" strokeWidth="2"/></svg>
-        </button>
-      </div>
-
-      <h2>🛒 My Cart</h2>
+      <h2>🛒 {t('cart.title', 'My Cart')}</h2>
 
       {Object.keys(groupedCart).length === 0 && (
-        <p className="empty-cart">Your cart is empty</p>
+        <p className="empty-cart">{t('cart.emptyCart', 'Your cart is empty')}</p>
       )}
 
       {Object.keys(groupedCart).map((farmerId) => {
@@ -133,7 +130,7 @@ export default function Cart() {
               <div key={item.id} className="item-row">
                 <div className="item-info">
                   <strong>{item.cropName}</strong>
-                  <small>Farmer selling price: ₹{item.pricePerKg} / kg</small>
+                  <small>{t('cart.farmerSellingPrice', 'Farmer selling price')}: ₹{item.pricePerKg} / kg</small>
                 </div>
 
                 <div className="qty-box">
@@ -155,17 +152,17 @@ export default function Cart() {
             {/* 📦 Summary */}
             <div className="summary">
               <div>
-                <p><strong>Total Quantity:</strong> {totalQty} kg</p>
+                <p><strong>{t('cart.totalQuantity', 'Total Quantity')}:</strong> {totalQty} kg</p>
                 <p className={`bulk-status ${isBulkActive ? "active" : "pending"}`}>
                   {isBulkActive
-                    ? `⭐ Bulk Discount Active (${BULK_DISCOUNT_LABEL} off on transport)`
-                    : `💡 Add ${qtyToUnlock} kg more to unlock bulk discount`}
+                    ? `⭐ ${t('cart.bulkDiscountActive', 'Bulk Discount Active')} (${BULK_DISCOUNT_LABEL} ${t('cart.offOnTransport', 'off on transport')})`
+                    : `💡 ${t('cart.addMoreToUnlock', { defaultValue: 'Add {{count}} kg more to unlock bulk discount', count: qtyToUnlock })}`}
                 </p>
-                <p><strong>Total Selling Price:</strong> ₹{totalPrice}</p>
+                <p><strong>{t('cart.totalSellingPrice', 'Total Selling Price')}:</strong> ₹{totalPrice}</p>
               </div>
 
               <button onClick={() => selectTransport(items)}>
-                🚚 Select Transport Dealer
+                🚚 {t('cart.selectTransportDealer', 'Select Transport Dealer')}
               </button>
             </div>
 

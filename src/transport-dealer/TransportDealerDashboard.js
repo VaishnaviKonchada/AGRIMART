@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import TransportDealerBottomNav from "./TransportDealerBottomNav";
 import { API_BASE_URL } from "../utils/api";
 import "../styles/TransportDealerDashboard.css";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function TransportDealerDashboard() {
   const navigate = useNavigate();
@@ -115,6 +116,7 @@ export default function TransportDealerDashboard() {
           <p className="time-display">{currentTime.toLocaleTimeString()}</p>
         </div>
         <div className="header-actions">
+          <LanguageSwitcher />
           <button 
             className="account-icon-btn"
             onClick={() => navigate("/transport-dealer/account")}

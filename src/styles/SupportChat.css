@@ -8,6 +8,7 @@
     radial-gradient(1200px 600px at -5% -20%, rgba(34, 197, 94, 0.12) 0%, transparent 60%),
     radial-gradient(1200px 700px at 110% 120%, rgba(14, 165, 233, 0.12) 0%, transparent 60%),
     linear-gradient(135deg, #f8fbf8 0%, #eef6ff 100%);
+  padding-bottom: 100px;
 }
 
 /* HEADER */

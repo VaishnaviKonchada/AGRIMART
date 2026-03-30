@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { apiGet } from "../utils/api";
 import "../styles/DeliveryStatus.css";
 import BottomNav from "../components/BottomNav";
+import CustomerHeader from "../components/CustomerHeader";
 
 const deliverySteps = [
   { 
@@ -134,13 +135,7 @@ export default function DeliveryStatus() {
 
   return (
     <div className="delivery-status-container">
-      {/* HEADER */}
-      <div className="delivery-header">
-        <button className="back-btn" onClick={() => navigate("/orders")}>
-          ← Back
-        </button>
-        <h1>Track Order</h1>
-      </div>
+      <CustomerHeader />
 
       <div className="delivery-content">
         {/* STATUS BANNER */}

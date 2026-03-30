@@ -1,7 +1,7 @@
 .cart-page {
   min-height: 100vh;
   background: linear-gradient(120deg, #e8f5e9 0%, #fffbe7 100%);
-  padding: 0;
+  padding: 0 0 100px;
   position: relative;
   box-sizing: border-box;
   display: flex;

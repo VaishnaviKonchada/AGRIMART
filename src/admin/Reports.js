@@ -204,8 +204,6 @@ All user accounts are active and verified`;
   };
 
 
-
-
   return (
     <div className="management-page">
       <div className="report-section">

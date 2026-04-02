@@ -216,20 +216,25 @@
 
 .crop-specs {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
+  align-items: center;
   background: #f9fafb;
-  padding: 12px;
+  padding: 14px 10px;
   border-radius: 12px;
   margin-bottom: 16px;
+  gap: 15px;
 }
 
 .spec {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
 }
 
 .spec .label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #6b7280;
   text-transform: uppercase;
   font-weight: 700;

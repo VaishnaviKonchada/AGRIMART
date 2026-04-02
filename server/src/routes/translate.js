@@ -11,7 +11,7 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Missing text' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.Gemini_API_Key;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.Gemini_API_KEY || process.env.Gemini_API_Key;
   if (!apiKey) {
     return res.status(500).json({ error: 'Gemini API key is not configured in .env' });
   }
@@ -51,9 +51,14 @@ router.post('/', async (req, res) => {
       // Default: Translation mode
       prompt = `You are a professional translator for an agricultural e-commerce application in India.
       Translate the following agricultural text into ${targetLang || 'English'}.
-      IMPORTANT: If the text contains the separator "|||", you MUST maintain exactly the same number of separators in your output. 
-      Only return the final translated text directly, with no extra quotes, formatting, or explanations.
-
+      
+      CRITICAL INSTRUCTIONS:
+      1. If the input contains the separator " ||| ", you MUST preserve exactly the same separator " ||| " in your output.
+      2. The number of segments in your output MUST MATCH the number of segments in the input.
+      3. ONLY return the final translated text. 
+      4. DO NOT provide explanations, numbering, extra notes, or any quotes.
+      5. Translate each segment accurately and naturally.
+      
       Text to translate:
       ${text}`;
     }

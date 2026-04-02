@@ -131,6 +131,10 @@ export default function CropDetails() {
     "Cotton": ["Hybrid Cotton", "Bt Cotton", "Local Cotton"],
     "Sugarcane": ["Red Sugarcane", "Green Sugarcane", "Hybrid Sugarcane"],
     "Millets": ["Ragi", "Jowar", "Bajra"],
+    "Mint": ["Local Mint (Pudina)", "Spearmint", "Peppermint"],
+    "Tulsi": ["Krishna Tulsi", "Rama Tulsi", "Vana Tulsi"],
+    "Curry Leaves": ["Local Karivepaku", "Hybrid Kadi Patta"],
+    "Fenugreek": ["Local Methi", "Kasuri Methi"],
   };
 
   const getVarieties = () => {
@@ -195,56 +199,72 @@ export default function CropDetails() {
   }, [selectedCrop, allCrops, filterVariety]);
 
   useEffect(() => {
+    if (!crop && filteredFarmers.length === 0) return;
+
+    const tLang = i18n.language === 'te' ? 'Telugu' : (i18n.language === 'hi' ? 'Hindi' : null);
+    if (!tLang) {
+      // If English, just ensure the map has the original values
+      const cropTitle = crop ? (crop.cropName || crop.name || "") : "";
+      const originalVarieties = getVarieties();
+      const serverVarieties = filteredFarmers.flatMap(f => f.crops.map(c => c.variety || "Standard"));
+      const allStrings = [...new Set([cropTitle, ...originalVarieties, ...serverVarieties])].filter(Boolean);
+      
+      setTranslatedVarietiesMap(prev => {
+        const next = { ...prev };
+        allStrings.forEach(s => { if (!next[s]) next[s] = s; });
+        return next;
+      });
+      return;
+    }
+
     const cropTitle = crop ? (crop.cropName || crop.name || "") : "";
     const originalVarieties = getVarieties();
     const serverVarieties = filteredFarmers.flatMap(f => f.crops.map(c => c.variety || "Standard"));
     const uniqueVars = [...new Set([cropTitle, ...originalVarieties, ...serverVarieties])].filter(Boolean);
 
-    if (uniqueVars.length === 0) return;
+    const stringsToTranslate = new Set();
+    const localMapping = { ...translatedVarietiesMap };
 
-    if (i18n.language === 'en') {
-      const emap = {};
-      uniqueVars.forEach(v => emap[v] = v);
-      setTranslatedVarietiesMap(emap);
-      return;
-    }
-
-    const tLang = i18n.language === 'te' ? 'Telugu' : 'Hindi';
-    const mapping = {};
     uniqueVars.forEach(v => {
-      // Primary check: translation file
-      const translated = t(`varieties.${v}`, v);
-      if (translated !== v) {
-        mapping[v] = translated;
+      // 1. Check if already translated in our map
+      if (translatedVarietiesMap[v] && translatedVarietiesMap[v] !== v) return;
+
+      // 2. Check translation files
+      const translated = t(v.toLowerCase(), v);
+      if (translated !== v && translated !== v.toLowerCase()) {
+        localMapping[v] = translated;
       } else {
-        // Secondary check: lowercase key
-        const lowerTrans = t(v.toLowerCase(), v);
-        mapping[v] = lowerTrans;
+        // 3. Needs AI translation
+        stringsToTranslate.add(v);
       }
     });
-    setTranslatedVarietiesMap(mapping);
 
-    // Also attempt AI translation for any missing varieties if needed
-    // (Optional: can keep this for dynamic server varieties)
-    const txtToTrans = uniqueVars.filter(v => mapping[v] === v).join(" ||| ");
-    if (txtToTrans) {
-      apiPost("translate", {
-        text: txtToTrans,
-        targetLang: tLang,
-        mode: "general"
-      }).then(res => {
-        if (res?.translatedText) {
-          const transArr = res.translatedText.split("|||").map(s => s.trim());
-          const newMapping = { ...mapping };
-          uniqueVars.filter(v => mapping[v] === v).forEach((v, i) => {
-             if (transArr[i] && transArr[i] !== v) {
-                newMapping[v] = transArr[i];
-             }
+    // Update with what we found locally first
+    setTranslatedVarietiesMap(localMapping);
+
+    if (stringsToTranslate.size === 0) return;
+
+    const toTransArr = Array.from(stringsToTranslate);
+    const txtToTrans = toTransArr.join(" ||| ");
+
+    apiPost("translate", {
+      text: txtToTrans,
+      targetLang: tLang,
+      mode: "general"
+    }).then(res => {
+      if (res?.translatedText) {
+        const transArr = res.translatedText.split("|||").map(s => s.trim().replace(/^["'“”‘’]+|["'“”‘’]+$/g, ''));
+        setTranslatedVarietiesMap(prev => {
+          const upMapping = { ...prev };
+          toTransArr.forEach((v, idx) => {
+            if (transArr[idx] && transArr[idx] !== v) {
+              upMapping[v] = transArr[idx];
+            }
           });
-          setTranslatedVarietiesMap(newMapping);
-        }
-      }).catch(e => console.error("AI Proxy failed", e));
-    }
+          return upMapping;
+        });
+      }
+    }).catch(e => console.error("AI Variety translation failed:", e));
   }, [crop, allCrops, i18n.language, filteredFarmers.length]);
 
   const addToCart = async (farmer, cropData) => {
@@ -271,7 +291,7 @@ export default function CropDetails() {
     navigate("/crop-details", {
       state: { crop: { name: cropName, cropName: cropName } }
     });
-    window.location.href = "/crop-details";
+    // Removed location.reload to prevent state loss
   };
 
   if (loading) return <div className="loading-state"><h3>{t('cropDetails.loading')}</h3></div>;
@@ -432,10 +452,11 @@ export default function CropDetails() {
                           key={i} 
                           className="mini-crop-chip"
                           onClick={() => {
+                            setCrop({ ...c, name: c.cropName });
                             navigate("/crop-details", {
-                              state: { crop: { ...c, name: c.cropName } }
+                              state: { crop: { ...c, name: c.cropName } },
+                              replace: true
                             });
-                            setTimeout(() => window.location.reload(), 100);
                           }}
                         >
                           <span className="name">{c.cropName}</span>

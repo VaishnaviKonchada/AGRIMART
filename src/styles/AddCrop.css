@@ -20,6 +20,8 @@
   flex-direction: column;
   gap: 8px; /* a bit more breathing room */
   width: 100%;
+  align-items: center;
+  text-align: center;
 }
 .add-crop-page::after {
   background: #f0abfc;
@@ -216,6 +218,7 @@
   box-sizing: border-box;
   letter-spacing: 0.3px;
   line-height: 1.5;
+  text-align: center;
 }
 
 .field input::placeholder,
@@ -242,7 +245,7 @@
 
 .input-with-icon .icon {
   position: absolute;
-  left: 14px;
+  left: 16px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 18px;
@@ -254,12 +257,13 @@
 }
 
 .input-with-icon input {
-  padding-left: 48px !important;
+  padding-left: 14px !important;
   padding-right: 14px !important;
   width: 100%;
   text-indent: 0;
   position: relative;
   z-index: 1;
+  text-align: center;
 }
 
 /* Date input specific styling */
@@ -611,6 +615,8 @@ input[type="number"]::-webkit-outer-spin-button {
   border-radius: 12px;
   background: rgba(255,255,255,0.9);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+  text-align-last: center; /* for select tags */
 }
 .field input:focus, .field select:focus, .field textarea:focus, .procedure-box:focus { border-color: var(--brand-start); box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15); }
 

@@ -129,7 +129,7 @@ export default function TransportDealerMessages() {
       <div className="messages-container">
         <div className="chats-list">
           <div className="chats-header">
-            <h3>{t("Conversations (")}{chats.length})</h3>
+            <h3>{t("Conversations")} ({chats.length})</h3>
           </div>
 
           {loading ? <div className="empty-chats">
@@ -144,7 +144,7 @@ export default function TransportDealerMessages() {
                   <div className="chat-avatar">{customerName.charAt(0).toUpperCase()}</div>
                   <div className="chat-info">
                     <div className="chat-name">{customerName}</div>
-                    <div className="chat-preview">{lastMessage}</div>
+                    <div className="chat-preview">{t(lastMessage, lastMessage)}</div>
                   </div>
                   <div className="chat-time">{lastTime}</div>
                 </div>;
@@ -201,7 +201,7 @@ export default function TransportDealerMessages() {
               const isDealer = String(senderId) === String(userId);
               const messageTime = msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString();
               return <div key={idx} className={`message ${isDealer ? "sent" : "received"}`}>
-                        <div className="message-content">{msg.text}</div>
+                        <div className="message-content">{t(msg.text, msg.text)}</div>
                         <div className="message-time">{messageTime}</div>
                       </div>;
             }) : <div className="chat-start">

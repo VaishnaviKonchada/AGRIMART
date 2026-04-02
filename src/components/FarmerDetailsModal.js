@@ -29,15 +29,24 @@ export default function FarmerDetailsModal({ farmerId, preferredCropName, prefer
       if (translated !== v) {
         mapping[v] = translated;
       } else {
-        // Secondary check: lowercase key (for crop names like 'Tomato')
+        // Secondary check: lowercase key
         const lowerTrans = t(v.toLowerCase(), v);
         mapping[v] = lowerTrans;
       }
     });
-    setTranslatedMap(mapping);
+
+    // If all already translated, just set it
+    const textsToTrans = uniqueTexts.filter(v => mapping[v] === v);
+    if (textsToTrans.length === 0) {
+      setTranslatedMap(mapping);
+      return;
+    }
+
+    // Set existing mapping first
+    setTranslatedMap(prev => ({ ...prev, ...mapping }));
 
     // AI Translation for missing ones
-    const txtToTrans = uniqueTexts.filter(v => mapping[v] === v).join(" ||| ");
+    const txtToTrans = textsToTrans.join(" ||| ");
     if (txtToTrans) {
       apiPost('translate', {
         text: txtToTrans,
@@ -45,12 +54,14 @@ export default function FarmerDetailsModal({ farmerId, preferredCropName, prefer
         mode: "general"
       }).then(res => {
         if (res?.translatedText) {
-          const parts = res.translatedText.split("|||").map(s => s.trim());
-          const fullMap = { ...mapping };
-          uniqueTexts.filter(v => mapping[v] === v).forEach((orig, idx) => {
-            if (parts[idx] && parts[idx] !== orig) fullMap[orig] = parts[idx];
+          const parts = res.translatedText.split("|||").map(s => s.trim().replace(/^[^a-zA-Z0-9\u0900-\u097F\u0C00-\u0C7F]+/, ''));
+          setTranslatedMap(prev => {
+            const fullMap = { ...prev };
+            textsToTrans.forEach((orig, idx) => {
+              if (parts[idx] && parts[idx] !== orig) fullMap[orig] = parts[idx];
+            });
+            return fullMap;
           });
-          setTranslatedMap(fullMap);
         }
       }).catch(e => console.error("Variety translation failed", e));
     }

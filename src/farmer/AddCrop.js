@@ -722,7 +722,7 @@ export default function AddCrop() {
                   <label>{t("addCrop.quantity")}</label>
                   <div className="input-with-icon">
                     <span className="icon">📦</span>
-                    <input type="number" min="1" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
+                    <input type="number" min="0.1" step="any" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
                   </div>
                   {errors.quantity && <span className="field-error">{errors.quantity}</span>}
                 </div>
@@ -737,7 +737,7 @@ export default function AddCrop() {
                   <label>{t("addCrop.pricePerKg")}</label>
                   <div className="input-with-icon">
                     <span className="icon">💰</span>
-                    <input type="number" min="1" value={pricePerKg} onChange={(e) => setPricePerKg(e.target.value)} />
+                    <input type="number" min="0.1" step="any" value={pricePerKg} onChange={(e) => setPricePerKg(e.target.value)} />
                   </div>
                   {errors.pricePerKg && <span className="field-error">{errors.pricePerKg}</span>}
                   {mandiInfo.loading && (
@@ -766,7 +766,7 @@ export default function AddCrop() {
               <div className="grid-3">
                 <div className="field">
                   <label>{t("addCrop.minOrder")}</label>
-                  <input type="number" min="1" value={minOrder} onChange={(e) => setMinOrder(e.target.value)} />
+                  <input type="number" min="0.1" step="any" value={minOrder} onChange={(e) => setMinOrder(e.target.value)} />
                 </div>
                 <div className="field">
                   <label>{t("addCrop.soilType")}</label>

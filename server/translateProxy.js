@@ -11,8 +11,9 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Missing text' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.Gemini_API_Key;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.Gemini_API_KEY || process.env.Gemini_API_Key;
   if (!apiKey) {
+    console.error("❌ Gemini API Key missing in environment variables!");
     return res.status(500).json({ error: 'Gemini API key is not configured in .env' });
   }
 

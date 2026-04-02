@@ -12,7 +12,7 @@ export default function Welcome() {
   return (
     <div className="welcome-container">
       <div className="welcome-bg-wrapper">
-        <img src={welcomeBg} alt="Welcome to AgriMart" className="welcome-bg-image" />
+        <img src={welcomeBg} alt={t('welcomeAlt', 'Welcome to AgriMart')} className="welcome-bg-image" />
         <div className="welcome-gradient-overlay"></div>
       </div>
 
@@ -23,7 +23,7 @@ export default function Welcome() {
         
         <div className="welcome-card">
           <div className="welcome-logo">🌾</div>
-          <h1 className="welcome-title">AgriMart</h1>
+          <h1 className="welcome-title">{t('welcomeTitle', 'AgriMart')}</h1>
           <p className="welcome-tagline">
             {t('marketplaceTagline', 'Your trusted marketplace for crops, vegetables & fruits')}
           </p>

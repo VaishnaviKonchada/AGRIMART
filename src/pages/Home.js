@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiGet } from "../utils/api";
+import { apiGet, apiPost } from "../utils/api";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import CustomerHeader from "../components/CustomerHeader";
 import BottomNav from "../components/BottomNav";
@@ -10,13 +10,14 @@ import "../styles/Home.css";
 const PENDING_DEALER_REQUESTS_KEY = "pendingDealerRequests";
 
 export default function Home() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const AUTO_REFRESH_MS = 5 * 60 * 1000;
   const [search, setSearch] = useState("");
   const [crops, setCrops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [translatedStringsMap, setTranslatedStringsMap] = useState({});
 
   // Default crop images mapping
   const cropImages = {
@@ -139,6 +140,51 @@ export default function Home() {
       if (!silent) setLoading(false);
     }
   };
+
+  // ── DYNAMIC TRANSLATION LOGIC ──
+  useEffect(() => {
+    if (crops.length === 0 || i18n.language === 'en') return;
+
+    const tLang = i18n.language === 'te' ? 'Telugu' : 'Hindi';
+    const stringsToTranslate = new Set();
+    
+    crops.forEach(crop => {
+      // Check crop name
+      const nameKey = crop.name.toLowerCase();
+      if (t(nameKey) === nameKey && !translatedStringsMap[crop.name]) {
+        stringsToTranslate.add(crop.name);
+      }
+      // Check farmer name (optional, but requested implicitly by "it is not showing")
+      // We only translate if it's not a common name we've already seen
+      if (!translatedStringsMap[crop.farmer]) {
+         stringsToTranslate.add(crop.farmer);
+      }
+    });
+
+    if (stringsToTranslate.size === 0) return;
+
+    const uniqueStrings = Array.from(stringsToTranslate);
+    const txtToTrans = uniqueStrings.join(" ||| ");
+
+    apiPost("translate", {
+      text: txtToTrans,
+      targetLang: tLang,
+      mode: "general"
+    }).then(res => {
+      if (res?.translatedText) {
+        const transArr = res.translatedText.split("|||").map(s => s.trim());
+        setTranslatedStringsMap(prev => {
+          const next = { ...prev };
+          uniqueStrings.forEach((original, idx) => {
+            if (transArr[idx] && transArr[idx] !== original) {
+              next[original] = transArr[idx];
+            }
+          });
+          return next;
+        });
+      }
+    }).catch(e => console.error("AI Home translation failed:", e));
+  }, [crops, i18n.language]);
 
   const filteredCrops = crops.filter((crop) =>
     crop.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -263,8 +309,10 @@ export default function Home() {
                 </div>
 
                 <div className="crop-info">
-                  <h3 className="crop-name">{t(crop.name.toLowerCase(), crop.name)}</h3>
-                  <p className="crop-farmer"><span>👨‍🌾</span> {crop.farmer}</p>
+                  <h3 className="crop-name">
+                    {translatedStringsMap[crop.name] || t(crop.name.toLowerCase(), crop.name)}
+                  </h3>
+                  <p className="crop-farmer"><span>👨‍🌾</span> {translatedStringsMap[crop.farmer] || crop.farmer}</p>
                   
                   <div className="crop-price-container">
                     <p className="crop-price">

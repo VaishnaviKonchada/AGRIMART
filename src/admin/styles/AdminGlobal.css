@@ -1,0 +1,200 @@
+/* Admin Global Styles - Premium Emerald Theme (Aligned with Customer Home) */
+:root {
+  --admin-primary: #10b981; /* Premium Emerald */
+  --admin-primary-dark: #059669;
+  --admin-bg: #f9fafb;
+  --admin-card-bg: #ffffff;
+  --text-dark: #1f2937;
+  --text-gray: #6b7280;
+  --border-light: #e5e7eb;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--admin-bg) !important;
+  background-image: radial-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px), radial-gradient(rgba(16, 185, 129, 0.03) 1px, transparent 1px) !important;
+  background-size: 20px 20px !important;
+  background-position: 0 0, 10px 10px !important;
+}
+
+.admin-layout-container {
+  min-height: 100vh;
+  background-color: transparent !important;
+  color: var(--text-dark);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  padding-bottom: 110px;
+}
+
+/* Premium Header */
+.admin-header {
+  background: white !important;
+  padding: 20px 40px !important;
+  border-bottom: 1px solid var(--border-light) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.header-left h1 {
+  margin: 0 !important;
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  color: var(--admin-primary) !important;
+  letter-spacing: -0.5px !important;
+}
+
+.header-left .welcome-msg {
+  font-size: 13px !important;
+  color: var(--text-gray) !important;
+  margin-top: 4px !important;
+}
+
+/* Back Button in Header */
+.header-back-btn {
+  background: var(--admin-bg) !important;
+  border: 1px solid var(--border-light) !important;
+  padding: 8px 16px !important;
+  border-radius: 20px !important;
+  color: var(--text-dark) !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  transition: all 0.2s !important;
+}
+
+.header-back-btn:hover {
+  background: white !important;
+  border-color: var(--admin-primary) !important;
+  color: var(--admin-primary) !important;
+}
+
+/* Premium Cards */
+.stat-card, .management-card, .farmer-card, .card {
+  background: white !important;
+  border: 1px solid var(--border-light) !important;
+  border-radius: 20px !important;
+  padding: 24px !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 20px !important;
+}
+
+.stat-card:hover, .farmer-card:hover, .card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: var(--shadow-lg) !important;
+  border-color: var(--admin-primary) !important;
+}
+
+.stat-glass-icon {
+  font-size: 32px !important;
+  background: #ecfdf5 !important; /* Extremely light emerald */
+  width: 64px !important;
+  height: 64px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 16px !important;
+  color: var(--admin-primary) !important;
+}
+
+/* Card Accents (Subtle top border instead of side) */
+.card-glow-emerald { border-top: 4px solid #10b981 !important; }
+.card-glow-indigo { border-top: 4px solid #6366f1 !important; }
+.card-glow-amber { border-top: 4px solid #f59e0b !important; }
+.card-glow-cyan { border-top: 4px solid #06b6d4 !important; }
+.card-glow-rose { border-top: 4px solid #f43f5e !important; }
+.card-glow-violet { border-top: 4px solid #8b5cf6 !important; }
+.card-glow-sky { border-top: 4px solid #0ea5e9 !important; }
+.card-glow-lime { border-top: 4px solid #84cc16 !important; }
+
+/* Dashboard Grid */
+.stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: 25px !important;
+  margin-top: 30px !important;
+}
+
+.stat-title {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: var(--text-gray) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+}
+
+.stat-value {
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+}
+
+/* Bottom Navigation */
+.admin-bottom-nav {
+  height: 85px !important;
+  background: white !important;
+  border-top: 1px solid var(--border-light) !important;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+}
+
+.nav-item {
+  color: var(--text-gray) !important;
+}
+
+.nav-item.active {
+  color: var(--admin-primary) !important;
+  background: #f0fdf4 !important;
+  border-radius: 12px !important;
+}
+
+/* Button Refinement */
+.detail-btn, .view-btn, .filter-btn.active {
+  background: var(--admin-primary) !important;
+  color: white !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
+  transition: background 0.2s !important;
+}
+
+.detail-btn:hover, .view-btn:hover {
+  background: var(--admin-primary-dark) !important;
+}
+
+/* Force removal of old management backgrounds */
+.management-page, .farmers-management, .admin-dashboard-content, .list-container, .farmers-container {
+  background: transparent !important;
+  padding: 20px 0 !important;
+}
+
+/* Clean Tables */
+table {
+  border: 1px solid var(--border-light) !important;
+  background: white !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+th {
+  background: #f9fafb !important;
+  color: var(--text-gray) !important;
+  font-size: 11px !important;
+  padding: 15px !important;
+}
+
+td {
+  padding: 15px !important;
+  color: var(--text-dark) !important;
+}

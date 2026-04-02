@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiPost } from "../utils/api";
-import { clearCartItems, readCartItems, writeCartItems } from "../utils/cartStorage";
+import { clearCartItems, readCartItems, writeCartItems, pushCartToBackend } from "../utils/cartStorage";
 import "../styles/Payment.css";
 import BottomNav from "../components/BottomNav";
 import CustomerHeader from "../components/CustomerHeader";
@@ -254,8 +254,14 @@ export default function Payment() {
       // Update cart with remaining items (from other farmers)
       if (remainingCartItems.length > 0) {
         writeCartItems(remainingCartItems);
+        await pushCartToBackend(remainingCartItems);
       } else {
         clearCartItems(); // Empty cart completely
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+           // We can call delete /api/cart or just push empty array
+           await pushCartToBackend([]);
+        }
       }
       
       localStorage.removeItem("selectedDealer");
@@ -397,10 +403,12 @@ export default function Payment() {
                   <span className="price-label">{t('myOrders.itemsTotal', 'Items Total')}</span>
                   <span className="price-value">₹{itemsTotal.toLocaleString()}</span>
                 </div>
-                <div className="price-row">
-                  <span className="price-label">{t('myOrders.baseDelivery', 'Base Delivery Charge')}</span>
-                  <span className="price-value">₹{transportBaseFee.toLocaleString()}</span>
-                </div>
+                {batchDiscount > 0 && (
+                  <div className="price-row">
+                    <span className="price-label">{t('myOrders.baseDelivery', 'Base Delivery Charge')}</span>
+                    <span className="price-value">₹{transportBaseFee.toLocaleString()}</span>
+                  </div>
+                )}
                 {batchDiscount > 0 && (
                   <div className="price-row">
                     <span className="price-label">{t('myOrders.batchDiscount', 'Batch Discount')} ({t('transportDealers.platformFunded', 'Platform-funded')})</span>
@@ -410,12 +418,6 @@ export default function Payment() {
                 <div className="price-row">
                   <span className="price-label">{t('myOrders.finalDeliveryCharge', 'Final Delivery Charge')}</span>
                   <span className="price-value">₹{transportFinalFee.toLocaleString()}</span>
-                </div>
-                <div className="price-row">
-                  <span className="price-label" style={{ fontSize: "0.95em", color: "#1976d2" }}>{t('myOrders.note', 'Note')}</span>
-                  <span className="price-value" style={{ fontSize: "0.95em", color: "#1976d2" }}>
-                    {t('myOrders.finalFeeNote', 'Delivery charge shown is the final backend-confirmed value after all discounts and batching. This matches the dealer and order summary.')}
-                  </span>
                 </div>
                 <div className="price-row">
                   <span className="price-label">{t('myOrders.platformFee', 'Platform Fee')} (2%, max ₹100)</span>

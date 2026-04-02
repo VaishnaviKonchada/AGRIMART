@@ -154,23 +154,14 @@ const ComplaintsSupport = () => {
     setShowModal(true);
   };
 
-  const goBack = () => navigate('/admin');
+
+
 
   return (
     <div className="management-page">
-      <button className="back-btn" onClick={goBack}>
-        <span>←</span> {t('common.back', 'Back')}
-      </button>
-
-      <div className="management-header">
-        <h1>{t('adminComplaints.title', 'Complaints & Support')}</h1>
-        <p>{t('adminComplaints.subtitle', 'Handle customer complaints and disputes')}</p>
-        <button className="filter-btn" onClick={() => fetchComplaints({ silent: true })}>
-          {refreshing ? t('common.refreshing', 'Refreshing...') : t('common.refresh', 'Refresh')}
-        </button>
-      </div>
 
       <div className="filter-section">
+
         <button 
           className={`filter-btn ${filterStatus === 'All' ? 'active' : ''}`}
           onClick={() => setFilterStatus('All')}

@@ -2,78 +2,71 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import "../styles/CropChatbot.css";
+import SessionManager from "../utils/SessionManager";
+import { API_BASE_URL, apiPost } from "../utils/api";
 
-function CropChatbot() {
-  const navigate = useNavigate();
+export default function CropChatbot() {
   const { t, i18n } = useTranslation();
-  const [chat, setChat] = useState([]);
-
-  // Set initial greeting
-  useEffect(() => {
-    setChat([
-      {
-        sender: "bot",
-        text: t("chatbotPage.greeting"),
-        ts: Date.now(),
-      },
-    ]);
-  }, []);
-
-  // Update bot messages when language changes
-  useEffect(() => {
-    setChat((prev) =>
-      prev.map((msg) => {
-        if (msg.sender === "bot") {
-          // If it matches exactly one of our static strings, update it
-          // Note: This only works for static messages, not dynamic results
-          if (msg.text === t("chatbotPage.greeting", { lng: i18n.language === 'en' ? 'hi' : 'en' })) {
-            return { ...msg, text: t("chatbotPage.greeting") };
-          }
-          // For simplicity, we mostly rely on new messages being in the right language
-        }
-        return msg;
-      })
-    );
-  }, [i18n.language, t]);
-
-  const [input, setInput] = useState("");
+  const navigate = useNavigate();
   const [image, setImage] = useState(null);
-  const [typing, setTyping] = useState(false);
+  const [chat, setChat] = useState([]);
   const [analyzed, setAnalyzed] = useState(false);
-  const fileRef = useRef();
+  const [input, setInput] = useState("");
+  const [typing, setTyping] = useState(false);
+  const fileRef = useRef(null);
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setAnalyzed(false);
-      setChat((prev) => [
-        ...prev,
+  const currentLang = i18n.language || "en";
+  const targetLangName = currentLang === "te" ? "Telugu" : currentLang === "hi" ? "Hindi" : "English";
+
+  useEffect(() => {
+    if (chat.length === 0) {
+      setChat([
         {
-          sender: "farmer",
-          text: `[${t("addCrop.uploadPhoto", "Uploaded a photo")}]`,
+          sender: "bot",
+          text: t("chatbot.greeting", "Hi! I'm your Crop Health Assistant. Upload a leaf photo to analyze, or ask me anything about irrigation, fertilizers, or pest control."),
           ts: Date.now(),
         },
       ]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentLang]);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImage(file);
+    setAnalyzed(false);
+    setChat((prev) => [
+      ...prev,
+      {
+        sender: "bot",
+        text: `📷 ${t("chatbot.imageReceived", "Image received. Ready to analyze.")}`,
+        ts: Date.now(),
+      },
+    ]);
   };
 
   const analyzeImage = async () => {
+    if (!image) return;
+    setChat((prev) => [...prev, { sender: "farmer", text: t("chatbot.analyzeCropImage", "Analyze my crop image"), ts: Date.now() }]);
     setTyping(true);
-    setChat((prev) => [
-      ...prev,
-      { sender: "bot", text: t("addCrop.analyzingImage"), ts: Date.now() },
-    ]);
+
     try {
       const formData = new FormData();
       formData.append("image", image);
-      const response = await fetch("/api/crop-diagnosis", {
+
+      const session = SessionManager.getSession();
+      const token = session?.token;
+
+      const response = await fetch(`${API_BASE_URL}/disease/predict`, {
         method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error("Prediction failed");
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || err.details || "Prediction failed");
       }
 
       const data = await response.json();
@@ -86,13 +79,41 @@ function CropChatbot() {
         .map((p, idx) => `${idx + 1}. ${p.label} (${Number((p.confidence || 0) * 100).toFixed(2)}%)`)
         .join("\n");
 
+      // Build report with localized labels (Fallback if translation fails)
+      const dLabel = t("chatbot.diagnosis", "Diagnosis");
+      const cLabel = t("chatbot.confidence", "Confidence");
+      const sLabel = t("chatbot.severity", "Severity");
+      const tLabel = t("chatbot.topPredictions", "Top predictions");
+      const rLabel = t("chatbot.recommendations", "Recommendations");
+      const cif = t("chatbot.checkInField", "Check in field");
+
+      let rawMessage = `${dLabel}: ${data.diagnosis}\n${cLabel}: ${confidencePct}%\n${sLabel}: ${data?.advice?.severity || cif}\n\n${tLabel}:\n${topLines}\n\n${rLabel}:\n${advice.map((line) => `- ${line}`).join("\n")}`;
+
+      // Translate the content if not English
+      if (currentLang !== "en") {
+        try {
+          // Send pure English text to AI so it knows what to translate
+          const englishMessage = `Diagnosis: ${data.diagnosis}\nConfidence: ${confidencePct}%\nSeverity: ${data?.advice?.severity || "Check in field"}\n\nTop predictions:\n${topLines}\n\nRecommendations:\n${advice.map((line) => `- ${line}`).join("\n")}`;
+          
+          const transRes = await apiPost("translate", {
+            text: englishMessage,
+            targetLang: targetLangName,
+            mode: "prediction" // Use the specialized agricultural translation mode
+          });
+          if (transRes?.translatedText) {
+            rawMessage = transRes.translatedText;
+          }
+        } catch (err) {
+          console.error("Translation failed", err);
+        }
+      }
+
       setTyping(false);
       setChat((prev) => [
         ...prev,
         {
           sender: "bot",
-          text:
-            `${t("addCrop.diagnosis")}: ${data.diagnosis}\n${t("addCrop.confidence")}: ${confidencePct}%\n${t("addCrop.severity")}: ${data?.advice?.severity || t("addCrop.checkInField")}\n\n${t("addCrop.topPredictions")}\n${topLines}\n\n${t("addCrop.recommendations")}\n${advice.map((line) => `- ${line}`).join("\n")}`,
+          text: rawMessage,
           ts: Date.now(),
         },
       ]);
@@ -104,7 +125,7 @@ function CropChatbot() {
         ...prev,
         {
           sender: "bot",
-          text: `${t("chatbotPage.couldNotAnalyze")} ${error.message}`,
+          text: `${t("chatbot.couldNotAnalyze")} ${error.message}`,
           ts: Date.now(),
         },
       ]);
@@ -112,7 +133,7 @@ function CropChatbot() {
   };
 
   const improveYield = () => {
-    setChat((prev) => [...prev, { sender: "farmer", text: t("addCrop.improveYieldQ"), ts: Date.now() }]);
+    setChat((prev) => [...prev, { sender: "farmer", text: t("chatbot.improveYieldQ"), ts: Date.now() }]);
     setTyping(true);
     setTimeout(() => {
       setTyping(false);
@@ -120,7 +141,7 @@ function CropChatbot() {
         ...prev,
         {
           sender: "bot",
-          text: t("addCrop.yieldTips"),
+          text: t("chatbot.yieldTips"),
           ts: Date.now(),
         },
       ]);
@@ -133,17 +154,35 @@ function CropChatbot() {
     setChat((prev) => [...prev, { sender: "farmer", text: msg, ts: Date.now() }]);
     setInput("");
     setTyping(true);
-    setTimeout(async () => {
+
+    try {
+      const response = await apiPost("translate", {
+        text: msg,
+        targetLang: targetLangName,
+        mode: "chat"
+      });
+
       setTyping(false);
       setChat((prev) => [
         ...prev,
         {
           sender: "bot",
-          text: t("addCrop.keepLearning"),
+          text: response.reply || t("chatbot.keepLearning"),
           ts: Date.now(),
         },
       ]);
-    }, 650);
+    } catch (error) {
+      console.error("Chat AI error:", error);
+      setTyping(false);
+      setChat((prev) => [
+        ...prev,
+        {
+          sender: "bot",
+          text: t("chatbot.keepLearning"),
+          ts: Date.now(),
+        },
+      ]);
+    }
   };
 
   return (
@@ -154,7 +193,7 @@ function CropChatbot() {
             <h2>🤖 {t("chatbot.title")}</h2>
             <p className="subtitle">{t("chatbot.subtitle")}</p>
           </div>
-          <button className="dashboard-btn" onClick={() => navigate("/farmer-dashboard")}> 
+          <button className="dashboard-btn" onClick={() => navigate("/farmer-dashboard")}>
             <span className="dash-icon">📊</span>
             <span className="dash-label">{t("chatbot.dashboard")}</span>
           </button>
@@ -170,40 +209,40 @@ function CropChatbot() {
           {typing && <div className="bubble bot typing"><span className="dot" /><span className="dot" /><span className="dot" /></div>}
         </div>
 
+        {/* Upload & Quick actions */}
         <div className="tools">
           <div className="uploader" onClick={() => fileRef.current?.click()}>
-            <span>📷 {t("addCrop.uploadLeafPhoto")}</span>
+            <span>📷 {t("chatbot.uploadLeafPhoto")}</span>
             <input ref={fileRef} type="file" accept="image/*" onChange={handleImageUpload} hidden />
           </div>
           {image && (
             <div className="preview">
               <img src={URL.createObjectURL(image)} alt="preview" />
               {!analyzed ? (
-                <button className="primary" onClick={analyzeImage}>{t("addCrop.analyzeImage")}</button>
+                <button className="primary" onClick={analyzeImage}>{t("chatbot.analyzeImage")}</button>
               ) : (
-                <button onClick={improveYield}>{t("addCrop.improveYield")}</button>
+                <button onClick={improveYield}>{t("chatbot.improveYield")}</button>
               )}
             </div>
           )}
           <div className="quick">
-            <button onClick={() => setInput(t("addCrop.quickIrrigationQ"))}>{t("addCrop.irrigationTips")}</button>
-            <button onClick={() => setInput(t("addCrop.quickFertilizerQ"))}>{t("addCrop.fertilizerSchedule")}</button>
-            <button onClick={() => setInput(t("addCrop.quickPestQ"))}>{t("addCrop.pestControl")}</button>
+            <button onClick={() => { setInput(t("chatbot.quickIrrigationQ")); sendText(); }}>{t("chatbot.irrigationTips")}</button>
+            <button onClick={() => { setInput(t("chatbot.quickFertilizerQ")); sendText(); }}>{t("chatbot.fertilizerSchedule")}</button>
+            <button onClick={() => { setInput(t("chatbot.quickPestQ")); sendText(); }}>{t("chatbot.pestControl")}</button>
           </div>
         </div>
 
+        {/* Composer */}
         <div className="composer">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={t("addCrop.inputPlaceholder")}
+            placeholder={t("chatbot.inputPlaceholder")}
             onKeyDown={(e) => e.key === 'Enter' && sendText()}
           />
-          <button className="send" onClick={sendText}>{t("addCrop.send")}</button>
+          <button className="send" onClick={sendText}>{t("chatbot.send")}</button>
         </div>
       </div>
     </div>
   );
 }
-
-export default CropChatbot;

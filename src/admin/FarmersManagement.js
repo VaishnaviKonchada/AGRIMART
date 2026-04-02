@@ -13,6 +13,16 @@ const FarmersManagement = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const normalizeFarmer = (farmer) => {
+      const profile = farmer?.profile || {};
+      return {
+        ...farmer,
+        id: farmer?.id || farmer?._id,
+        location: farmer?.location || farmer?.profile?.locationText || [farmer?.profile?.mandal, farmer?.profile?.district, farmer?.profile?.state].filter(Boolean).join(', ') || 'N/A',
+        profile,
+      };
+    };
+
     const fetchFarmers = async () => {
       const token = localStorage.getItem("accessToken");
       if (!token) {
@@ -23,9 +33,9 @@ const FarmersManagement = () => {
       try {
         const data = await apiGet('admin/farmers-with-crops');
         if (Array.isArray(data)) {
-          setFarmers(data);
+          setFarmers(data.map(normalizeFarmer));
         } else if (data?.farmers) {
-          setFarmers(data.farmers);
+          setFarmers(data.farmers.map(normalizeFarmer));
         }
       } catch (error) {
         console.error("❌ Error fetching farmers:", error);
@@ -63,17 +73,7 @@ const FarmersManagement = () => {
   const goBack = () => navigate('/admin');
 
   return (
-    <div className="farmers-management">
-      <button className="back-btn" onClick={goBack}>
-        <span>←</span> {t('common.back', 'Back')}
-      </button>
-
-      <div className="management-header">
-        <h1>{t('admin.farmers.title', 'Farmers Management')}</h1>
-        <p>{t('admin.farmers.subtitle', 'View and manage farmer accounts')}</p>
-      </div>
-
-      <div className="farmers-container">
+    <div className="farmers-container">
         {loading ? (
           <div className="loading-state">⏳ {t('admin.farmers.loading', 'Loading farmers...')}</div>
         ) : farmers.length === 0 ? (
@@ -90,13 +90,13 @@ const FarmersManagement = () => {
                   <p className="crops-count">🌾 {farmer.totalCrops || 0} {t('admin.farmers.totalCrops')} | {farmer.activeCrops || 0} {t('admin.farmers.active')}</p>
                 </div>
                 <div className="farmer-actions">
-                  <button 
+                  <button
                     className="detail-btn"
                     onClick={() => viewFarmerDetails(farmer)}
                   >
                     {t('admin.farmers.viewDetails', 'View Details')}
                   </button>
-                  <button 
+                  <button
                     className={`status-toggle ${farmer.status === 'active' ? 'enabled' : 'disabled'}`}
                     onClick={() => toggleFarmerStatus(farmer._id)}
                   >
@@ -107,7 +107,6 @@ const FarmersManagement = () => {
             ))}
           </div>
         )}
-      </div>
 
       {showModal && selectedFarmer && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
@@ -121,6 +120,10 @@ const FarmersManagement = () => {
               <section className="profile-section">
                 <h3>{t('admin.farmers.profileInfo', 'Profile Information')}</h3>
                 <div className="info-grid">
+                  <div className="info-item">
+                    <label>{t('admin.orders.farmerId', 'Farmer ID')}</label>
+                    <p>#{selectedFarmer.id || selectedFarmer._id || 'N/A'}</p>
+                  </div>
                   <div className="info-item">
                     <label>{t('admin.customers.email')}</label>
                     <p>{selectedFarmer.email}</p>
@@ -140,6 +143,10 @@ const FarmersManagement = () => {
                   <div className="info-item">
                     <label>{t('admin.customers.statePincode', 'Pincode')}</label>
                     <p>{selectedFarmer.profile?.pincode || 'N/A'}</p>
+                  </div>
+                  <div className="info-item">
+                    <label>{t('admin.customers.address', 'Full Address')}</label>
+                    <p>{selectedFarmer.profile?.fullLocation || selectedFarmer.profile?.locationText || selectedFarmer.location || 'N/A'}</p>
                   </div>
                   <div className="info-item">
                     <label>{t('admin.customers.memberSince', 'Join Date')}</label>

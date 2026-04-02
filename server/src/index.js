@@ -19,6 +19,8 @@ import transportDealersRoutes from './routes/transportDealers.js';
 import locationsRoutes from './routes/locations.js';
 import dealerOperationsRoutes from './routes/dealerOperations.js';
 import diseaseRoutes from './routes/disease.js';
+import translateRoutes from './routes/translate.js';
+import cartRoutes from './routes/cart.js';
 import { importDistricts, importMandals } from './services/csvImportService.js';
 
 dotenv.config();
@@ -65,6 +67,10 @@ try {
   console.log('[LOAD] ✅ Dealer operations route registered');
   app.use('/api/disease', diseaseRoutes);
   console.log('[LOAD] ✅ Disease prediction route registered');
+  app.use('/api/translate', translateRoutes);
+  console.log('[LOAD] ✅ Translate proxy route registered');
+  app.use('/api/cart', cartRoutes);
+  console.log('[LOAD] ✅ Cart routes registered');
 } catch (err) {
   console.error('[ERROR] Failed to register routes:', err.message, err.stack);
   process.exit(1);

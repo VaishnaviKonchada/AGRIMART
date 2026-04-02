@@ -216,7 +216,7 @@ export default function Register() {
 
   return (
     <div className="auth-bg">
-      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 0 0 0' }}>
+      <div className="auth-lang-switcher">
         <LanguageSwitcher />
       </div>
       <div className="auth-box">
@@ -240,7 +240,7 @@ export default function Register() {
             borderRadius: '4px', 
             marginBottom: '10px',
             fontSize: '12px',
-            color: '#888'
+            color: 'rgba(255, 255, 255, 0.9)'
           }}>
             {role === 'customer' && t('registerCustomerInfo')}
             {role === 'farmer' && t('registerFarmerInfo')}
@@ -255,7 +255,7 @@ export default function Register() {
           onChange={(e) => setName(e.target.value)}
         />
 
-        <div style={{ fontSize: '12px', color: '#999', marginTop: '15px', marginBottom: '5px' }}>
+        <div style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.9)', marginTop: '15px', marginBottom: '5px', fontWeight: '500' }}>
           📍 {t("locationInfo")}
         </div>
 

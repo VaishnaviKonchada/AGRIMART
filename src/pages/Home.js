@@ -154,71 +154,92 @@ export default function Home() {
     <div className="home-page">
       <CustomerHeader />
 
-      {/* ── SEARCH HERO BANNER ── */}
-      <section className="search-section">
-        <div className="search-section-inner">
-          <h1 className="search-title">{t('Fresh Produce, Direct from Farmers', 'Fresh Produce, Direct from Farmers')}</h1>
-          <p className="search-subtitle">{t('Search vegetables, fruits, grains & more', 'Search vegetables, fruits, grains & more')}</p>
-          <div className="search-box">
-            <span className="search-icon">🔍</span>
-            <input
-              id="home-search"
-              type="text"
-              placeholder={t("Search crops, vegetables, fruits...", "Search crops, vegetables, fruits...")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+      {/* ── MODERN HERO BANNER ── */}
+      <section className="hero-section">
+        <div className="hero-overlay"></div>
+        <div className="hero-content">
+          <h1 className="hero-title">{t('Fresh Produce, Direct from Farmers')}</h1>
+          <p className="hero-subtitle">{t('Direct from the farm source. Organic & Fresh.')}</p>
+          <div className="search-box-wrapper">
+            <div className="search-box">
+              <span className="search-icon">🔍</span>
+              <input
+                id="home-search"
+                type="text"
+                placeholder={t("Search crops, vegetables, fruits...")}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CATEGORIES ── */}
+      <section className="categories-section">
+        <div className="section-container">
+          <div className="category-chips">
+            {['All', 'Vegetable', 'Fruit', 'Grain', 'Spice', 'Herb'].map(cat => (
+              <button 
+                key={cat} 
+                className={`category-chip ${ (cat === 'All' && search === '') || search.toLowerCase() === cat.toLowerCase() ? 'active' : ''}`}
+                onClick={() => setSearch(cat === 'All' ? '' : cat)}
+              >
+                {t(cat.toLowerCase(), cat)}
+              </button>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── SECTION HEADER ── */}
       {!loading && !error && (
-        <div className="section-header">
-          <h2 className="section-title-text">
-            🌿 {t('Available Crops', 'Available Crops')}
+        <div className="list-header section-container">
+          <h2 className="list-title">
+            <span>🌿</span> {t('Available Crops', 'Available Crops')}
           </h2>
-          <span className="section-count">
-            {filteredCrops.length} {filteredCrops.length === 1 ? t('listing', 'listing') : t('listings', 'listings')}
-          </span>
+          <div className="list-meta">
+            <span className="count-badge">
+              {filteredCrops.length} {filteredCrops.length === 1 ? t('listing', 'listing') : t('listings', 'listings')}
+            </span>
+          </div>
         </div>
       )}
 
-      {/* ── CROPS CONTAINER ── */}
-      <div className="crops-container">
-
+      {/* ── CROPS GRID ── */}
+      <section className="crops-list section-container">
         {/* Loading */}
         {loading && (
-          <div className="state-card">
+          <div className="status-container">
             <div className="ag-spinner"></div>
-            <p className="state-message">{t('Loading fresh crops…', 'Loading fresh crops…')}</p>
+            <p className="status-text">{t('Loading fresh crops…', 'Loading fresh crops…')}</p>
           </div>
         )}
 
         {/* Error */}
         {error && (
-          <div className="state-card">
-            <span className="state-icon">⚠️</span>
-            <p className="error-text">{error}</p>
+          <div className="status-container error">
+            <span className="status-icon">⚠️</span>
+            <p className="status-text">{error}</p>
             <button className="retry-btn" onClick={fetchCrops}>↻ {t('Retry', 'Retry')}</button>
           </div>
         )}
 
         {/* Empty */}
         {!loading && !error && filteredCrops.length === 0 && (
-          <div className="state-card">
-            <span className="state-icon">🔍</span>
-            <p className="state-message">{t('No crops found for', 'No crops found for')} "{search}"</p>
+          <div className="status-container empty">
+            <span className="status-icon">🔍</span>
+            <p className="status-text">{t('No crops found for', 'No crops found for')} "{search}"</p>
           </div>
         )}
 
         {/* Grid */}
         {!loading && !error && filteredCrops.length > 0 && (
-          <div className="crops-grid">
+          <div className="home-crops-grid">
             {filteredCrops.map((crop) => (
               <div
                 key={crop.id}
-                className="crop-card"
+                className="home-crop-card"
                 onClick={() =>
                   navigate("/crop-details", {
                     state: {
@@ -237,32 +258,33 @@ export default function Home() {
                 <div className="crop-image-wrapper">
                   <img src={crop.image} alt={crop.name} className="crop-image" />
                   <span className={`category-badge ${crop.category.toLowerCase()}`}>
-                    {t(crop.category, crop.category)}
+                    {t(crop.category.toLowerCase(), crop.category)}
                   </span>
                 </div>
 
                 <div className="crop-info">
-                  <h3 className="crop-name">{t(crop.name, crop.name)}</h3>
-                  <p className="crop-price">
-                    ₹{crop.sellingPricePerKg} <span>/{t('kg', 'kg')}</span>
-                  </p>
-                  <p className="crop-price-note">{t('Farmer selling price', 'Farmer selling price')}</p>
+                  <h3 className="crop-name">{t(crop.name.toLowerCase(), crop.name)}</h3>
+                  <p className="crop-farmer"><span>👨‍🌾</span> {crop.farmer}</p>
+                  
+                  <div className="crop-price-container">
+                    <p className="crop-price">
+                      ₹{crop.sellingPricePerKg}<span><br/>{t('kg_unit', '/kg')}</span>
+                    </p>
+                  </div>
+                  
                   {crop.mandiReference && (
-                    <span
-                      className="crop-mandi-ref"
-                      title={t("Government mandi wholesale reference. 1 quintal = 100 kg.", "Government mandi wholesale reference. 1 quintal = 100 kg.")}
-                    >
-                      🏛 ₹{crop.mandiReference.modalPricePerQuintal}/{t('quintal', 'quintal')}
-                    </span>
+                    <div className="mandi-info">
+                      <span className="mandi-pill">{t('mandi_ref_short', 'Ref:')} ₹{crop.mandiReference.modalPricePerQuintal}</span>
+                    </div>
                   )}
-                  <p className="crop-farmer">👨‍🌾 {crop.farmer}</p>
-                  <button className="view-details-btn">{t('View Details →', 'View Details →')}</button>
+
+                  <button className="view-details-btn">{t('view_details', 'View Details')}</button>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </section>
 
       <BottomNav />
 

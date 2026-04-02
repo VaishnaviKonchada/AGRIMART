@@ -3,10 +3,7 @@
 .transport-dealer-account {
   min-height: 100vh;
   padding: 24px 16px 90px;
-  background:
-    radial-gradient(ellipse 900px 500px at 5% 0%, rgba(102, 187, 106, 0.18) 0%, transparent 55%),
-    radial-gradient(ellipse 700px 600px at 100% 100%, rgba(141, 110, 99, 0.12) 0%, transparent 55%),
-    linear-gradient(160deg, #F9FBE7 0%, #F1F8E9 50%, #E8F5E9 100%);
+  background: #ffffff !important;
 }
 
 .account-header { 
@@ -352,7 +349,8 @@
   border-radius: 10px;
   font-size: 14px;
   font-family: 'Poppins', sans-serif;
-  background: #F1F8E9;
+  background: #ffffff;
+
   color: #263238;
   transition: all 0.25s ease-in-out;
 }

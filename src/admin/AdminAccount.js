@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { API_BASE_URL } from "../utils/api";
 import { getCurrentLocationDetails } from "../utils/locationHelpers";
 import './styles/ManagementPages.css';
@@ -9,6 +10,7 @@ import '../styles/TransportDealerAccount.css';
 
 const AdminAccount = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
@@ -111,7 +113,7 @@ const AdminAccount = () => {
         });
         // Update only role and name in localStorage, keep original login data
         const storedUser = JSON.parse(localStorage.getItem("registeredUser") || '{}');
-        localStorage.setItem("registeredUser", JSON.stringify({...storedUser, name: data.user.name, role: data.user.role}));
+        localStorage.setItem("registeredUser", JSON.stringify({ ...storedUser, name: data.user.name, role: data.user.role }));
       } else if (response.status === 401) {
         console.error('❌ Token expired or invalid. Redirecting to login.');
         alert('Your session has expired. Please login again.');
@@ -196,7 +198,7 @@ const AdminAccount = () => {
         setAdmin(data.user);
         // Update only name and role in localStorage, keep original login data
         const storedUser = JSON.parse(localStorage.getItem("registeredUser") || '{}');
-        localStorage.setItem("registeredUser", JSON.stringify({...storedUser, name: data.user.name, role: data.user.role}));
+        localStorage.setItem("registeredUser", JSON.stringify({ ...storedUser, name: data.user.name, role: data.user.role }));
         alert("Profile updated successfully ✅");
         setEditMode(false);
         // Refresh profile from backend
@@ -225,20 +227,21 @@ const AdminAccount = () => {
     localStorage.removeItem("dealerProfile");
     localStorage.removeItem("farmerProfile");
     localStorage.removeItem("adminProfile");
-    
+
     console.log("✅ Admin logged out successfully");
     alert("Logged out successfully. You can now login with a different role.");
     navigate("/login");
   };
 
-  const goBack = () => navigate('/admin');
+
+
 
   if (loading) {
     return (
       <div className="management-page">
         <div className="loading-container">
           <div className="spinner"></div>
-          <p>Loading your profile...</p>
+          <p>{t('admin.account.loading')}</p>
         </div>
       </div>
     );
@@ -249,7 +252,7 @@ const AdminAccount = () => {
       <div className="management-page">
         <div className="account-container">
           <div className="profile-card">
-            <p>Please log in to view your admin account</p>
+            <p>{t('admin.account.pleaseLogin')}</p>
             <button onClick={() => navigate('/login')}>🔐 Go to Login</button>
           </div>
         </div>
@@ -259,18 +262,9 @@ const AdminAccount = () => {
 
   return (
     <div className="transport-dealer-account">
-      <div className="account-header">
-        <div className="title-wrap">
-          <h2>🛡️ Administrator Account</h2>
-          <p className="subtitle">Manage your admin profile and access</p>
-        </div>
-        <button className="dashboard-btn" onClick={() => navigate('/admin-dashboard')}>
-          <span className="dash-icon">📊</span>
-          <span className="dash-label">Dashboard</span>
-        </button>
-      </div>
 
       <div className="profile-card">
+
         <div className="avatar">{(admin.name || "A").charAt(0).toUpperCase()}</div>
         <div className="info">
           <div className="name">{admin.name || "Administrator"}</div>
@@ -284,31 +278,31 @@ const AdminAccount = () => {
           </div>
         </div>
         <div className="badges">
-          <span className="badge verified">Full Access</span>
-          <span className="badge active">Active</span>
+          <span className="badge verified">{t('admin.account.fullAccess')}</span>
+          <span className="badge active">{t('admin.account.active')}</span>
         </div>
       </div>
 
       <div className="quick-nav-buttons">
         <button className="nav-btn orders-btn" onClick={() => navigate('/admin/users')}>
           <span className="nav-icon">👥</span>
-          <span className="nav-label">Manage Users</span>
+          <span className="nav-label">{t('admin.account.manageUsers')}</span>
         </button>
         <button className="nav-btn payments-btn" onClick={() => navigate('/admin/orders')}>
           <span className="nav-icon">📦</span>
-          <span className="nav-label">Monitor Orders</span>
+          <span className="nav-label">{t('admin.account.monitorOrders')}</span>
         </button>
         <button className="nav-btn" onClick={() => navigate('/admin/complaints')}>
           <span className="nav-icon">⚠️</span>
-          <span className="nav-label">Complaints</span>
+          <span className="nav-label">{t('admin.account.complaints')}</span>
         </button>
       </div>
 
       <div className="form-section">
-        <h3 className="section-title">📋 Personal Information</h3>
+        <h3 className="section-title">📋 {t('admin.account.personalInfo')}</h3>
         <fieldset className="form-grid" disabled={!editMode}>
           <div className="field">
-            <label>Full Name</label>
+            <label>{t('admin.account.fullName')}</label>
             <input
               name="name"
               value={formData.name}
@@ -316,11 +310,11 @@ const AdminAccount = () => {
             />
           </div>
           <div className="field">
-            <label>Email</label>
+            <label>{t('admin.account.email')}</label>
             <input value={admin.email || ""} disabled />
           </div>
           <div className="field">
-            <label>Phone Number</label>
+            <label>{t('admin.account.phone')}</label>
             <input
               name="phone"
               value={formData.phone}
@@ -332,10 +326,10 @@ const AdminAccount = () => {
       </div>
 
       <div className="form-section">
-        <h3 className="section-title">🏠 Address Information</h3>
+        <h3 className="section-title">🏠 {t('admin.account.addressInfo')}</h3>
         <fieldset className="form-grid" disabled={!editMode}>
           <div className="field">
-            <label>Country</label>
+            <label>{t('admin.account.country')}</label>
             <input
               name="country"
               value={formData.country}
@@ -343,7 +337,7 @@ const AdminAccount = () => {
             />
           </div>
           <div className="field">
-            <label>State</label>
+            <label>{t('admin.account.state')}</label>
             <input
               name="state"
               value={formData.state}
@@ -351,7 +345,7 @@ const AdminAccount = () => {
             />
           </div>
           <div className="field">
-            <label>District</label>
+            <label>{t('admin.account.district')}</label>
             <input
               name="district"
               value={formData.district}
@@ -359,7 +353,7 @@ const AdminAccount = () => {
             />
           </div>
           <div className="field">
-            <label>Mandal</label>
+            <label>{t('admin.account.mandal')}</label>
             <input
               name="mandal"
               value={formData.mandal}
@@ -367,7 +361,7 @@ const AdminAccount = () => {
             />
           </div>
           <div className="field">
-            <label>Door No/House No</label>
+            <label>{t('admin.account.doorNo')}</label>
             <input
               name="doorNo"
               value={formData.doorNo}
@@ -376,7 +370,7 @@ const AdminAccount = () => {
             />
           </div>
           <div className="field">
-            <label>Pincode</label>
+            <label>{t('admin.account.pincode')}</label>
             <input
               name="pincode"
               value={formData.pincode}
@@ -384,7 +378,7 @@ const AdminAccount = () => {
             />
           </div>
           <div className="field full">
-            <label>Full Location/Address</label>
+            <label>{t('admin.account.fullLocation')}</label>
             <input
               name="location"
               value={formData.location}
@@ -393,7 +387,7 @@ const AdminAccount = () => {
             />
           </div>
           <div className="field full">
-            <label>Address Coordinates</label>
+            <label>{t('admin.account.addressCoords')}</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#1a4d2e', fontSize: '15px' }}>
                 {formData.coordinates && formData.coordinates.lat && formData.coordinates.lon
@@ -421,7 +415,7 @@ const AdminAccount = () => {
                     marginLeft: '4px'
                   }}
                 >
-                  {fetchingCoords ? 'Fetching...' : 'Fetch from Address'}
+                  {fetchingCoords ? t('admin.account.fetching') : t('admin.account.fetchFromAddress')}
                 </button>
               )}
               {coordsError && (
@@ -436,14 +430,14 @@ const AdminAccount = () => {
         <div className="account-location-modal-overlay" onClick={() => setShowLocationModal(false)}>
           <div className="account-location-modal" onClick={(e) => e.stopPropagation()}>
             <div className="account-location-modal-header">
-              <h3>Pick Current Location</h3>
+              <h3>{t('admin.account.pickCurrentLocation')}</h3>
               <button type="button" className="account-location-modal-close" onClick={() => setShowLocationModal(false)}>
                 ✕
               </button>
             </div>
 
             {locationPayload?.baseLocation && (
-              <p className="account-location-modal-text">Detected: {locationPayload.baseLocation}</p>
+              <p className="account-location-modal-text">{t('admin.account.detected')} {locationPayload.baseLocation}</p>
             )}
 
             {locationSuggestions.length > 0 && (
@@ -463,7 +457,7 @@ const AdminAccount = () => {
 
             {famousNearby.length > 0 && (
               <div className="account-famous-nearby">
-                <span className="account-famous-title">Nearby famous place(s):</span>
+                <span className="account-famous-title">{t('admin.account.nearbyFamousPlaces')}</span>
                 <div className="account-famous-list">
                   {famousNearby.map((place, idx) => (
                     <button
@@ -486,22 +480,22 @@ const AdminAccount = () => {
         {!editMode ? (
           <>
             <button className="save-btn" type="button" onClick={() => setEditMode(true)}>
-              ✏️ Edit Details
+              ✏️ {t('admin.account.editDetails')}
             </button>
             <button className="logout-btn" type="button" onClick={() => setShowLogoutConfirm(true)}>
-              🚪 Logout
+              🚪 {t('admin.account.logout')}
             </button>
           </>
         ) : (
           <>
             <button className="save-btn" type="button" onClick={saveProfile} disabled={saving}>
-              {saving ? "💾 Saving..." : "💾 Save Changes"}
+              {saving ? `💾 ${t('admin.account.saving')}` : `💾 ${t('admin.account.saveChanges')}`}
             </button>
             <button className="cancel-btn" type="button" onClick={() => setEditMode(false)} disabled={saving}>
-              Cancel
+              {t('admin.account.cancel')}
             </button>
             <button className="logout-btn" type="button" onClick={() => setShowLogoutConfirm(true)} disabled={saving}>
-              🚪 Logout
+              🚪 {t('admin.account.logout')}
             </button>
           </>
         )}
@@ -511,18 +505,18 @@ const AdminAccount = () => {
         <div className="modal-overlay" onClick={() => setShowLogoutConfirm(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Confirm Logout</h2>
+              <h2>{t('admin.account.confirmLogout')}</h2>
               <button className="close-btn" onClick={() => setShowLogoutConfirm(false)}>✕</button>
             </div>
             <div className="modal-body">
-              <p className="logout-message">Are you sure you want to logout?</p>
+              <p className="logout-message">{t('admin.account.confirmLogoutMsg')}</p>
             </div>
             <div className="modal-footer">
               <button className="logout-confirm-btn" onClick={handleLogout}>
-                Yes, Logout
+                {t('admin.account.yesLogout')}
               </button>
               <button className="modal-close-btn" onClick={() => setShowLogoutConfirm(false)}>
-                Cancel
+                {t('admin.account.cancel')}
               </button>
             </div>
           </div>

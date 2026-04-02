@@ -20,9 +20,12 @@ const orderSchema = new mongoose.Schema(
     customerEmail: String,
     farmerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     farmerName: String,
+    farmerEmail: String,
+    farmerPhone: String,
     dealerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     dealerName: String,
     dealerEmail: String,
+    dealerPhone: String,
     dealerRequestId: { type: mongoose.Schema.Types.ObjectId, ref: 'DealerRequest' },
 
     customerSnapshot: {

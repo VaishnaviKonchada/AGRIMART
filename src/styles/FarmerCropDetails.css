@@ -1,155 +1,256 @@
+/* Premium Farmer Crop Details Styles */
 .farmer-crop-details-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f5f8ff 0%, #eef3f2 100%);
-  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 40px 20px 100px;
+  /* Added 100px bottom padding for BottomNav safety */
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
 .farmer-crop-details-header {
-  max-width: 1100px;
-  margin: 0 auto 16px;
-}
-
-.header-top-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.language-toggle {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.language-btn {
-  border: 1px solid #bfdbfe;
-  background: #eff6ff;
-  color: #1e3a8a;
-  padding: 8px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.language-btn.active {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
-  color: #fff;
-}
-
-.farmer-crop-details-header h1 {
-  margin: 10px 0 4px;
-  color: #1f2937;
-}
-
-.farmer-crop-details-header p {
-  margin: 0;
-  color: #4b5563;
-}
-
-.back-btn {
-  border: none;
-  background: #1d4ed8;
-  color: #ffffff;
-  padding: 10px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.farmer-crop-details-card,
-.farmer-info-box,
-.crop-item-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-  padding: 16px;
-}
-
-.farmer-crop-details-card {
-  max-width: 600px;
-  margin: 50px auto;
+  max-width: 900px;
+  margin: 0 auto 32px;
   text-align: center;
 }
 
+.farmer-crop-details-header h1 {
+  font-size: 32px;
+  font-weight: 900;
+  color: #0f172a;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.farmer-crop-details-header p {
+  color: #64748b;
+  font-size: 16px;
+}
+
+.back-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 20px;
+}
+
+.back-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateX(-5px);
+}
+
+/* Farmer Info Box */
 .farmer-info-box {
-  max-width: 1100px;
-  margin: 0 auto 16px;
+  max-width: 900px;
+  margin: 0 auto 32px;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 10px 40px rgba(15, 23, 42, 0.05);
+  border: 1px solid #f1f5f9;
 }
 
-.info-grid,
-.crop-item-grid {
+.farmer-info-box h3 {
+  margin-bottom: 20px;
+  color: #1e293b;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
 }
 
-.crop-list {
-  max-width: 1100px;
-  margin: 0 auto;
-  display: grid;
-  gap: 14px;
+.info-grid div {
+  font-size: 15px;
+  color: #334155;
 }
 
-.crop-item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.crop-item-header h3 {
-  margin: 0;
-  color: #111827;
-}
-
-.crop-item-header span {
-  background: #dcfce7;
-  color: #166534;
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 12px;
-}
-
-.crop-description {
-  margin-top: 10px;
-  color: #374151;
-}
-
-.crop-image-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(120px, 1fr));
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.crop-preview-image {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-}
-
-.crop-image-note {
-  margin-top: 10px;
-  color: #6b7280;
+.info-grid strong {
+  color: #64748b;
+  font-weight: 700;
+  margin-right: 8px;
   font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-@media (max-width: 640px) {
-  .farmer-crop-details-page {
-    padding: 12px;
-  }
+/* Premium List Row */
+.crop-list {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
 
-  .header-top-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.crop-item-row-premium {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 15px 50px rgba(15, 23, 42, 0.06);
+  border: 1px solid #f1f5f9;
+  position: relative;
+}
 
-  .crop-image-row {
+.crop-badge-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.variety-pill {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.organic-tag {
+  background: #fdf2f8;
+  color: #9d174d;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.crop-item-row-premium h3 {
+  font-size: 26px;
+  font-weight: 900;
+  color: #0f172a;
+  margin-bottom: 24px;
+}
+
+.crop-visual-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.gallery-thumb {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 20px;
+  border: 1px solid #f1f5f9;
+}
+
+/* Stats Metrics */
+.stats-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.metric {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metric.highlight {
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+}
+
+.metric .label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.metric .value {
+  font-size: 18px;
+  font-weight: 900;
+  color: #1e293b;
+}
+
+.metric.highlight .value {
+  color: #059669;
+}
+
+/* Tags row */
+.detail-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.tag {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+}
+
+/* Sections */
+.description-section,
+.guidance-section-box {
+  margin-top: 24px;
+}
+
+.description-section h4,
+.guidance-section-box h4 {
+  font-size: 14px;
+  margin-bottom: 12px;
+  color: #64748b;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.description-section p {
+  color: #334155;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.guidance-section-box {
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  padding: 24px;
+  border-radius: 20px;
+}
+
+.guidance-content {
+  color: #92400e;
+  line-height: 1.6;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .stats-metric-grid {
     grid-template-columns: 1fr;
+  }
+
+  .farmer-info-box,
+  .crop-item-row-premium {
+    padding: 20px;
+  }
+
+  .farmer-crop-details-header h1 {
+    font-size: 24px;
   }
 }

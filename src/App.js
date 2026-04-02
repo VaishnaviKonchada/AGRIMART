@@ -46,6 +46,7 @@ import TransportDealerActiveTrips from "./transport-dealer/TransportDealerActive
 import TransportDealerNotifications from "./transport-dealer/TransportDealerNotifications";
 import TransportDealerServiceArea from "./transport-dealer/TransportDealerServiceArea";
 import TransportDealerVehicleDetails from "./transport-dealer/TransportDealerVehicleDetails";
+import TransportDealerLayout from "./transport-dealer/TransportDealerLayout";
 
 // Admin Pages
 import AdminDashboard from "./admin/AdminDashboard";
@@ -57,7 +58,9 @@ import PaymentsSettlements from "./admin/PaymentsSettlements";
 import ComplaintsSupport from "./admin/ComplaintsSupport";
 import Reports from "./admin/Reports";
 import AdminAccount from "./admin/AdminAccount";
+import AdminHeader from "./admin/AdminHeader";
 import AdminBottomNav from "./admin/AdminBottomNav";
+import "./admin/styles/AdminGlobal.css";
 
 import RequireRole from "./components/RequireRole";
 
@@ -77,12 +80,23 @@ export default function App() {
     }
   }, []);
 
-  const AdminWrapper = ({ children }) => {
+  const AdminWrapper = ({ children, user }) => {
     return (
-      <>
-        {children}
+      <div className="admin-layout-container">
+        <AdminHeader user={user} />
+        <div style={{ padding: '0 30px', maxWidth: '1440px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+          {children}
+        </div>
         <AdminBottomNav />
-      </>
+      </div>
+    );
+  };
+
+  const TransportDealerLayoutWrapper = ({ children }) => {
+    return (
+      <TransportDealerLayout>
+        {children}
+      </TransportDealerLayout>
     );
   };
 
@@ -125,31 +139,31 @@ export default function App() {
         <Route path="/farmer/support" element={<RequireRole role="farmer"><FarmerLayout><SupportChat /></FarmerLayout></RequireRole>} />
 
         {/* Transport Dealer Flow */}
-        <Route path="/transport-dealer-dashboard" element={<RequireRole role="transport dealer"><TransportDealerDashboard /></RequireRole>} />
-        <Route path="/transport-dealer/dashboard" element={<RequireRole role="transport dealer"><TransportDealerDashboard /></RequireRole>} />
-        <Route path="/transport-dealer/account" element={<RequireRole role="transport dealer"><TransportDealerAccount /></RequireRole>} />
-        <Route path="/transport-dealer/orders" element={<RequireRole role="transport dealer"><TransportDealerOrders /></RequireRole>} />
-        <Route path="/transport-dealer/payments" element={<RequireRole role="transport dealer"><TransportDealerPayments /></RequireRole>} />
-        <Route path="/transport-dealer/earnings" element={<RequireRole role="transport dealer"><TransportDealerEarnings /></RequireRole>} />
-        <Route path="/transport-dealer/vehicles" element={<RequireRole role="transport dealer"><TransportDealerVehicles /></RequireRole>} />
-        <Route path="/transport-dealer/service-area" element={<RequireRole role="transport dealer"><TransportDealerServiceArea /></RequireRole>} />
-        <Route path="/transport-dealer/vehicle-details" element={<RequireRole role="transport dealer"><TransportDealerVehicleDetails /></RequireRole>} />
-        <Route path="/transport-dealer/messages" element={<RequireRole role="transport dealer"><TransportDealerMessages /></RequireRole>} />
-        <Route path="/transport-dealer/requests" element={<RequireRole role="transport dealer"><TransportDealerRequests /></RequireRole>} />
-        <Route path="/transport-dealer/active-trips" element={<RequireRole role="transport dealer"><TransportDealerActiveTrips /></RequireRole>} />
-        <Route path="/transport-dealer/notifications" element={<RequireRole role="transport dealer"><TransportDealerNotifications /></RequireRole>} />
-        <Route path="/transport-dealer/support" element={<RequireRole role="transport dealer"><SupportChat /></RequireRole>} />
+        <Route path="/transport-dealer-dashboard" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerDashboard /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/dashboard" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerDashboard /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/account" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerAccount /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/orders" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerOrders /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/payments" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerPayments /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/earnings" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerEarnings /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/vehicles" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerVehicles /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/service-area" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerServiceArea /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/vehicle-details" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerVehicleDetails /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/messages" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerMessages /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/requests" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerRequests /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/active-trips" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerActiveTrips /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/notifications" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><TransportDealerNotifications /></TransportDealerLayoutWrapper></RequireRole>} />
+        <Route path="/transport-dealer/support" element={<RequireRole role="transport dealer"><TransportDealerLayoutWrapper><SupportChat /></TransportDealerLayoutWrapper></RequireRole>} />
 
         {/* Admin Flow */}
-        <Route path="/admin" element={<RequireRole role="admin"><AdminWrapper><AdminDashboard user={user} /></AdminWrapper></RequireRole>} />
-        <Route path="/admin/farmers" element={<RequireRole role="admin"><AdminWrapper><FarmersManagement /></AdminWrapper></RequireRole>} />
-        <Route path="/admin/customers" element={<RequireRole role="admin"><AdminWrapper><CustomersManagement /></AdminWrapper></RequireRole>} />
-        <Route path="/admin/dealers" element={<RequireRole role="admin"><AdminWrapper><TransportDealersManagement /></AdminWrapper></RequireRole>} />
-        <Route path="/admin/orders" element={<RequireRole role="admin"><AdminWrapper><OrdersMonitoring /></AdminWrapper></RequireRole>} />
-        <Route path="/admin/payments" element={<RequireRole role="admin"><AdminWrapper><PaymentsSettlements /></AdminWrapper></RequireRole>} />
-        <Route path="/admin/complaints" element={<RequireRole role="admin"><AdminWrapper><ComplaintsSupport /></AdminWrapper></RequireRole>} />
-        <Route path="/admin/reports" element={<RequireRole role="admin"><AdminWrapper><Reports /></AdminWrapper></RequireRole>} />
-        <Route path="/admin/account" element={<RequireRole role="admin"><AdminWrapper><AdminAccount user={user} setUser={setUser} /></AdminWrapper></RequireRole>} />
+        <Route path="/admin" element={<RequireRole role="admin"><AdminWrapper user={user}><AdminDashboard user={user} /></AdminWrapper></RequireRole>} />
+        <Route path="/admin/farmers" element={<RequireRole role="admin"><AdminWrapper user={user}><FarmersManagement /></AdminWrapper></RequireRole>} />
+        <Route path="/admin/customers" element={<RequireRole role="admin"><AdminWrapper user={user}><CustomersManagement /></AdminWrapper></RequireRole>} />
+        <Route path="/admin/dealers" element={<RequireRole role="admin"><AdminWrapper user={user}><TransportDealersManagement /></AdminWrapper></RequireRole>} />
+        <Route path="/admin/orders" element={<RequireRole role="admin"><AdminWrapper user={user}><OrdersMonitoring /></AdminWrapper></RequireRole>} />
+        <Route path="/admin/payments" element={<RequireRole role="admin"><AdminWrapper user={user}><PaymentsSettlements /></AdminWrapper></RequireRole>} />
+        <Route path="/admin/complaints" element={<RequireRole role="admin"><AdminWrapper user={user}><ComplaintsSupport /></AdminWrapper></RequireRole>} />
+        <Route path="/admin/reports" element={<RequireRole role="admin"><AdminWrapper user={user}><Reports /></AdminWrapper></RequireRole>} />
+        <Route path="/admin/account" element={<RequireRole role="admin"><AdminWrapper user={user}><AdminAccount user={user} setUser={setUser} /></AdminWrapper></RequireRole>} />
 
         {/* Legacy / shorter paths redirect to canonical */}
         <Route path="/transport-dashboard" element={<Navigate to="/transport-dealer-dashboard" replace />} />

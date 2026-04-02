@@ -59,15 +59,7 @@ const AdminDashboard = ({ user }) => {
   );
 
   return (
-    <div className="admin-dashboard">
-      <div className="admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h1>{t('admin.dashboard.title', 'Admin Dashboard')}</h1>
-          <p className="admin-subtitle">{t('admin.dashboard.welcome', 'Welcome back')}, {user?.name || t('admin.dashboard.administrator', 'Administrator')}</p>
-        </div>
-        <LanguageSwitcher />
-      </div>
-
+    <div className="admin-dashboard-content">
       <div className="stats-container">
         <div className="stats-grid">
           <StatCard 

@@ -1,56 +1,62 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { apiGet } from "../utils/api";
 import "../styles/DeliveryStatus.css";
 import BottomNav from "../components/BottomNav";
 import CustomerHeader from "../components/CustomerHeader";
 
-const deliverySteps = [
-  { 
-    id: "Confirmed", 
-    label: "Order Confirmed",
-    icon: "✓",
-    description: "We have received your order"
-  },
-  { 
-    id: "Picked Up", 
-    label: "Picked Up",
-    icon: "📦",
-    description: "Your order has been picked up"
-  },
-  { 
-    id: "In Transit", 
-    label: "In Transit",
-    icon: "🚚",
-    description: "Your order is on the way"
-  },
-  { 
-    id: "Delivered", 
-    label: "Delivered",
-    icon: "🎉",
-    description: "Order delivered successfully"
-  },
-];
-
 export default function DeliveryStatus() {
   const { orderId: orderIdParam } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const deliverySteps = [
+    { 
+      id: "Confirmed", 
+      label: t('deliveryStatus.orderPlaced'),
+      icon: "🛒",
+      description: t('deliveryStatus.orderPlacedDesc')
+    },
+    { 
+      id: "Confirmed", 
+      label: t('deliveryStatus.processing'),
+      icon: "⚙️",
+      description: t('deliveryStatus.processingDesc')
+    },
+    { 
+      id: "Picked Up", 
+      label: t('deliveryStatus.shipped'),
+      icon: "📦",
+      description: t('deliveryStatus.shippedDesc')
+    },
+    { 
+      id: "In Transit", 
+      label: t('deliveryStatus.inTransit'),
+      icon: "🚚",
+      description: t('deliveryStatus.inTransitDesc')
+    },
+    { 
+      id: "Delivered", 
+      label: t('deliveryStatus.delivered'),
+      icon: "🎯",
+      description: t('deliveryStatus.deliveredDesc')
+    },
+  ];
+
   useEffect(() => {
     const fetchOrder = async () => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const orders = await apiGet('orders');
         if (Array.isArray(orders)) {
-          const decodedOrderId = decodeURIComponent(orderIdParam);
-          const found = orders.find((o) => (o.orderId || o.id || o._id) === decodedOrderId);
+          const decodedId = String(decodeURIComponent(orderIdParam)).trim();
+          const found = orders.find((o) => 
+            String(o.orderId || '').trim() === decodedId || 
+            String(o._id || '').trim() === decodedId ||
+            String(o.id || '').trim() === decodedId
+          );
           setOrder(found);
         }
       } catch (error) {
@@ -65,11 +71,10 @@ export default function DeliveryStatus() {
 
   if (loading) {
     return (
-      <div className="delivery-status-container">
-        <div className="not-found-card">
-          <div className="not-found-icon">⏳</div>
-          <h2>Loading Order</h2>
-          <p>Please wait while we fetch your order details...</p>
+      <div className="delivery-status-container loading">
+        <div className="loader-wrapper">
+          <div className="agrimart-loader"></div>
+          <p>{t('deliveryStatus.trackingOrder')}</p>
         </div>
       </div>
     );
@@ -79,109 +84,110 @@ export default function DeliveryStatus() {
     return (
       <div className="delivery-status-container">
         <div className="not-found-card">
-          <div className="not-found-icon">📦</div>
-          <h2>Order Not Found</h2>
-          <p>We couldn't find the order you're looking for.</p>
-          <p className="order-id-text">Order ID: {decodeURIComponent(orderIdParam)}</p>
+          <div className="not-found-icon">🔍</div>
+          <h2>{t('deliveryStatus.orderNotFound')}</h2>
+          <p>{t('deliveryStatus.orderNotFoundDesc')}</p>
+          <div className="id-badge">{decodeURIComponent(orderIdParam)}</div>
           <button 
             className="back-to-orders-btn"
             onClick={() => navigate("/orders")}
           >
-            ← Back to My Orders
+            ← {t('deliveryStatus.backToOrders')}
           </button>
         </div>
       </div>
     );
   }
 
-  const currentStepIndex = deliverySteps.findIndex(step => step.id === order.status);
+  // Map backend status to our granular tracking steps
+  const getActiveStepIndex = () => {
+    const status = order.status;
+    if (status === "Delivered") return 4;
+    if (status === "In Transit") return 3;
+    if (status === "Picked Up") return 2;
+    if (status === "Confirmed") return 1; // "Processing"
+    return 0; // "Order Placed"
+  };
+
+  const currentStepIndex = getActiveStepIndex();
   const isDelivered = order.status === "Delivered";
   const isCancelled = order.status === "Cancelled";
 
-  // Calculate estimated delivery (for demo - 3 days from order creation)
-  const orderCreatedTime = order.createdAt ? new Date(order.createdAt).getTime() : Date.now();
-  const estimatedDelivery = new Date(orderCreatedTime + 3 * 24 * 60 * 60 * 1000);
-  const formattedEstimatedDate = estimatedDelivery.toLocaleDateString('en-IN', { 
-    weekday: 'short', 
+  // Date Formatting
+  const orderDate = order.createdAt ? new Date(order.createdAt) : new Date();
+  const formattedOrderDate = orderDate.toLocaleDateString('en-IN', { 
+    day: 'numeric', 
     month: 'short', 
-    day: 'numeric' 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  // Estimated Arrival Logic
+  const estArrival = new Date(orderDate.getTime() + 2 * 24 * 60 * 60 * 1000);
+  const formattedArrival = estArrival.toLocaleDateString('en-IN', { 
+    weekday: 'long',
+    day: 'numeric', 
+    month: 'long'
   });
 
   const orderId = order.orderId || order.id || order._id;
-  const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A';
-  const total = order.summary?.total || order.total || 0;
+  
+  // Calculate component values cleanly
+  const itemsSubtotalVal = Number(order.summary?.itemsTotal || order.itemsTotal || (order.items || []).reduce((sum, item) => sum + ((item.quantity || 0) * (item.pricePerKg || 0)), 0));
+  const deliveryFeeVal = Number(order.summary?.transportFinalFee || order.summary?.transportFee || order.transport?.price || 0);
+  const total = Number(order.summary?.total || order.total || 0);
+  const platformFeeVal = Number(order.summary?.platformFee || order.summary?.platformContribution || Math.max(0, total - itemsSubtotalVal - deliveryFeeVal));
+
   const farmerLocation = order.delivery?.pickup || order.farmer?.location || "Not specified";
   const deliveryLocation = order.delivery?.drop || order.delivery?.location || "Not specified";
-  const dealerName = order.dealerName || order.transport?.dealerName || "N/A";
-  const vehicleType = order.transport?.vehicle || "N/A";
-  const routeDistance = Number(order.delivery?.distance);
-  const transportBaseFee = Number(order.summary?.transportBaseFee || order.transport?.price || 0);
-  const transportFinalFee = Number(order.summary?.transportFinalFee || order.summary?.transportFee || order.transport?.price || 0);
-  const batchDiscount = Number(order.summary?.batchDiscount || Math.max(transportBaseFee - transportFinalFee, 0));
-  const dealerPayout = Number(order.summary?.dealerPayout || transportFinalFee);
-  const platformContribution = Number(order.summary?.platformContribution || Math.max(dealerPayout - transportFinalFee, 0));
-  const hasCoordinates = (coords) => {
-    const lat = Number(coords?.lat);
-    const lng = Number(coords?.lng);
-    return Number.isFinite(lat) && Number.isFinite(lng);
-  };
-  const formatCoordinates = (coords) => {
-    if (!hasCoordinates(coords)) return "N/A";
-    return `${Number(coords.lat).toFixed(6)}, ${Number(coords.lng).toFixed(6)}`;
-  };
-  const distanceSource = hasCoordinates(order.delivery?.pickupCoordinates) && hasCoordinates(order.delivery?.dropCoordinates)
-    ? "Exact GPS"
-    : "Fallback area";
-
+  const dealerName = order.dealerName || order.transport?.dealerName || "Assigned Dealer";
+  const vehicleType = order.transport?.vehicle || "Transport Vehicle";
   return (
     <div className="delivery-status-container">
       <CustomerHeader />
 
       <div className="delivery-content">
-        {/* STATUS BANNER */}
-        <div className={`status-banner ${isDelivered ? 'delivered' : isCancelled ? 'cancelled' : 'in-progress'}`}>
-          <div className="status-banner-content">
-            <div className="status-icon-large">
-              {isDelivered ? "✓" : isCancelled ? "✕" : "🚚"}
-            </div>
-            <div className="status-text">
-              <h2>{isDelivered ? "Delivered" : isCancelled ? "Cancelled" : order.status}</h2>
-              <p>
+        {/* HEADER SECTION */}
+        <div className="tracking-header">
+           <div className="header-top">
+              <button className="back-link" onClick={() => navigate("/orders")}>← {t('deliveryStatus.back')}</button>
+              <span className="order-tag">{t('deliveryStatus.orderHash')}{orderId}</span>
+           </div>
+           <div className="header-main">
+              <h1>{isDelivered ? t('deliveryStatus.successfullyDelivered') : isCancelled ? t('deliveryStatus.orderCancelled') : t('deliveryStatus.arrivingBy') + " " + estArrival.toLocaleDateString('en-IN', {day: 'numeric', month: 'short'})}</h1>
+              <p className="status-subtext">
                 {isDelivered 
-                  ? "Your order has been delivered successfully" 
-                  : isCancelled 
-                  ? "This order has been cancelled"
-                  : `Expected delivery by ${formattedEstimatedDate}`}
+                  ? `${t('deliveryStatus.deliveredOn')} ${new Date().toLocaleDateString()}` 
+                  : `${t('deliveryStatus.deliveryOnTrack')} ${order.status}`}
               </p>
-            </div>
-          </div>
+           </div>
         </div>
 
-        {/* DELIVERY TIMELINE */}
+        {/* MODERN TRACKER */}
         {!isCancelled && (
-          <div className="timeline-card">
-            <h3 className="section-heading">Delivery Status</h3>
-            <div className="delivery-timeline">
+          <div className="tracker-card">
+            <div className="tracker-steps-container">
               {deliverySteps.map((step, index) => {
-                const isActive = index <= currentStepIndex;
-                const isCurrent = index === currentStepIndex;
+                const isCompleted = index < currentStepIndex;
+                const isProcessing = index === currentStepIndex;
+                const isFuture = index > currentStepIndex;
                 
                 return (
-                  <div key={step.id} className={`timeline-item ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''}`}>
-                    <div className="timeline-marker">
-                      <div className="timeline-circle">
-                        {isActive ? step.icon : index + 1}
+                  <div key={index} className={`step-item ${isCompleted ? 'completed' : ''} ${isProcessing ? 'processing' : ''} ${isFuture ? 'future' : ''}`}>
+                    <div className="step-point">
+                      <div className="point-circle">
+                         {isCompleted ? "✓" : step.icon}
                       </div>
                       {index < deliverySteps.length - 1 && (
-                        <div className={`timeline-line ${isActive && index < currentStepIndex ? 'active' : ''}`}></div>
+                        <div className="step-line">
+                           <div className="line-fill" style={{ width: isCompleted ? '100%' : '0%' }}></div>
+                        </div>
                       )}
                     </div>
-                    <div className="timeline-content">
-                      <h4>{step.label}</h4>
-                      <p>{step.description}</p>
-                      {isCurrent && (
-                        <span className="current-badge">Current Status</span>
-                      )}
+                    <div className="step-info">
+                      <span className="step-label">{step.label}</span>
+                      {isProcessing && <span className="step-time">{t('deliveryStatus.updateJustNow')}</span>}
                     </div>
                   </div>
                 );
@@ -190,108 +196,80 @@ export default function DeliveryStatus() {
           </div>
         )}
 
-        {/* ORDER DETAILS */}
-        <div className="details-card">
-          <h3 className="section-heading">Order Details</h3>
-          
-          <div className="detail-row">
-            <span className="detail-label">Order ID</span>
-            <span className="detail-value">{orderId}</span>
-          </div>
-          
-          <div className="detail-row">
-            <span className="detail-label">Order Date</span>
-            <span className="detail-value">{orderDate}</span>
-          </div>
-          
-          <div className="detail-row">
-            <span className="detail-label">Payment Method</span>
-            <span className="detail-value">
-              <span className="payment-badge">💳 {order.paymentMethod || "UPI"}</span>
-            </span>
+        {/* QUICK DETAILS GRID */}
+        <div className="details-grid">
+          <div className="info-card map-card">
+             <div className="card-icon">📍</div>
+             <div className="card-details">
+                <h4>{t('deliveryStatus.deliveryAddress')}</h4>
+                <p className="primary-text">{order?.customerSnapshot?.fullAddress || deliveryLocation}</p>
+                <p className="secondary-text">{order?.customerSnapshot?.phone || order.customerPhone || t('deliveryStatus.contactAttached')}</p>
+             </div>
           </div>
 
-          <div className="detail-row">
-            <span className="detail-label">Total Amount</span>
-            <span className="detail-value amount">₹{total.toLocaleString()}</span>
+          <div className="info-card shipment-card">
+             <div className="card-icon">🚚</div>
+             <div className="card-details">
+                <h4>{t('deliveryStatus.shipmentInfo')}</h4>
+                <p className="primary-text">{dealerName}</p>
+                <p className="secondary-text">{vehicleType} • {t('deliveryStatus.expectedSoon')}</p>
+             </div>
           </div>
         </div>
 
-        {/* ITEMS ORDERED */}
-        <div className="items-card">
-          <h3 className="section-heading">Items Ordered</h3>
-          <div className="items-list">
-            {order.items.map((item, index) => (
-              <div key={index} className="order-item">
-                <div className="item-icon">🌾</div>
-                <div className="item-details">
-                  <h4>{item.cropName || item.name}</h4>
-                  <p>{item.quantity} kg × farmer selling price ₹{item.pricePerKg}/kg</p>
+        {/* ORDER SUMMARY PREVIEW */}
+        <div className="summary-card">
+           <div className="summary-header">
+              <h3>{t('deliveryStatus.orderSummary')}</h3>
+              <span className="date-tag">{formattedOrderDate}</span>
+           </div>
+           <div className="items-preview">
+              {order.items.slice(0, 2).map((item, i) => (
+                <div key={i} className="preview-row">
+                   <div className="item-thumb">🌾</div>
+                   <div className="item-meta">
+                      <span className="name">{item.cropName || item.name}</span>
+                      <span className="qty">{item.quantity} kg</span>
+                   </div>
+                   <span className="price">₹{(item.quantity * item.pricePerKg).toLocaleString()}</span>
                 </div>
-                <div className="item-price">
-                  ₹{(item.quantity * item.pricePerKg).toLocaleString()}
+              ))}
+              {order.items.length > 2 && <p className="more-items">+ {order.items.length - 2} {t('deliveryStatus.moreItems')}</p>}
+           </div>
+           <div className="summary-footer">
+              <div className="footer-row">
+                 <span>{t('deliveryStatus.itemsSubtotal')}</span>
+                 <span>₹{itemsSubtotalVal.toLocaleString()}</span>
+              </div>
+              <div className="footer-row">
+                 <span>{t('deliveryStatus.deliveryFee')}</span>
+                 <span>₹{deliveryFeeVal.toLocaleString()}</span>
+              </div>
+              {platformFeeVal > 0 && (
+                <div className="footer-row">
+                   <span>{t('deliveryStatus.platformFee')}</span>
+                   <span>₹{platformFeeVal.toLocaleString()}</span>
                 </div>
+              )}
+              <div className="footer-row total">
+                 <span>{t('deliveryStatus.totalPaid')}</span>
+                 <span>₹{total.toLocaleString()}</span>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* DELIVERY ADDRESS */}
-        <div className="address-card">
-          <h3 className="section-heading">Delivery Information</h3>
-          
-          <div className="address-section">
-            <div className="address-icon">📍</div>
-            <div className="address-content">
-              <h4>Pickup Location</h4>
-              <p>{farmerLocation}</p>
-              <p>Coords: {formatCoordinates(order.delivery?.pickupCoordinates)}</p>
-            </div>
-          </div>
-
-          <div className="address-divider">
-            <div className="divider-line"></div>
-            <div className="divider-icon">↓</div>
-            <div className="divider-line"></div>
-          </div>
-
-          <div className="address-section">
-            <div className="address-icon">🎯</div>
-            <div className="address-content">
-              <h4>Delivery Location</h4>
-              <p>{order?.customerSnapshot?.fullAddress?.trim() ? order.customerSnapshot.fullAddress : deliveryLocation}</p>
-              <p>Coords: {formatCoordinates(order.delivery?.dropCoordinates)}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* TRANSPORT INFO */}
-        <div className="transport-card">
-          <h3 className="section-heading">Transport Details</h3>
-          <div className="transport-info">
-            <div className="transport-row">
-              <div className="transport-icon">🚚</div>
-              <div className="transport-details">
-                <h4>{dealerName}</h4>
-                <p>Vehicle: <span className="vehicle-badge">{vehicleType}</span></p>
-                <p>Distance: <strong>{Number.isFinite(routeDistance) ? `${routeDistance} km` : "N/A"}</strong></p>
-                <p>Source: <strong>{distanceSource}</strong></p>
-                <p>Base Delivery: ₹{transportBaseFee.toLocaleString()}</p>
-                <p style={{ color: "#2e7d32" }}>Batch Discount: -₹{batchDiscount.toLocaleString()}</p>
-                <p>Final Delivery Charge: ₹{transportFinalFee.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
+           </div>
         </div>
 
         {/* ACTION BUTTONS */}
-        <div className="action-buttons">
-          <button className="action-btn primary" onClick={() => navigate("/orders")}>
-            View All Orders
+        <div className="action-row">
+          <button className="secondary-btn" onClick={() => navigate("/orders")}>
+             {t('deliveryStatus.trackAnotherOrder')}
           </button>
-          <button className="action-btn secondary" onClick={() => navigate("/support")}>
-            📞 Contact Support
+          <button className="primary-btn" onClick={() => navigate("/home")}>
+             {t('deliveryStatus.continueShopping')}
           </button>
+        </div>
+
+        <div className="support-section">
+           <p>{t('deliveryStatus.needHelp')} <button onClick={() => navigate("/support")}>{t('deliveryStatus.contactSupport')}</button></p>
         </div>
       </div>
       <BottomNav />

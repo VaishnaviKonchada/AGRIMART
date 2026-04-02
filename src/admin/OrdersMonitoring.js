@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { apiGet } from "../utils/api";
 import './styles/ManagementPages.css';
 
 
 
 const OrdersMonitoring = () => {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -37,12 +39,12 @@ const OrdersMonitoring = () => {
     fetchOrders();
   }, []);
 
-  const filteredOrders = filterStatus === 'All' 
-    ? orders 
+  const filteredOrders = filterStatus === 'All'
+    ? orders
     : orders.filter(o => o.status === filterStatus);
 
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'Pending': return '#f97316';
       case 'Confirmed': return '#3b82f6';
       case 'Accepted': return '#0ea5e9';
@@ -99,28 +101,28 @@ const OrdersMonitoring = () => {
   return (
     <div className="management-page">
       <button className="back-btn" onClick={goBack}>
-        <span>←</span> Back
+        <span>←</span> {t('admin.reports.back')}
       </button>
 
       <div className="management-header">
-        <h1>Orders Monitoring</h1>
-        <p>Track and monitor all platform orders</p>
+        <h1>{t('admin.orders.title')}</h1>
+        <p>{t('admin.orders.subtitle')}</p>
       </div>
 
       <div className="filter-section">
-        <button 
+        <button
           className={`filter-btn ${filterStatus === 'All' ? 'active' : ''}`}
           onClick={() => setFilterStatus('All')}
         >
-          All Orders
+          {t('admin.orders.allOrders')}
         </button>
         {['Pending', 'Confirmed', 'Accepted', 'In Transit', 'Delivered', 'Cancelled'].map(status => (
-          <button 
+          <button
             key={status}
             className={`filter-btn ${filterStatus === status ? 'active' : ''}`}
             onClick={() => setFilterStatus(status)}
           >
-            {status}
+            {t(`admin.orders.statusKeys.${status}`, status)}
           </button>
         ))}
       </div>
@@ -129,15 +131,15 @@ const OrdersMonitoring = () => {
         <table className="orders-table">
           <thead>
             <tr>
-              <th>Order ID</th>
-              <th>Farmer</th>
-              <th>Customer</th>
-              <th>Dealer</th>
-              <th>Amount</th>
-              <th>Admin Fee</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Action</th>
+              <th>{t('admin.orders.orderId')}</th>
+              <th>{t('admin.orders.farmer')}</th>
+              <th>{t('admin.orders.customer')}</th>
+              <th>{t('admin.orders.dealer')}</th>
+              <th>{t('admin.orders.amount')}</th>
+              <th>{t('admin.orders.adminFee')}</th>
+              <th>{t('admin.orders.status')}</th>
+              <th>{t('admin.orders.date')}</th>
+              <th>{t('admin.orders.action')}</th>
             </tr>
           </thead>
           <tbody>
@@ -150,20 +152,20 @@ const OrdersMonitoring = () => {
                 <td>₹{getAmount(order).toLocaleString()}</td>
                 <td>₹{getPlatformFee(order).toLocaleString()}</td>
                 <td>
-                  <span className="status-pill" style={{ 
+                  <span className="status-pill" style={{
                     background: getStatusColor(order.status),
                     color: 'white'
                   }}>
-                    {order.status}
+                      {t(`admin.orders.statusKeys.${order.status}`, order.status)}
                   </span>
                 </td>
                 <td>{formatDate(getOrderDate(order))}</td>
                 <td>
-                  <button 
+                  <button
                     className="action-btn"
                     onClick={() => viewOrderDetails(order)}
                   >
-                    View
+                    {t('admin.orders.view')}
                   </button>
                 </td>
               </tr>
@@ -176,123 +178,123 @@ const OrdersMonitoring = () => {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Order #{getOrderId(selectedOrder)}</h2>
+              <h2>{t('admin.orders.orderDetails')} #{getOrderId(selectedOrder)}</h2>
               <button className="close-btn" onClick={() => setShowModal(false)}>✕</button>
             </div>
 
             <div className="modal-body">
               <section className="info-section">
-                <h3>Order Details</h3>
+                <h3>{t('admin.orders.orderDetails')}</h3>
                 <div className="info-rows">
                   <div className="info-row">
-                    <label>Order ID</label>
+                    <label>{t('admin.orders.orderId')}</label>
                     <span>#{getOrderId(selectedOrder)}</span>
                   </div>
                   <div className="info-row">
-                    <label>Status</label>
-                    <span 
-                      className="status-pill" 
-                      style={{ 
+                    <label>{t('admin.orders.status')}</label>
+                    <span
+                      className="status-pill"
+                      style={{
                         background: getStatusColor(selectedOrder.status),
                         color: 'white',
                         display: 'inline-block'
                       }}
                     >
-                      {selectedOrder.status}
+                      {t(`admin.orders.statusKeys.${selectedOrder.status}`, selectedOrder.status)}
                     </span>
                   </div>
                   <div className="info-row">
-                    <label>Order Date</label>
+                    <label>{t('admin.orders.orderDate')}</label>
                     <span>{formatDate(getOrderDate(selectedOrder))}</span>
                   </div>
                   <div className="info-row">
-                    <label>Total Amount</label>
+                    <label>{t('admin.orders.totalAmount')}</label>
                     <span>₹{getAmount(selectedOrder).toLocaleString()}</span>
                   </div>
                   <div className="info-row">
-                    <label>Admin Platform Fee</label>
+                    <label>{t('admin.orders.adminPlatformFee')}</label>
                     <span>₹{getPlatformFee(selectedOrder).toLocaleString()}</span>
                   </div>
                 </div>
               </section>
 
               <section className="info-section">
-                <h3>Parties Involved</h3>
+                <h3>{t('admin.orders.partiesInvolved')}</h3>
                 <div className="info-rows">
                   <div className="info-row">
-                    <label>Customer Name</label>
+                    <label>{t('admin.orders.customerName')}</label>
                     <span>{getCustomerName(selectedOrder)}</span>
                   </div>
                   <div className="info-row">
-                    <label>Customer Phone</label>
+                    <label>{t('admin.orders.customerPhone')}</label>
                     <span>{selectedOrder.delivery?.dropPhone || selectedOrder.customerSnapshot?.phone || selectedOrder.customerId?.profile?.phone || '-'}</span>
                   </div>
                   <div className="info-row">
-                    <label>Customer ID</label>
+                    <label>{t('admin.orders.customerId')}</label>
                     <span>{String(selectedOrder.customerId?._id || selectedOrder.customerId || '-')}</span>
                   </div>
                   <div className="info-row">
-                    <label>Farmer Name</label>
+                    <label>{t('admin.orders.farmerName')}</label>
                     <span>{getFarmerName(selectedOrder)}</span>
                   </div>
                   <div className="info-row">
-                    <label>Farmer ID</label>
+                    <label>{t('admin.orders.farmerId')}</label>
                     <span>{String(selectedOrder.farmerId?._id || selectedOrder.farmerId || '-')}</span>
                   </div>
                   <div className="info-row">
-                    <label>Transport Dealer</label>
+                    <label>{t('admin.orders.transportDealer')}</label>
                     <span>{getDealerName(selectedOrder)}</span>
                   </div>
                   <div className="info-row">
-                    <label>Dealer ID</label>
+                    <label>{t('admin.orders.dealerId')}</label>
                     <span>{String(selectedOrder.dealerId?._id || selectedOrder.dealerId || selectedOrder.transport?.dealerId || '-')}</span>
                   </div>
                 </div>
               </section>
 
               <section className="info-section">
-                <h3>Delivery Route</h3>
+                <h3>{t('admin.orders.deliveryRoute')}</h3>
                 <div className="info-rows">
                   <div className="info-row">
-                    <label>Pickup Location</label>
+                    <label>{t('admin.orders.pickupLocation')}</label>
                     <span>{selectedOrder.delivery?.pickup || '-'}</span>
                   </div>
                   <div className="info-row">
-                    <label>Delivery Location</label>
+                    <label>{t('admin.orders.deliveryLocation')}</label>
                     <span>{selectedOrder.delivery?.drop || '-'}</span>
                   </div>
                   <div className="info-row">
-                    <label>Drop Address</label>
+                    <label>{t('admin.orders.dropAddress')}</label>
                     <span>{selectedOrder.delivery?.dropLocationText || selectedOrder.customerSnapshot?.locationText || '-'}</span>
                   </div>
                   <div className="info-row">
-                    <label>Door No</label>
+                    <label>{t('admin.orders.doorNo')}</label>
                     <span>{selectedOrder.delivery?.dropDoorNo || selectedOrder.customerSnapshot?.doorNo || '-'}</span>
                   </div>
                 </div>
               </section>
 
               <section className="info-section">
-                <h3>Cargo Details</h3>
+                <h3>{t('admin.orders.cargoDetails')}</h3>
                 <div className="info-rows">
                   <div className="info-row">
-                    <label>Crop Name</label>
+                    <label>{t('admin.orders.cropName')}</label>
                     <span>{selectedOrder.items?.[0]?.cropName || '-'}</span>
                   </div>
                   <div className="info-row">
-                    <label>Quantity</label>
+                    <label>{t('admin.orders.quantity')}</label>
                     <span>{selectedOrder.items?.[0]?.quantity || 0} kg</span>
                   </div>
                   <div className="info-row">
-                    <label>Vehicle Type</label>
+                    <label>{t('admin.orders.vehicleType')}</label>
                     <span>{selectedOrder.transport?.vehicle || '-'}</span>
                   </div>
                   <div className="info-row">
-                    <label>Farmer Receives</label>
+                    <label>{t('admin.orders.farmerReceives')}</label>
                     <span>₹{(selectedOrder.summary?.itemsTotal || 0).toLocaleString()}</span>
                   </div>
                   <div className="info-row">
-                    <label>Dealer Price</label>
+                    <label>{t('admin.orders.dealerPrice')}</label>
                     <span>₹{getDealerPrice(selectedOrder).toLocaleString()}</span>
                   </div>
                 </div>
@@ -300,7 +302,7 @@ const OrdersMonitoring = () => {
             </div>
 
             <div className="modal-footer">
-              <button className="modal-close-btn" onClick={() => setShowModal(false)}>Close</button>
+              <button className="modal-close-btn" onClick={() => setShowModal(false)}>{t('admin.orders.close')}</button>
             </div>
           </div>
         </div>

@@ -232,7 +232,27 @@ function groupOrdersIntoBatches(orders) {
         stopNumber: idx + 1,
         orderId: o.orderId,
         _id: String(o._id),
+        customerId: String(o.customerId?._id || o.customerId || ''),
+        farmerId: String(o.farmerId?._id || o.farmerId || ''),
         customerName: o.customerName,
+        customer: {
+          id: String(o.customerId?._id || o.customerId || ''),
+          name: o.customerId?.name || o.customerName,
+          phone: o.delivery?.dropPhone || o.customerSnapshot?.phone || o.customerPhone || '',
+          address: o.delivery?.dropDoorNo || o.customerSnapshot?.doorNo || '',
+          mandal: o.delivery?.dropMandal || o.customerSnapshot?.mandal || '',
+          district: o.delivery?.dropDistrict || o.customerSnapshot?.district || '',
+          state: o.delivery?.dropState || o.customerSnapshot?.state || '',
+          pincode: o.delivery?.dropPincode || o.customerSnapshot?.pincode || '',
+          locationText: o.delivery?.dropLocationText || o.customerSnapshot?.locationText || ''
+        },
+        farmer: {
+          id: String(o.farmerId?._id || o.farmerId || ''),
+          name: o.farmerId?.name || o.farmerName,
+          phone: o.farmerPhone || o.farmerId?.profile?.phone || '',
+          email: o.farmerEmail || o.farmerId?.email || '',
+          location: o.delivery?.pickup || o.farmerId?.profile?.locationText || ''
+        },
         dropLocation:
           o.delivery?.drop ||
           o.delivery?.dropMandal ||

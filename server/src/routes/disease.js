@@ -14,8 +14,20 @@ const upload = multer({
   },
 });
 
-function runPrediction({ imagePath, modelPath, labelsPath, solutionsPath }) {
-  const pythonExec = process.env.PYTHON_EXECUTABLE || path.resolve(process.cwd(), '..', '.venv', 'Scripts', 'python.exe');
+async function runPrediction({ imagePath, modelPath, labelsPath, solutionsPath }) {
+  const venvPath = path.resolve(process.cwd(), '..', '.venv', 'Scripts', 'python.exe');
+  let pythonExec = process.env.PYTHON_EXECUTABLE;
+
+  // Check if venv python exists, otherwise fallback to system python
+  if (!pythonExec) {
+    try {
+      await fs.access(venvPath);
+      pythonExec = venvPath;
+    } catch {
+      pythonExec = 'python'; // Hope it's in the PATH
+    }
+  }
+
   const scriptPath = path.resolve(process.cwd(), 'ml', 'predict_disease.py');
   const timeoutMs = Number(process.env.DISEASE_PREDICTION_TIMEOUT_MS || 180000);
 
@@ -27,6 +39,8 @@ function runPrediction({ imagePath, modelPath, labelsPath, solutionsPath }) {
     '--solutions', solutionsPath,
     '--top-k', '3',
   ];
+
+  console.log(`[DISEASE_DEBUG] Spawning: ${pythonExec} ${args.slice(0, 3).join(' ')} ...`);
 
   return new Promise((resolve, reject) => {
     const child = spawn(pythonExec, args, {
@@ -50,18 +64,30 @@ function runPrediction({ imagePath, modelPath, labelsPath, solutionsPath }) {
       stderr += chunk.toString();
     });
 
+    child.on('error', (err) => {
+      clearTimeout(timeout);
+      reject(new Error(`Failed to start child process: ${err.message}`));
+    });
+
     child.on('close', (code) => {
       clearTimeout(timeout);
 
       if (code !== 0) {
+        console.error('[DISEASE_STDERR]', stderr);
         return reject(new Error(stderr || `Predict script failed with code ${code}`));
       }
 
       try {
-        const parsed = JSON.parse(stdout.trim());
+        const cleaned = stdout.trim();
+        // Sometimes TF prints noise before JSON. Try to find the JSON start.
+        const jsonStart = cleaned.indexOf('{');
+        if (jsonStart === -1) {
+          throw new Error('No JSON output found');
+        }
+        const parsed = JSON.parse(cleaned.substring(jsonStart));
         resolve(parsed);
       } catch (err) {
-        reject(new Error(`Invalid prediction output: ${stdout || err.message}`));
+        reject(new Error(`Invalid prediction output (Check server log for stderr): ${err.message}`));
       }
     });
   });

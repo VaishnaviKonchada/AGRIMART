@@ -559,6 +559,8 @@ router.get('/batch-orders/:dealerId', requireAuth, async (req, res) => {
         type: 'single',
         _id: String(order._id),
         orderId: order.orderId,
+        customerId: String(order.customerId?._id || order.customerId || ''),
+        farmerId: String(order.farmerId?._id || order.farmerId || ''),
         customerName: order.customerName,
         farmerName: order.farmerName,
         cropItem: order.items?.[0]?.cropName || 'N/A',
@@ -578,13 +580,19 @@ router.get('/batch-orders/:dealerId', requireAuth, async (req, res) => {
         status: order.status,
         customer: {
           name: order.customerId?.name || order.customerName,
-          phone: order.delivery?.dropPhone || order.customerSnapshot?.phone || '',
+          phone: order.delivery?.dropPhone || order.customerSnapshot?.phone || order.customerPhone || '',
           address: order.delivery?.dropDoorNo || order.customerSnapshot?.doorNo || '',
           mandal: order.delivery?.dropMandal || order.customerSnapshot?.mandal || '',
           district: order.delivery?.dropDistrict || order.customerSnapshot?.district || '',
           state: order.delivery?.dropState || order.customerSnapshot?.state || '',
           pincode: order.delivery?.dropPincode || order.customerSnapshot?.pincode || '',
           locationText: order.delivery?.dropLocationText || order.customerSnapshot?.locationText || ''
+        },
+        farmer: {
+          name: order.farmerId?.name || order.farmerName,
+          phone: order.farmerPhone || order.farmerId?.profile?.phone || '',
+          email: order.farmerEmail || order.farmerId?.email || '',
+          location: order.delivery?.pickup || order.farmerId?.profile?.locationText || ''
         },
         createdAt: order.createdAt,
         acceptedAt: order.acceptedAt,

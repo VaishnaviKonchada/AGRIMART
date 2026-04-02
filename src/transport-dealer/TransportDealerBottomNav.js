@@ -1,10 +1,12 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import "../styles/TransportDealerBottomNav.css";
 
 export default function TransportDealerBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const isActive = (path) => location.pathname === path;
 
@@ -36,7 +38,7 @@ export default function TransportDealerBottomNav() {
         onClick={() => navigate("/transport-dealer-dashboard")}
       >
         🏠
-        <span>Dashboard</span>
+        <span>{t("Dashboard")}</span>
       </div>
 
       <div
@@ -44,7 +46,7 @@ export default function TransportDealerBottomNav() {
         onClick={() => navigate("/transport-dealer/requests")}
       >
         📬
-        <span>Requests</span>
+        <span>{t("Requests")}</span>
       </div>
 
       <div
@@ -52,7 +54,7 @@ export default function TransportDealerBottomNav() {
         onClick={() => navigate("/transport-dealer/earnings")}
       >
         💰
-        <span>Earnings</span>
+        <span>{t("Earnings")}</span>
       </div>
 
       <div
@@ -60,7 +62,7 @@ export default function TransportDealerBottomNav() {
         onClick={() => navigate("/transport-dealer/vehicles")}
       >
         🚙
-        <span>Vehicles</span>
+        <span>{t("Vehicles")}</span>
       </div>
 
       <div
@@ -68,12 +70,12 @@ export default function TransportDealerBottomNav() {
         onClick={() => navigate("/transport-dealer/account")}
       >
         👤
-        <span>Account</span>
+        <span>{t("Account")}</span>
       </div>
 
       <button className="nav-item logout-btn" onClick={handleLogout} style={{ border: 'none', background: 'none', cursor: 'pointer', width: '100%' }}>
         🚪
-        <span>Logout</span>
+        <span>{t("Logout")}</span>
       </button>
     </div>
   );

@@ -1,53 +1,92 @@
 /* Background */
 .auth-bg {
   min-height: 100vh;
-  background: linear-gradient(rgba(19, 78, 46, 0.72), rgba(12, 53, 32, 0.78)),
-    url("https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=2000&q=80")
-      center/cover no-repeat fixed;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 24px;
-  font-family: "Segoe UI", sans-serif;
+  position: relative;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  background: #ecfdf5;
+}
+
+.auth-bg::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("../assets/welcome-bg.png");
+  background-size: cover;
+  background-position: center;
+  z-index: 1;
+}
+
+.auth-bg::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.3) 0%, rgba(6, 78, 59, 0.7) 100%);
+  z-index: 2;
 }
 
 /* Card */
 .auth-box {
+  position: relative;
+  z-index: 3;
   width: 100%;
-  max-width: 440px;
-  background: rgba(255, 255, 255, 0.96);
-  padding: 32px 28px;
-  border-radius: 16px;
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.24);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  max-width: 480px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 40px;
+  padding: 40px 32px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Title */
 .auth-title {
   text-align: center;
-  color: #2e7d32;
-  margin-bottom: 20px;
+  font-family: 'Outfit', sans-serif;
+  color: white;
+  margin-bottom: 24px;
   font-weight: 800;
-  letter-spacing: 0.4px;
-  font-size: 26px;
+  letter-spacing: -0.02em;
+  font-size: 2.5rem;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 /* Inputs */
 .auth-input {
   margin-bottom: 12px;
-  border-radius: 9px;
-  padding: 11px 12px;
-  border: 1px solid #dce6dd;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  background: #f8fbf8;
+  border-radius: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-size: 1rem;
 }
 
 .auth-input:focus {
-  border-color: #2e7d32;
-  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+  border-color: #047857;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.4);
   outline: none;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
 }
 
 /* Password input wrapper with toggle button */
@@ -60,87 +99,116 @@
 
 .password-input-wrapper .auth-input {
   margin-bottom: 0;
-  padding-right: 44px;
+  padding-right: 48px;
   flex: 1;
 }
 
 .password-toggle-btn {
   position: absolute;
-  right: 10px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  background: none;
+  background: rgba(255, 255, 255, 0.8);
   border: none;
   cursor: pointer;
   font-size: 18px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background 0.2s ease, transform 0.15s ease;
+  padding: 6px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .password-toggle-btn:hover {
-  background: rgba(46, 125, 50, 0.08);
+  background: white;
   transform: translateY(-50%) scale(1.1);
-}
-
-.password-toggle-btn:active {
-  transform: translateY(-50%) scale(0.95);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 /* Buttons */
 .auth-btn {
   width: 100%;
-  margin-top: 10px;
-  border-radius: 10px;
+  margin-top: 16px;
+  border-radius: 20px;
   font-weight: 700;
-  padding: 13px;
-  box-shadow: 0 10px 24px rgba(46, 125, 50, 0.25);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
-  background: linear-gradient(120deg, #2e7d32, #3fa34d);
+  font-family: 'Outfit', sans-serif;
+  padding: 16px;
+  font-size: 1.1rem;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white;
+  color: #047857;
   border: none;
 }
 
 .auth-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 32px rgba(46, 125, 50, 0.3);
-  background: linear-gradient(120deg, #2a7230, #399944);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+  background: #ecfdf5;
 }
 
 /* Links */
 .auth-link {
   text-align: center;
-  margin-top: 10px;
-  font-size: 14px;
+  margin-top: 16px;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .auth-link a {
-  color: #2e7d32;
-  font-weight: 600;
+  color: white;
+  font-weight: 700;
   text-decoration: none;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.5);
+  transition: all 0.2s ease;
 }
 
 .auth-link a:hover {
-  text-decoration: underline;
+  border-bottom: 1px solid white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 /* Location icon button */
 .btn-outline-success {
-  height: 42px;
-  margin-top: 2px;
-  border-radius: 8px;
-  border: 1px solid #2e7d32;
-  color: #2e7d32;
-  background: #f6fff7;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+  height: 50px;
+  margin-top: 0px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: #047857;
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
 }
 
 .btn-outline-success:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.15);
-  background: #e8f8ec;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  background: white;
+}
+
+/* Language Switcher for Auth */
+.auth-lang-switcher {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 6px 16px;
+  border-radius: 99px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+@media (max-width: 480px) {
+  .auth-box {
+    padding: 32px 24px;
+    border-radius: 32px;
+  }
+  .auth-lang-switcher {
+    top: 20px;
+    right: 20px;
+  }
 }
 
 /* Enhanced Auth Container & Card */

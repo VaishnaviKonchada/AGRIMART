@@ -1,32 +1,34 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import FarmerDetailsModal from "../components/FarmerDetailsModal";
 import BottomNav from "../components/BottomNav";
 import CustomerHeader from "../components/CustomerHeader";
-import { readCartItems, writeCartItems } from "../utils/cartStorage";
-import { apiGet } from "../utils/api";
+import { readCartItems, writeCartItems, pushCartToBackend, syncCartWithBackend } from "../utils/cartStorage";
+import { apiGet, apiPost } from "../utils/api";
 import "../styles/CropDetails.css";
 
 export default function CropDetails() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const AUTO_REFRESH_MS = 5 * 60 * 1000;
   
-  // Get selectedCrop from navigation state OR fallback to localStorage (for backward compatibility)
   const selectedCrop = location.state?.crop || JSON.parse(localStorage.getItem("selectedCrop") || "null");
 
   const [crop, setCrop] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedFarmer, setExpandedFarmer] = useState(null);
   const [filterVariety, setFilterVariety] = useState("all");
-  const [allCrops, setAllCrops] = useState([]); // Store all crops from backend
+  const [allCrops, setAllCrops] = useState([]); 
   const [showFarmerDetailsModal, setShowFarmerDetailsModal] = useState(false);
   const [selectedFarmerId, setSelectedFarmerId] = useState(null);
   const [selectedCropContext, setSelectedCropContext] = useState(null);
   const [mandiReference, setMandiReference] = useState(null);
   const [mandiLoading, setMandiLoading] = useState(false);
+  const [translatedVarietiesMap, setTranslatedVarietiesMap] = useState({});
 
-  // Fetch crop details and all crops from backend
+
   useEffect(() => {
     const fetchCropDetails = async () => {
       try {
@@ -35,13 +37,11 @@ export default function CropDetails() {
           return;
         }
 
-        // Set the selected crop immediately
         setCrop(selectedCrop);
         if (selectedCrop.mandiReference) {
           setMandiReference(selectedCrop.mandiReference);
         }
 
-        // Fetch all crops from backend to find farmers
         const allCropsData = await apiGet("crops");
         setAllCrops(allCropsData || []);
         const selectedName = (selectedCrop.cropName || selectedCrop.name || '').toLowerCase();
@@ -49,7 +49,6 @@ export default function CropDetails() {
         if (matchedCrop?.mandiReference) {
           setMandiReference(matchedCrop.mandiReference);
         }
-        console.log("✅ All crops loaded:", allCropsData.length, "crops");
       } catch (error) {
         console.error("❌ Error fetching crop details:", error);
         setAllCrops([]);
@@ -59,6 +58,7 @@ export default function CropDetails() {
     };
 
     fetchCropDetails();
+    syncCartWithBackend();
   }, [selectedCrop]);
 
   useEffect(() => {
@@ -133,10 +133,8 @@ export default function CropDetails() {
     "Millets": ["Ragi", "Jowar", "Bajra"],
   };
 
-  // Make variety lookup case-insensitive and robust
   const getVarieties = () => {
     if (!crop?.name) return [];
-    // Find the key in cropVarieties that matches crop.name (case-insensitive, trimmed)
     const cropNameNormalized = crop.name.trim().toLowerCase();
     const key = Object.keys(cropVarieties).find(
       k => k.trim().toLowerCase() === cropNameNormalized
@@ -144,23 +142,16 @@ export default function CropDetails() {
     return key ? cropVarieties[key] : [];
   };
 
-  // Fetch real farmers from backend based on selected crop
   const filteredFarmers = useMemo(() => {
     if (!selectedCrop || !allCrops || allCrops.length === 0) {
       return [];
     }
 
-    console.log("🔍 Filtering farmers for crop:", selectedCrop.name, "Variety filter:", filterVariety);
-    console.log("📊 Available crops from backend:", allCrops.length);
-
-    // Always use the latest pricePerKg from the backend API response
-    // Find all crops that match the selected crop name (case-insensitive)
     const cropNameNormalized = selectedCrop.name.trim().toLowerCase();
     const matchingCrops = allCrops.filter(c =>
       c.cropName && c.cropName.trim().toLowerCase() === cropNameNormalized
     );
 
-    // Filter by variety if a specific variety is selected
     let cropsToDisplay = matchingCrops;
     if (filterVariety && filterVariety !== "all") {
       cropsToDisplay = matchingCrops.filter(c =>
@@ -168,7 +159,6 @@ export default function CropDetails() {
       );
     }
 
-    // Group crops by farmers, always using pricePerKg from API
     const farmerMap = {};
     cropsToDisplay.forEach(crop => {
       const farmerId = crop.farmerId?._id || crop.farmerId;
@@ -188,9 +178,8 @@ export default function CropDetails() {
         farmerMap[farmerId].coordinates = farmerCoordinates;
       }
 
-      // Always use pricePerKg from API, never fallback to static or hardcoded value
       const availableQuantity = Number(crop.availableQuantity ?? crop.availableKg ?? crop.quantity ?? 0);
-      const pricePerKg = Number(crop.pricePerKg); // No fallback, must be from API
+      const pricePerKg = Number(crop.pricePerKg); 
 
       farmerMap[farmerId].crops.push({
         id: crop._id,
@@ -205,81 +194,138 @@ export default function CropDetails() {
     return Object.values(farmerMap);
   }, [selectedCrop, allCrops, filterVariety]);
 
-  const addToCart = (farmer, cropData) => {
-  const cart = readCartItems();
+  useEffect(() => {
+    const cropTitle = crop ? (crop.cropName || crop.name || "") : "";
+    const originalVarieties = getVarieties();
+    const serverVarieties = filteredFarmers.flatMap(f => f.crops.map(c => c.variety || "Standard"));
+    const uniqueVars = [...new Set([cropTitle, ...originalVarieties, ...serverVarieties])].filter(Boolean);
 
-  cart.push({
-    id: Date.now(),
-    cropId: cropData.id,
-    cropName: cropData.name,
-    farmerId: farmer.id,
-    farmerName: farmer.name,
-    farmerLocation: farmer.location,
-    farmerCoordinates: farmer.coordinates || null,
-    variety: cropData.variety,
-    pricePerKg: cropData.price,
-    quantity: 1,
-  });
+    if (uniqueVars.length === 0) return;
 
-  writeCartItems(cart);
-  alert("✅ Item added to cart 🛒");
-};
+    if (i18n.language === 'en') {
+      const emap = {};
+      uniqueVars.forEach(v => emap[v] = v);
+      setTranslatedVarietiesMap(emap);
+      return;
+    }
+
+    const tLang = i18n.language === 'te' ? 'Telugu' : 'Hindi';
+    const mapping = {};
+    uniqueVars.forEach(v => {
+      // Primary check: translation file
+      const translated = t(`varieties.${v}`, v);
+      if (translated !== v) {
+        mapping[v] = translated;
+      } else {
+        // Secondary check: lowercase key
+        const lowerTrans = t(v.toLowerCase(), v);
+        mapping[v] = lowerTrans;
+      }
+    });
+    setTranslatedVarietiesMap(mapping);
+
+    // Also attempt AI translation for any missing varieties if needed
+    // (Optional: can keep this for dynamic server varieties)
+    const txtToTrans = uniqueVars.filter(v => mapping[v] === v).join(" ||| ");
+    if (txtToTrans) {
+      apiPost("translate", {
+        text: txtToTrans,
+        targetLang: tLang,
+        mode: "general"
+      }).then(res => {
+        if (res?.translatedText) {
+          const transArr = res.translatedText.split("|||").map(s => s.trim());
+          const newMapping = { ...mapping };
+          uniqueVars.filter(v => mapping[v] === v).forEach((v, i) => {
+             if (transArr[i] && transArr[i] !== v) {
+                newMapping[v] = transArr[i];
+             }
+          });
+          setTranslatedVarietiesMap(newMapping);
+        }
+      }).catch(e => console.error("AI Proxy failed", e));
+    }
+  }, [crop, allCrops, i18n.language, filteredFarmers.length]);
+
+  const addToCart = async (farmer, cropData) => {
+    const cart = readCartItems();
+    const newItem = {
+      id: Date.now(),
+      cropId: cropData.id,
+      cropName: cropData.name,
+      farmerId: farmer.id,
+      farmerName: farmer.name,
+      farmerLocation: farmer.location,
+      farmerCoordinates: farmer.coordinates || null,
+      variety: cropData.variety,
+      pricePerKg: cropData.price,
+      quantity: 1,
+    };
+    cart.push(newItem);
+    writeCartItems(cart);
+    await pushCartToBackend(cart);
+    alert(t('cart.added_success', '✅ Added to cart'));
+  };
 
   const viewOtherCrop = (cropName) => {
     navigate("/crop-details", {
-      state: {
-        crop: { 
-          name: cropName,
-          cropName: cropName
-        }
-      }
+      state: { crop: { name: cropName, cropName: cropName } }
     });
-    // Force reload to fetch new data
     window.location.href = "/crop-details";
   };
 
-  if (loading) return <h3>Loading crop details...</h3>;
-  if (!crop) return <h3>No crop selected</h3>;
+  if (loading) return <div className="loading-state"><h3>{t('cropDetails.loading')}</h3></div>;
+  if (!crop) return <div className="error-state"><h3>{t('cropDetails.noCrop')}</h3></div>;
 
   return (
-    <div className="crop-details-page">
+    <div className="crop-details-page premium-ui">
       <CustomerHeader />
 
-      <div className="page-header">
-        <h2>🌾 {crop.cropName || crop.name}</h2>
-        <p className="subtitle">{filteredFarmers.length} farmer{filteredFarmers.length !== 1 ? 's' : ''} available</p>
+      <div className="page-header glass">
+        <h2>🌾 {translatedVarietiesMap[crop.cropName || crop.name] || (crop.cropName || crop.name)}</h2>
+        <p className="subtitle">
+          {t('cropDetails.farmersFound', { count: filteredFarmers.length })}
+        </p>
       </div>
 
-      <div className="price-context-card">
-        <div className="price-context-title">Price clarity</div>
-        <div className="price-context-line">Customer price shown below is the farmer selling price in ₹/kg.</div>
-        <div className="price-context-line muted" title="Government mandi prices are wholesale rates. 1 quintal = 100 kg.">Mandi reference uses ₹/quintal. 1 quintal = 100 kg.</div>
-        {mandiLoading && <div className="price-context-line muted">Loading AP mandi reference...</div>}
+      <div className="price-clarity-card glass">
+        <div className="price-context-title">
+          <span className="icon">🛡️</span> {t('cropDetails.priceClarity')}
+        </div>
+        <p className="price-context-line">{t('cropDetails.priceSubtitle')}</p>
+        <p className="price-context-line muted">{t('cropDetails.mandiReferenceNote')}</p>
+        
+        {mandiLoading && <div className="mandi-loader">
+          <div className="spinner"></div> {t('cropDetails.loadingMandi')}
+        </div>}
+        
         {!mandiLoading && mandiReference && (
-          <>
-            <div className="price-context-line">
-              AP mandi wholesale reference: ₹{mandiReference.modalPricePerQuintal}/quintal
-              {mandiReference.arrivalDate ? ` on ${mandiReference.arrivalDate}` : ""}
+          <div className="mandi-data">
+            <div className="price-context-line highlight">
+              {t('cropDetails.apMandiReference', { price: mandiReference.modalPricePerQuintal, date: '' })}
+              {mandiReference.arrivalDate && t('cropDetails.onDate', { date: mandiReference.arrivalDate })}
             </div>
             <div className="price-context-line muted">
-              Approx reference equivalent: ₹{mandiReference.suggestedPricePerKg}/kg
-              {mandiReference.market ? ` • ${mandiReference.market}, ${mandiReference.state}` : ""}
+              {t('cropDetails.approxEquivalent', { price: mandiReference.suggestedPricePerKg })}
+              {mandiReference.market && t('cropDetails.marketState', { 
+                market: t(mandiReference.market, mandiReference.market), 
+                state: t(mandiReference.state, mandiReference.state) 
+              })}
             </div>
-          </>
+          </div>
         )}
       </div>
 
-      {/* FILTER SECTION */}
-      <div className="filter-section">
+      <div className="filter-section glass">
         {getVarieties().length > 0 && (
-          <div className="filter-box full-width">
-            <label className="filter-label">🌱 Select Variety</label>
+          <div className="filter-box">
+            <label className="filter-label">🌱 {t('cropDetails.selectVariety')}</label>
             <div className="variety-chips">
               <span
                 className={`variety-chip ${filterVariety === "all" ? "active" : ""}`}
                 onClick={() => setFilterVariety("all")}
               >
-                All Varieties
+                {t('cropDetails.allVarieties')}
               </span>
               {getVarieties().map((variety, i) => (
                 <span
@@ -287,7 +333,7 @@ export default function CropDetails() {
                   className={`variety-chip ${filterVariety === variety ? "active" : ""}`}
                   onClick={() => setFilterVariety(variety)}
                 >
-                  {variety}
+                  {translatedVarietiesMap[variety] || variety}
                 </span>
               ))}
             </div>
@@ -296,161 +342,115 @@ export default function CropDetails() {
       </div>
 
       <div className="farmers-list">
-        {loading && (
-          <div style={{textAlign: 'center', padding: '40px', color: '#1e8e3e'}}>
-            <div style={{fontSize: '48px', marginBottom: '10px'}}>🌾</div>
-            Loading farmers...
-          </div>
-        )}
-
-        {!loading && filteredFarmers.length === 0 && (
-          <div style={{textAlign: 'center', padding: '40px', color: '#7f8c8d'}}>
-            <div style={{fontSize: '48px', marginBottom: '10px'}}>😔</div>
-            <p>No farmers available with this crop.</p>
-            <p style={{fontSize: '14px', marginTop: '10px'}}>
+        {(!loading && filteredFarmers.length === 0) ? (
+          <div className="empty-state glass">
+            <div className="empty-icon">😔</div>
+            <p>{t('cropDetails.noFarmers')}</p>
+            <p className="hint">
               {filterVariety !== "all" 
-                ? `Try selecting "All Varieties" or choose a different variety.`
-                : "Check back later or try another crop."}
+                ? t('cropDetails.tryAllVarieties')
+                : t('cropDetails.checkLater')}
             </p>
           </div>
-        )}
-
-        {!loading && filteredFarmers.map((f) => {
-          // Get the first crop that matches the selected crop name (for display in header)
-          const displayCrop = f.crops.find(c => c.name === crop?.name) || f.crops[0];
-          
-          return (
-            <div key={f.id} className="farmer-card">
-              
-              {/* FARMER INFO ROW */}
+        ) : (
+          filteredFarmers.map((f) => (
+            <div key={f.id} className="farmer-card glass-card">
               <div className="farmer-header">
-                <div className="farmer-info">
+                <div className="farmer-main">
                   <h4>👨‍🌾 {f.name}</h4>
-                </div>
-                <div className="location-badge">
-                  📍 {f.location}
+                  <div className="location-badge">📍 {f.location}</div>
                 </div>
               </div>
 
-              {/* CROPS FROM THIS FARMER */}
-              {f.crops.map((cropItem, idx) => (
-                <div key={idx} style={{marginBottom: idx < f.crops.length - 1 ? '15px' : '0', paddingBottom: idx < f.crops.length - 1 ? '15px' : '0', borderBottom: idx < f.crops.length - 1 ? '1px solid #e0e0e0' : 'none'}}>
-                  {f.crops.length > 1 && (
-                    <div style={{fontSize: '13px', color: '#16a34a', fontWeight: '600', marginBottom: '8px'}}>
-                      🌱 {cropItem.variety || "Standard"}
+              <div className="farmer-crops">
+                {f.crops.map((cropItem, idx) => (
+                  <div key={idx} className="crop-item-row">
+                    <div className="crop-variety-label">
+                      🌱 {translatedVarietiesMap[cropItem.variety] || cropItem.variety}
                     </div>
-                  )}
-                  {/* VERTICAL CROP DETAILS ROW (line-by-line format) */}
-                  <div className="farmer-info-vertical" style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '2px', fontSize: '1.08rem', fontWeight: 600, color: '#222', marginBottom: '8px'}}>
-                    <span><span className="farmer-info-label">available:</span> <span className="farmer-info-value">{cropItem.availableKg} kg</span></span>
-                    <span><span className="farmer-info-label">selling price:</span> <span className="farmer-info-value">₹{mandiReference && mandiReference.suggestedPricePerKg ? mandiReference.suggestedPricePerKg : cropItem.price} /kg</span></span>
-                    <span><span className="farmer-info-label">total value:</span> <span className="farmer-info-value">₹{Number(cropItem.totalValue || 0).toLocaleString()}</span></span>
+                    
+                    <div className="crop-specs">
+                      <div className="spec">
+                        <span className="label">{t('cropDetails.available')}:</span>
+                        <span className="value">{cropItem.availableKg} {t('kg', 'kg')}</span>
+                      </div>
+                      <div className="spec highlight">
+                        <span className="label">{t('cropDetails.sellingPrice')}:</span>
+                        <span className="value">₹{cropItem.price} {t('kg_unit', '/kg')}</span>
+                      </div>
+                      <div className="spec">
+                        <span className="label">{t('cropDetails.totalValue')}:</span>
+                        <span className="value">₹{Number(cropItem.totalValue || 0).toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    <div className="card-actions">
+                      <button className="btn-primary" onClick={() => addToCart(f, cropItem)}>
+                        🛒 {t('cropDetails.addToCart')}
+                      </button>
+
+                      <button
+                        className="btn-secondary"
+                        onClick={() => {
+                          setSelectedFarmerId(f.id);
+                          setSelectedCropContext({
+                            cropName: cropItem.name,
+                            variety: cropItem.variety,
+                          });
+                          setShowFarmerDetailsModal(true);
+                        }}
+                      >
+                        👨‍🌾 {t('cropDetails.farmerDetails')}
+                      </button>
+                    </div>
                   </div>
+                ))}
+              </div>
 
-                  {/* ACTION BUTTONS */}
-                  <div className="action-buttons" style={{marginTop: '10px'}}>
-                    <button className="add-cart-btn" onClick={() => addToCart(f, cropItem)}>
-                      🛒 Add to Cart
-                    </button>
-
-                    <button
-                      className="farmer-details-btn"
-                      onClick={() => {
-                        setSelectedFarmerId(f.id);
-                        setSelectedCropContext({
-                          cropName: cropItem.name,
-                          variety: cropItem.variety,
-                        });
-                        setShowFarmerDetailsModal(true);
-                      }}
-                    >
-                      👨‍🌾 Farmer Details
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-              {/* OTHER CROPS BUTTON */}
               <button
-                className="other-crops-btn"
-                style={{marginTop: '15px', width: '100%'}}
-                onClick={() =>
-                  setExpandedFarmer(expandedFarmer === f.id ? null : f.id)
-                }
+                className="btn-dropdown"
+                onClick={() => setExpandedFarmer(expandedFarmer === f.id ? null : f.id)}
               >
-                🌱 View Other Crops {expandedFarmer === f.id ? "▲" : "▼"}
+                🌱 {t('cropDetails.viewOtherCrops')} {expandedFarmer === f.id ? "▲" : "▼"}
               </button>
 
-            {/* OTHER CROPS DROPDOWN */}
-            {expandedFarmer === f.id && (
-              <div className="other-crops">
-                <div className="crops-grid">
-                  {/* Show other crops from backend for SAME farmer */}
-                  {(() => {
-                    if (allCrops.length > 0) {
-                      // Get crops from SAME farmer but different crop name
-                      const sameFarmerCrops = allCrops
-                        .filter((c) => 
-                          (c.farmerId?._id === f.id || c.farmerId === f.id) && // Same farmer
-                          c.cropName?.toLowerCase() !== crop?.name?.toLowerCase() // Different crop
-                        );
+              {expandedFarmer === f.id && (
+                <div className="other-crops-panel">
+                  <div className="crops-grid">
+                    {(() => {
+                      const sameFarmerCrops = allCrops.filter(c => 
+                        (c.farmerId?._id === f.id || c.farmerId === f.id) && 
+                        c.cropName?.toLowerCase() !== crop?.name?.toLowerCase()
+                      );
 
-                      
                       if (sameFarmerCrops.length === 0) {
-                        return <p style={{padding: '15px', color: '#666'}}>This farmer has no other crops listed</p>;
+                        return <p className="no-data">{t('cropDetails.noOtherCrops')}</p>;
                       }
                       
                       return sameFarmerCrops.map((c, i) => (
                         <div 
                           key={i} 
-                          className="crop-chip"
+                          className="mini-crop-chip"
                           onClick={() => {
                             navigate("/crop-details", {
-                              state: {
-                                crop: {
-                                  name: c.cropName,
-                                  cropName: c.cropName,
-                                  variety: c.variety,
-                                  pricePerKg: Number(c.pricePerKg || 0),
-                                  category: c.category
-                                }
-                              }
+                              state: { crop: { ...c, name: c.cropName } }
                             });
-                            // Force page reload for new crop data
                             setTimeout(() => window.location.reload(), 100);
                           }}
                         >
-                          <span className="crop-name">{c.cropName}</span>
-                          <span className="crop-price">₹{c.pricePerKg}/kg</span>
+                          <span className="name">{c.cropName}</span>
+                          <span className="price">₹{c.pricePerKg}{t('kg_unit', '/kg')}</span>
                         </div>
                       ));
-                    }
-                    
-                    // Fallback to hardcoded data (same farmer only)
-                    return f.crops
-                      ? f.crops
-                          .filter((c) => c.name !== crop.name)
-                          .map((c, i) => (
-                            <div 
-                              key={i} 
-                              className="crop-chip"
-                              onClick={() => viewOtherCrop(c.name)}
-                            >
-                              <span className="crop-name">{c.name}</span>
-                              <span className="crop-price">₹{c.price}/kg</span>
-                            </div>
-                          ))
-                      : <p style={{padding: '15px', color: '#666'}}>No other crops available</p>;
-                  })()}
+                    })()}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-          );
-        })}
+              )}
+            </div>
+          ))
+        )}
       </div>
 
-      {/* Farmer Details Modal */}
       {showFarmerDetailsModal && selectedFarmerId && (
         <FarmerDetailsModal
           farmerId={selectedFarmerId}

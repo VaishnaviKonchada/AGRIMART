@@ -85,11 +85,18 @@ router.get('/filter', async (req, res) => {
       });
     }
 
-    // ✅ Determine vehicle type based on quantity (required)
-    const vehicleType = getVehicleTypeByQuantity(quantity);
+    // ✅ Determine vehicle type based on BOTH quantity and distance
+    const typeByQty = getVehicleTypeByQuantity(quantity);
+    const typeByDist = getVehicleTypeByDistance(distance);
+    
+    const hierarchy = { 'BIKE': 1, 'AUTO': 2, 'TRUCK': 3 };
+    const vehicleType = (hierarchy[typeByQty] || 0) >= (hierarchy[typeByDist] || 0) 
+      ? typeByQty 
+      : typeByDist;
+
     if (!vehicleType) {
       return res.status(400).json({
-        error: 'Invalid quantity. Bike <= 10kg, Auto >10kg to <=50kg, Truck >50kg to <=150kg'
+        error: 'Invalid request parameters for vehicle selection'
       });
     }
 
@@ -322,7 +329,12 @@ router.post('/request', requireAuth, requireRole('customer'), async (req, res) =
     const resolvedCropItem = cropItem || cropName || cropDetails || '';
 
     const resolvedQty = Number(quantity) || 0;
-    const resolvedVehicleType = String(vehicleType || getVehicleTypeByQuantity(resolvedQty) || '').toUpperCase();
+    const resolvedVehicleTypeQty = getVehicleTypeByQuantity(resolvedQty);
+    const resolvedVehicleTypeDist = getVehicleTypeByDistance(distance);
+    const hierarchy = { 'BIKE': 1, 'AUTO': 2, 'TRUCK': 3 };
+    const resolvedVehicleType = (hierarchy[resolvedVehicleTypeQty] || 0) >= (hierarchy[resolvedVehicleTypeDist] || 0)
+      ? String(resolvedVehicleTypeQty).toUpperCase()
+      : String(resolvedVehicleTypeDist).toUpperCase();
     const resolvedBatchDiscountRate = parseBatchDiscountRate(pricing?.batchDiscountRate);
     const computedPricing = calculateTransportPricing(distance, resolvedVehicleType, resolvedQty, {
       batchDiscountRate: resolvedBatchDiscountRate,

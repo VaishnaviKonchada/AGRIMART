@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { apiGet, API_BASE_URL } from "../utils/api";
 import './styles/ManagementPages.css';
 
 
 
 const Reports = () => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [reportData, setReportData] = useState({
     orders: [],
@@ -59,10 +61,10 @@ const Reports = () => {
 
       try {
         const orders = await apiGet('orders');
-        
+
         if (Array.isArray(orders)) {
           const validOrders = orders.filter(isValidOrder);
-          
+
           let totalRevenue = 0;
           let platformFee = 0;
           let dealerPayouts = 0;
@@ -78,19 +80,19 @@ const Reports = () => {
 
           const avgOrderValue = validOrders.length > 0 ? Math.round(totalRevenue / validOrders.length) : 0;
 
-            setReportData({
-              orders: validOrders,
-              revenue: totalRevenue,
-              metrics: {
-                totalOrders: validOrders.length,
-                totalRevenue: totalRevenue,
-                platformFee: Math.round(platformFee),
-                dealerPayouts: dealerPayouts,
-                avgOrderValue: avgOrderValue,
-                deliveredOrders: delivered,
-                pendingOrders: validOrders.length - delivered
-              }
-            });
+          setReportData({
+            orders: validOrders,
+            revenue: totalRevenue,
+            metrics: {
+              totalOrders: validOrders.length,
+              totalRevenue: totalRevenue,
+              platformFee: Math.round(platformFee),
+              dealerPayouts: dealerPayouts,
+              avgOrderValue: avgOrderValue,
+              deliveredOrders: delivered,
+              pendingOrders: validOrders.length - delivered
+            }
+          });
         }
       } catch (error) {
         console.error("❌ Error fetching report data:", error);
@@ -201,85 +203,78 @@ All user accounts are active and verified`;
     }
   };
 
-  const goBack = () => navigate('/admin');
+
+
 
   return (
     <div className="management-page">
-      <button className="back-btn" onClick={goBack}>
-        <span>←</span> Back
-      </button>
-
-      <div className="management-header">
-        <h1>Reports & Analytics</h1>
-        <p>Download platform reports and analytics</p>
-      </div>
-
       <div className="report-section">
-        <h2>Report Summary</h2>
+
+        <h2>{t('admin.reports.reportSummary')}</h2>
         <div className="report-metrics">
           <div className="metric-card">
-            <span className="metric-label">Total Orders</span>
+            <span className="metric-label">{t('admin.reports.totalOrders')}</span>
             <span className="metric-value">{reportData.metrics.totalOrders}</span>
           </div>
           <div className="metric-card">
-            <span className="metric-label">Total Revenue</span>
+            <span className="metric-label">{t('admin.reports.totalRevenue')}</span>
             <span className="metric-value">₹{reportData.metrics.totalRevenue}</span>
           </div>
           <div className="metric-card">
-            <span className="metric-label">Platform Commission</span>
+            <span className="metric-label">{t('admin.reports.platformCommission')}</span>
             <span className="metric-value">₹{reportData.metrics.platformFee}</span>
           </div>
           <div className="metric-card">
-            <span className="metric-label">Avg Order Value</span>
+            <span className="metric-label">{t('admin.reports.avgOrderValue')}</span>
             <span className="metric-value">₹{reportData.metrics.avgOrderValue}</span>
           </div>
           <div className="metric-card">
-            <span className="metric-label">Delivered</span>
+            <span className="metric-label">{t('admin.reports.delivered')}</span>
             <span className="metric-value">{reportData.metrics.deliveredOrders}</span>
           </div>
           <div className="metric-card">
-            <span className="metric-label">Pending</span>
+            <span className="metric-label">{t('admin.reports.pending')}</span>
             <span className="metric-value">{reportData.metrics.pendingOrders}</span>
           </div>
         </div>
       </div>
 
       <div className="download-section">
-        <h2>Download Reports</h2>
+        <h2>{t('admin.reports.downloadReports')}</h2>
         <div className="download-buttons">
-          <button 
+          <button
             className="download-btn"
             onClick={() => downloadCSV(reportData.orders, 'orders-report.csv')}
           >
-            📊 Download Orders CSV
+            {t('admin.reports.downloadOrdersCSV')}
           </button>
-          <button 
+          <button
             className="download-btn"
             onClick={downloadRevenueReport}
           >
-            💹 Download Revenue Report
+            {t('admin.reports.downloadRevenueReport')}
           </button>
-          <button 
+          <button
             className="download-btn"
             onClick={downloadUsageReport}
           >
-            👥 Download Usage Report
+            {t('admin.reports.downloadUsageReport')}
           </button>
         </div>
       </div>
 
       <div className="orders-list-section">
-        <h2>Recent Orders (Used in Reports)</h2>
+        <h2>{t('admin.reports.recentOrders')}</h2>
         <div className="orders-table-container">
           <table className="orders-table">
             <thead>
               <tr>
-                <th>Order ID</th>
-                <th>Dealer</th>
-                <th>Customer</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Date</th>
+                <th>{t('admin.reports.orderId')}</th>
+                <th>{t('admin.reports.dealer')}</th>
+                <th>{t('admin.reports.customer')}</th>
+                <th>{t('admin.reports.amount')}</th>
+                <th>{t('admin.reports.status')}</th>
+                <th>{t('admin.reports.date')}</th>
               </tr>
             </thead>
             <tbody>

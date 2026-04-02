@@ -1,48 +1,58 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "../styles/Cart.css";
-import { clearCartItems, readCartItems, writeCartItems } from "../utils/cartStorage";
+import { clearCartItems, readCartItems, writeCartItems, syncCartWithBackend, pushCartToBackend } from "../utils/cartStorage";
 import { apiGet } from "../utils/api";
 import { BULK_DISCOUNT_LABEL, BULK_ORDER_MIN_QTY } from "../constants/pricingRules";
 import BottomNav from "../components/BottomNav";
 import CustomerHeader from "../components/CustomerHeader";
 import { useTranslation } from "react-i18next";
+import emptyCartImg from "../assets/empty-cart.png";
 
 export default function Cart() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [cart, setCart] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // On mount, validate cart items against backend crops
-    const validateCart = async () => {
-      const localCart = readCartItems();
+    // 0. Try to populate from local storage immediately for speed
+    const syncInit = readCartItems();
+    if (syncInit.length > 0) {
+      setCart(syncInit);
+    }
+
+    const initCart = async () => {
       try {
-        const crops = await apiGet("crops");
-        // Build a Set of available crop names (case-insensitive)
+        setLoading(true);
+        // 1. Sync local cart with backend
+        await syncCartWithBackend();
+        const localCart = readCartItems();
+        
+        // Update with immediate local sync result
+        setCart(localCart);
+        
+        // 2. Refresh crops and check availability
+        const crops = await apiGet("crops").catch(() => []);
         const availableCropNames = new Set(
           crops.map(c => (c.cropName || c.name || "").trim().toLowerCase())
         );
-        // Only keep cart items whose cropName is still available
-        const filteredCart = localCart.filter(item =>
-          availableCropNames.has((item.cropName || "").trim().toLowerCase())
-        );
-        if (filteredCart.length !== localCart.length) {
-          // Update cart if any items were removed
-          if (filteredCart.length) {
-            writeCartItems(filteredCart);
-          } else {
-            clearCartItems();
-          }
-        }
-        setCart(filteredCart);
+        
+        // Map availability
+        const validatedCart = localCart.map(item => ({
+          ...item,
+          isAvailable: crops.length > 0 ? availableCropNames.has((item.cropName || "").trim().toLowerCase()) : true
+        }));
+        
+        setCart(validatedCart);
       } catch (err) {
-        // On error, fallback to local cart
-        setCart(localCart);
+        console.error("Cart init error:", err);
+      } finally {
+        setLoading(false);
       }
     };
-    validateCart();
-  }, []);
+    initCart();
+  }, [navigate]);
 
   // 🔹 Group items by farmerId
   const groupedCart = cart.reduce((acc, item) => {
@@ -52,7 +62,7 @@ export default function Cart() {
   }, {});
 
   // 🔹 Update quantity (min = 1)
-  const updateQty = (id, delta) => {
+  const updateQty = async (id, delta) => {
     const updated = cart.map((item) => {
       if (item.id === id) {
         const qty = item.quantity + delta;
@@ -63,10 +73,11 @@ export default function Cart() {
 
     setCart(updated);
     writeCartItems(updated);
+    await pushCartToBackend(updated);
   };
 
   // 🔹 Remove item
-  const removeItem = (id) => {
+  const removeItem = async (id) => {
     const updated = cart.filter((item) => item.id !== id);
     setCart(updated);
     if (updated.length) {
@@ -74,6 +85,7 @@ export default function Cart() {
     } else {
       clearCartItems();
     }
+    await pushCartToBackend(updated);
   };
 
   // 🔹 Select transport dealer for one farmer
@@ -95,81 +107,149 @@ export default function Cart() {
     navigate("/transport-dealers");
   };
 
-  return (
+  const isEmpty = Object.keys(groupedCart).length === 0;
 
+  return (
     <div className="cart-page">
       <CustomerHeader />
 
-      <h2>🛒 {t('cart.title', 'My Cart')}</h2>
+      <div className="cart-header-container">
+        <h2>
+          <span>🛒</span> {t('cart.title', 'My Cart')}
+        </h2>
+      </div>
 
-      {Object.keys(groupedCart).length === 0 && (
-        <p className="empty-cart">{t('cart.emptyCart', 'Your cart is empty')}</p>
+      {loading ? (
+        <div className="empty-cart-container" style={{ minHeight: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="spinner"></div>
+          <p style={{ marginLeft: '12px' }}>{t('common.loading', 'Loading Cart...')}</p>
+        </div>
+      ) : isEmpty ? (
+        <div className="empty-cart-container">
+          <img src={emptyCartImg} alt="Empty Cart" className="empty-cart-img" />
+          <h3>{t('cart.emptyCartTitle', 'Your basket is empty')}</h3>
+          <p>{t('cart.emptyCartSub', 'Looks like you haven\'t added any fresh crops yet.')}</p>
+          <Link to="/home" className="shop-now-btn">
+            {t('cart.shopNow', 'Shop Fresh Crops')}
+          </Link>
+        </div>
+      ) : (
+        <div className="cart-content">
+          {(() => {
+            const globalTotalQty = cart.reduce((s, i) => s + i.quantity, 0);
+            const isGlobalBulkActive = globalTotalQty >= BULK_ORDER_MIN_QTY;
+            const globalQtyToUnlock = Math.max(0, BULK_ORDER_MIN_QTY - globalTotalQty);
+
+            return (
+              <>
+                {/* Global Bulk Discount Notification */}
+                <div className={`discount-banner global-banner ${isGlobalBulkActive ? "active" : "pending"}`} 
+                     style={{ marginBottom: '20px', borderRadius: '12px', padding: '16px' }}>
+                  {isGlobalBulkActive ? (
+                    <>
+                      <span>⭐</span>
+                      <div>
+                        <b>{t('cart.bulkDiscountActive', 'Bulk Discount Unlocked!')}</b>
+                        {BULK_DISCOUNT_LABEL} {t('cart.offOnTransport', 'off on transport costs')}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span>💡</span>
+                      <div>
+                        <b>{t('cart.bulkDiscountPending', 'Unlock Bulk Discount')}</b>
+                        {t('cart.addMoreToUnlock', { 
+                          defaultValue: 'Add {{count}} kg more to get transport discount', 
+                          count: globalQtyToUnlock 
+                        })}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {Object.keys(groupedCart).map((farmerId) => {
+                  const items = groupedCart[farmerId];
+                  const totalQty = items.reduce((s, i) => s + i.quantity, 0);
+                  const totalPrice = items.reduce(
+                    (s, i) => s + i.quantity * i.pricePerKg,
+                    0
+                  );
+
+                  return (
+                    <div key={farmerId} className="farmer-card">
+                      {/* 👨‍🌾 Farmer Header */}
+                      <header className="farmer-header">
+                        <div className="farmer-info">
+                          <h3>👨‍🌾 {items[0].farmerName}</h3>
+                          <p>📍 {items[0].farmerLocation}</p>
+                        </div>
+                        <div className="items-count-badge">
+                          {items.length} {t('cart.items', 'items')}
+                        </div>
+                      </header>
+
+                      {/* 🧺 Products */}
+                      <div className="items-list">
+                        {items.map((item) => (
+                          <div key={item.id} className="item-row">
+                            <div className="crop-placeholder-img">
+                              {item.category === 'Fruit' ? '🍎' : '🥬'}
+                            </div>
+                            
+                            <div className="item-details">
+                              <b>{item.cropName}</b>
+                              <span>₹{item.pricePerKg} {t('kg_unit', '/ kg')}</span>
+                              {item.isAvailable === false && (
+                                <span className="out-of-stock-badge">⚠️ {t('cart.unavailable', 'Currently Unavailable')}</span>
+                              )}
+                            </div>
+
+                            <div className="qty-controls">
+                              <button className="qty-btn" onClick={() => updateQty(item.id, -1)} aria-label="Decrease quantity">−</button>
+                              <span className="current-qty">{item.quantity} {t('kg', 'kg')}</span>
+                              <button className="qty-btn" onClick={() => updateQty(item.id, 1)} aria-label="Increase quantity">+</button>
+                            </div>
+
+                            <div className="price-col">
+                              ₹{item.quantity * item.pricePerKg}
+                            </div>
+
+                            <button className="remove-btn" onClick={() => removeItem(item.id)} title="Remove item">
+                              🗑️
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* 📦 Summary */}
+                      <footer className="farmer-footer">
+                        <div className="summary-stats">
+                          <div className="stat-group">
+                            <div className="stat">
+                              <span className="stat-label">{t('cart.totalWeight', 'Total Weight')}</span>
+                              <span className="stat-value">{totalQty} {t('kg', 'kg')}</span>
+                            </div>
+                            <div className="stat">
+                              <span className="stat-label">{t('cart.subtotal', 'Subtotal')}</span>
+                              <span className="stat-value">₹{totalPrice}</span>
+                            </div>
+                          </div>
+
+                          <button className="checkout-btn" onClick={() => selectTransport(items)}>
+                            🚚 {t('cart.continueCheckout', 'Find Transport')}
+                          </button>
+                        </div>
+                      </footer>
+                    </div>
+                  );
+                })}
+              </>
+            );
+          })()}
+        </div>
       )}
-
-      {Object.keys(groupedCart).map((farmerId) => {
-        const items = groupedCart[farmerId];
-        const totalQty = items.reduce((s, i) => s + i.quantity, 0);
-        const isBulkActive = totalQty >= BULK_ORDER_MIN_QTY;
-        const qtyToUnlock = Math.max(0, BULK_ORDER_MIN_QTY - totalQty);
-        const totalPrice = items.reduce(
-          (s, i) => s + i.quantity * i.pricePerKg,
-          0
-        );
-
-        return (
-          <div key={farmerId} className="farmer-card">
-
-            {/* 👨‍🌾 Farmer Header */}
-            <div className="farmer-header">
-              <h3>👨‍🌾 {items[0].farmerName}</h3>
-              <p>📍 {items[0].farmerLocation}</p>
-            </div>
-
-            {/* 🧺 Products */}
-            {items.map((item) => (
-              <div key={item.id} className="item-row">
-                <div className="item-info">
-                  <strong>{item.cropName}</strong>
-                  <small>{t('cart.farmerSellingPrice', 'Farmer selling price')}: ₹{item.pricePerKg} / kg</small>
-                </div>
-
-                <div className="qty-box">
-                  <button onClick={() => updateQty(item.id, -1)}>-</button>
-                  <span>{item.quantity} kg</span>
-                  <button onClick={() => updateQty(item.id, 1)}>+</button>
-                </div>
-
-                <div className="item-total">
-                  ₹{item.quantity * item.pricePerKg}
-                </div>
-
-                <span className="remove" onClick={() => removeItem(item.id)}>
-                  ❌
-                </span>
-              </div>
-            ))}
-
-            {/* 📦 Summary */}
-            <div className="summary">
-              <div>
-                <p><strong>{t('cart.totalQuantity', 'Total Quantity')}:</strong> {totalQty} kg</p>
-                <p className={`bulk-status ${isBulkActive ? "active" : "pending"}`}>
-                  {isBulkActive
-                    ? `⭐ ${t('cart.bulkDiscountActive', 'Bulk Discount Active')} (${BULK_DISCOUNT_LABEL} ${t('cart.offOnTransport', 'off on transport')})`
-                    : `💡 ${t('cart.addMoreToUnlock', { defaultValue: 'Add {{count}} kg more to unlock bulk discount', count: qtyToUnlock })}`}
-                </p>
-                <p><strong>{t('cart.totalSellingPrice', 'Total Selling Price')}:</strong> ₹{totalPrice}</p>
-              </div>
-
-              <button onClick={() => selectTransport(items)}>
-                🚚 {t('cart.selectTransportDealer', 'Select Transport Dealer')}
-              </button>
-            </div>
-
-          </div>
-        );
-      })}
       <BottomNav />
     </div>
   );
 }
+

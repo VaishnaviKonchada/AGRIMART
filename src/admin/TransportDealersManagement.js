@@ -125,15 +125,6 @@ const TransportDealersManagement = () => {
 
   return (
     <div className="management-page">
-      <button className="back-btn" onClick={goBack}>
-        <span>←</span> {t('common.back', 'Back')}
-      </button>
-
-      <div className="management-header">
-        <h1>{t('admin.dealers.title', 'Transport Dealers Management')}</h1>
-        <p>{t('admin.dealers.subtitle', 'Approve and manage transport dealers')}</p>
-      </div>
-
       <div className="list-container">
         {error && <div className="warning-message">⚠️ {error}</div>}
         {loading && <div className="no-dealers"><p>{t('admin.dealers.loading', 'Loading dealers...')}</p></div>}

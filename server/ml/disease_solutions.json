@@ -1,4 +1,194 @@
 {
+  "apple_scab": {
+    "disease": "Apple Scab",
+    "severity": "High",
+    "solution": [
+      "Remove and destroy fallen leaves and fruit to reduce inoculum.",
+      "Apply fungicides like Captan or Myclobutanil during the early growth stages.",
+      "Prune trees to improve air circulation and sunlight penetration.",
+      "Plant resistant apple varieties in the future."
+    ]
+  },
+  "apple_rust": {
+    "disease": "Cedar Apple Rust",
+    "severity": "Moderate",
+    "solution": [
+      "Remove nearby cedar/juniper trees if possible as they are alternate hosts.",
+      "Apply protective fungicides like Myclobutanil during early spring.",
+      "Prune and destroy infected galls from cedar trees.",
+      "Select rust-resistant apple cultivars."
+    ]
+  },
+  "cherry_powdery_mildew": {
+    "disease": "Cherry Powdery Mildew",
+    "severity": "Moderate",
+    "solution": [
+      "Improve air circulation through pruning.",
+      "Apply sulfur-based fungicides or horticultural oils.",
+      "Avoid excess nitrogen fertilization that promotes lush growth.",
+      "Monitor new growth regularly during humid weather."
+    ]
+  },
+  "corn_gray_leaf_spot": {
+    "disease": "Gray Leaf Spot (Corn)",
+    "severity": "High",
+    "solution": [
+      "Rotate crops with non-grass species for at least one year.",
+      "Plow under crop debris to encourage rapid decomposition.",
+      "Apply foliar fungicides such as strobilurins or triazoles if symptoms appear early.",
+      "Use hybrid varieties with high resistance ratings."
+    ]
+  },
+  "corn_common_rust": {
+    "disease": "Common Rust (Corn)",
+    "severity": "Moderate",
+    "solution": [
+      "Plant resistant corn hybrids.",
+      "Apply fungicides if infection occurs early and weather is cool and humid.",
+      "Avoid overhead irrigation during late afternoon or evening.",
+      "Maintain optimal soil fertility to support plant health."
+    ]
+  },
+  "corn_northern_leaf_blight": {
+    "disease": "Northern Leaf Blight (Corn)",
+    "severity": "High",
+    "solution": [
+      "Rotate crops to reduce the amount of pathogen in the field.",
+      "Till crop residue to manage overwintering spores.",
+      "Apply fungicides like Propiconazole or Azoxystrobin.",
+      "Choose resistant hybrids suitable for your climate."
+    ]
+  },
+  "grape_black_rot": {
+    "disease": "Grape Black Rot",
+    "severity": "High",
+    "solution": [
+      "Prune and remove all mummified fruit left on the vines.",
+      "Apply fungicides like Myclobutanil or Captan from bud break to bloom.",
+      "Ensure proper vineyard sanitation and weed control.",
+      "Maintain an open canopy to allow rapid leaf drying."
+    ]
+  },
+  "potato_early_blight": {
+    "disease": "Potato Early Blight (Alternaria solani)",
+    "severity": "Moderate",
+    "solution": [
+      "Apply protective fungicides like Chlorothalonil or Mancozeb regularly.",
+      "Maintain adequate soil fertility, especially nitrogen and potassium.",
+      "Avoid overhead irrigation or water in the morning to allow foliage to dry.",
+      "Rotate with non-solanaceous crops for 2-3 years."
+    ]
+  },
+  "potato_late_blight": {
+    "disease": "Potato Late Blight (Phytophthora infestans)",
+    "severity": "Critical",
+    "solution": [
+      "Destroy all infected plants and cull piles immediately to stop spread.",
+      "Apply systemic fungicides like Metalaxyl or Dimethomorph.",
+      "Avoid excessive irrigation during periods of high humidity and cool temperatures.",
+      "Plant only certified disease-free seed tubers."
+    ]
+  },
+  "rice_bacterial_leaf_blight": {
+    "disease": "Rice Bacterial Leaf Blight",
+    "severity": "Critical",
+    "solution": [
+      "Apply balanced fertilizers; avoid excess nitrogen.",
+      "Drain fields during the early stage of infection if possible.",
+      "Spray copper-based bactericides or Streptomycin-based products.",
+      "Choose resistant varieties like BPT 5204 or MTU 1010 if available."
+    ]
+  },
+  "rice_brown_spot": {
+    "disease": "Rice Brown Spot",
+    "severity": "Moderate",
+    "solution": [
+      "Correct soil nutrient deficiencies, especially potassium and silica.",
+      "Use certified disease-free seeds and treat them with fungicides before sowing.",
+      "Maintain proper field level and drainage.",
+      "Apply fungicides like Carbendazim or Propiconazole as recommended."
+    ]
+  },
+  "rice_leaf_smut": {
+    "disease": "Rice Leaf Smut",
+    "severity": "Mild",
+    "solution": [
+      "Generally not economically significant; maintain good field hygiene.",
+      "Avoid excessive nitrogen fertilization.",
+      "Ensure proper plant spacing for better air circulation.",
+      "Remove and destroy infected stubble after harvest."
+    ]
+  },
+  "tomato_bacterial_spot": {
+    "disease": "Tomato Bacterial Spot",
+    "severity": "High",
+    "solution": [
+      "Spray copper-based fungicides periodically during humid weather.",
+      "Avoid overhead irrigation; use drip irrigation if possible.",
+      "Practice 3-year crop rotation with non-solanaceous crops.",
+      "Use only certified disease-free seeds and transplants."
+    ]
+  },
+  "tomato_early_blight": {
+    "disease": "Tomato Early Blight",
+    "severity": "Moderate",
+    "solution": [
+      "Apply fungicides like Chlorothalonil or Mancozeb at first sign of spots.",
+      "Mulch around plants to prevent soil-borne spores from splashing onto leaves.",
+      "Prune lower leaves to improve air flow and prevent ground contact.",
+      "Space plants adequately to allow air circulation."
+    ]
+  },
+  "tomato_late_blight": {
+    "disease": "Tomato Late Blight",
+    "severity": "Critical",
+    "solution": [
+      "Uproot and bag infected plants immediately; do not compost them.",
+      "Apply fungicides like Copper or Chlorothalonil preventatively during cool, wet periods.",
+      "Avoid planting where potatoes or tomatoes were grown in the previous year.",
+      "Monitor weather alerts for late blight risk in your area."
+    ]
+  },
+  "tomato_leaf_mold": {
+    "disease": "Tomato Leaf Mold",
+    "severity": "Moderate",
+    "solution": [
+      "Improve greenhouse or field ventilation to reduce humidity.",
+      "Avoid wetting foliage during irrigation.",
+      "Apply fungicides like Chlorothalonil or Azoxystrobin.",
+      "Plant resistant varieties in humid environments."
+    ]
+  },
+  "tomato_septoria_leaf_spot": {
+    "disease": "Tomato Septoria Leaf Spot",
+    "severity": "Moderate",
+    "solution": [
+      "Apply fungicides such as Mancozeb or Chlorothalonil regularly.",
+      "Remove and discard infected lower leaves as they appear.",
+      "Avoid overhead watering and keep the foliage dry.",
+      "Suppress soil-borne spores by mulching heavily."
+    ]
+  },
+  "tomato_spider_mites": {
+    "disease": "Tomato Spider Mites (Two-spotted Mite)",
+    "severity": "Moderate",
+    "solution": [
+      "Spray the undersides of leaves with water to dislodge mites.",
+      "Apply insecticidal soap or neem oil for organic control.",
+      "Introduce natural predators like predatory mites.",
+      "Ensure plants are well-watered as drought stress favors mites."
+    ]
+  },
+  "tomato_yellow_leaf_curl_virus": {
+    "disease": "Tomato Yellow Leaf Curl Virus (TYLCV)",
+    "severity": "Critical",
+    "solution": [
+      "Control whiteflies using yellow sticky traps and insecticides/neem oil.",
+      "Remove and destroy infected plants immediately to prevent spread.",
+      "Use reflective mulches to deter whiteflies from landing.",
+      "Plant TYLCV-resistant varieties in high-risk areas."
+    ]
+  },
   "default": {
     "disease": "Unknown condition",
     "severity": "Needs field inspection",
@@ -42,51 +232,6 @@
       "Spray wettable sulfur or potassium bicarbonate early.",
       "Avoid excess nitrogen that creates dense canopy.",
       "Increase sunlight penetration by pruning where possible."
-    ]
-  },
-  "downy_mildew": {
-    "disease": "Downy mildew",
-    "severity": "High",
-    "solution": [
-      "Use disease-free seed and improve drainage immediately.",
-      "Apply systemic fungicide recommended for downy mildew.",
-      "Do not irrigate at night and keep foliage dry."
-    ]
-  },
-  "leaf_spot": {
-    "disease": "Leaf spot",
-    "severity": "Mild to moderate",
-    "solution": [
-      "Remove affected leaves and crop debris.",
-      "Use copper-based fungicide if spread is increasing.",
-      "Rotate crop family in next season."
-    ]
-  },
-  "bacterial": {
-    "disease": "Bacterial disease",
-    "severity": "High",
-    "solution": [
-      "Avoid working in wet fields to reduce spread.",
-      "Use copper bactericide where allowed by local guidance.",
-      "Disinfect tools and remove infected plant parts quickly."
-    ]
-  },
-  "viral": {
-    "disease": "Viral disease",
-    "severity": "High",
-    "solution": [
-      "Rogue infected plants early to protect healthy plants.",
-      "Control vector insects such as whitefly and aphids.",
-      "Use virus-resistant varieties in the next cycle."
-    ]
-  },
-  "scab": {
-    "disease": "Scab",
-    "severity": "Moderate",
-    "solution": [
-      "Prune and destroy infected twigs or leaves.",
-      "Use preventive fungicide during humid weather windows.",
-      "Keep canopy open and avoid prolonged leaf wetness."
     ]
   }
 }

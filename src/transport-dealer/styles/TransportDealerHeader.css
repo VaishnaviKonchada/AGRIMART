@@ -1,0 +1,80 @@
+/* Transport Dealer Header Styles */
+.dashboard-header { 
+  max-width: 1440px; 
+  margin: 0 auto; 
+  width: 100%; 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 15px 30px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-sizing: border-box;
+}
+
+.greeting-section h1 { margin: 0; font-size: 20px; color: #0f172a; font-weight: 800; }
+.dealer-name { color: #475569; margin: 2px 0; font-weight: 700; font-size: 14px; }
+.time-display { color: #64748b; font-size: 12px; font-weight: 500; }
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.account-icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.account-icon-btn:hover {
+  background: var(--dealer-primary, #1e8e3e);
+  color: white;
+  border-color: var(--dealer-primary, #1e8e3e);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(30, 142, 62, 0.2);
+}
+
+.profile-btn { 
+  border: 1px solid #e2e8f0; 
+  background: #fff; 
+  color: #334155; 
+  padding: 10px 16px; 
+  border-radius: 12px; 
+  font-weight: 700; 
+  font-size: 14px; 
+  cursor: pointer; 
+  transition: all 0.3s ease; 
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); 
+}
+
+.profile-btn:hover { 
+  background: linear-gradient(135deg, #1e8e3e, #2e7d32); 
+  color: #fff; 
+  border-color: transparent; 
+  transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+  .dashboard-header {
+    padding: 10px 15px;
+  }
+  .greeting-section h1 { font-size: 16px; }
+  .dealer-name { font-size: 12px; }
+  .time-display { font-size: 10px; }
+  .profile-btn { display: none; }
+}

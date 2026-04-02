@@ -38,7 +38,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     const chat = await Chat.findById(req.params.id)
       .populate('customerId', 'name email')
       .populate('dealerId', 'name email profile')
-      .populate('dealerRequestId', 'pickupLocation dropLocation distance customerPhone customerDoorNo customerCountry customerState customerDistrict customerMandal customerPincode customerLocationText customerCoordinates pricing quotedPrice');
+      .populate('dealerRequestId', 'pickupLocation dropLocation distance customerPhone customerDoorNo customerCountry customerState customerDistrict customerMandal customerPincode customerLocationText customerCoordinates pricing quotedPrice licensePlate vehicleType');
     if (!chat) return res.status(404).json({ message: 'Chat not found' });
     // Check auth: customer or dealer in chat
     if (chat.customerId._id.toString() !== req.user.sub && chat.dealerId._id.toString() !== req.user.sub) {
@@ -56,7 +56,7 @@ router.get('/request/:requestId', requireAuth, async (req, res) => {
     const chat = await Chat.findOne({ dealerRequestId: req.params.requestId })
       .populate('customerId', 'name email')
       .populate('dealerId', 'name email profile')
-      .populate('dealerRequestId', 'pickupLocation dropLocation distance customerPhone customerDoorNo customerCountry customerState customerDistrict customerMandal customerPincode customerLocationText customerCoordinates pricing quotedPrice');
+      .populate('dealerRequestId', 'pickupLocation dropLocation distance customerPhone customerDoorNo customerCountry customerState customerDistrict customerMandal customerPincode customerLocationText customerCoordinates pricing quotedPrice licensePlate vehicleType');
 
     if (!chat) return res.status(404).json({ message: 'Chat not found for request' });
 
@@ -102,6 +102,46 @@ router.post('/:id/message', requireAuth, async (req, res) => {
     await chat.save();
     return res.json(chat);
   } catch (e) {
+    return res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/chats/:id/negotiate - customer counter-offer
+router.post('/:id/negotiate', requireAuth, async (req, res) => {
+  try {
+    const { price } = req.body;
+    if (!price) return res.status(400).json({ message: 'Price required' });
+    
+    const chat = await Chat.findById(req.params.id);
+    if (!chat) return res.status(404).json({ message: 'Chat not found' });
+    
+    if (chat.customerId.toString() !== req.user.sub) {
+      return res.status(403).json({ message: 'Only customer can negotiate' });
+    }
+
+    const finalPrice = parseFloat(price);
+    
+    // Explicitly update fields to ensure Mongoose detects changes
+    if (!chat.negotiation) chat.negotiation = {};
+    chat.set('negotiation.finalPrice', finalPrice);
+    chat.set('negotiation.offeredPrice', finalPrice);
+    chat.set('negotiation.customerDecision', 'confirmed');
+    chat.set('negotiation.dealerDecision', 'pending');
+    chat.markModified('negotiation');
+    
+    chat.confirmed = false;
+    chat.confirmedAt = null;
+
+    // This message text matches the dealer's getEffectiveFinalPrice regex
+    chat.messages.push({
+      senderId: req.user.sub,
+      text: `Customer counter-offer: Rs.${finalPrice}`,
+    });
+
+    await chat.save();
+    return res.json(chat);
+  } catch (e) {
+    console.error('Error negotiating:', e);
     return res.status(500).json({ message: 'Server error' });
   }
 });
@@ -162,7 +202,14 @@ router.post('/:id/price-decision', requireAuth, async (req, res) => {
     }
 
     if (!chat.negotiation?.finalPrice) {
-      return res.status(400).json({ message: 'No negotiated final price yet' });
+      // Fallback to initial quote if no negotiation happened
+      await chat.populate('dealerRequestId', 'quotedPrice');
+      if (chat.dealerRequestId?.quotedPrice) {
+        if (!chat.negotiation) chat.negotiation = {};
+        chat.negotiation.finalPrice = chat.dealerRequestId.quotedPrice;
+      } else {
+        return res.status(400).json({ message: 'No negotiated final price yet' });
+      }
     }
 
     const normalized = decision === 'confirm' ? 'confirmed' : 'rejected';
@@ -335,12 +382,12 @@ router.get('/', requireAuth, async (req, res) => {
     if (req.user.role === 'dealer') {
       chats = await Chat.find({ dealerId: req.user.sub })
         .populate('customerId', 'name email phone')
-        .populate('dealerRequestId', 'pickupLocation dropLocation distance customerPhone customerDoorNo customerCountry customerState customerDistrict customerMandal customerPincode customerLocationText customerCoordinates pricing quotedPrice')
+        .populate('dealerRequestId', 'pickupLocation dropLocation distance customerPhone customerDoorNo customerCountry customerState customerDistrict customerMandal customerPincode customerLocationText customerCoordinates pricing quotedPrice licensePlate vehicleType')
         .sort({ updatedAt: -1 });
     } else {
       chats = await Chat.find({ customerId: req.user.sub })
         .populate('dealerId', 'name email')
-        .populate('dealerRequestId', 'pickupLocation dropLocation distance customerPhone customerDoorNo customerCountry customerState customerDistrict customerMandal customerPincode customerLocationText customerCoordinates pricing quotedPrice')
+        .populate('dealerRequestId', 'pickupLocation dropLocation distance customerPhone customerDoorNo customerCountry customerState customerDistrict customerMandal customerPincode customerLocationText customerCoordinates pricing quotedPrice licensePlate vehicleType')
         .sort({ updatedAt: -1 });
     }
     return res.json(chats);

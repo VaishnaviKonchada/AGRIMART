@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { apiGet, apiPut } from "../utils/api";
 import { getCurrentLocationDetails } from "../utils/locationHelpers";
 import "../styles/FarmerAccount.css";
-import "../styles/TransportDealerAccount.css";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
 export default function FarmerAccount() {
@@ -233,7 +232,7 @@ export default function FarmerAccount() {
   };
 
   return (
-    <div className="transport-dealer-account">
+    <div className="farmer-account">
       <div className="account-header">
         <div className="title-wrap">
           <h2>👨‍🌾 {t('farmerAccount.title')}</h2>

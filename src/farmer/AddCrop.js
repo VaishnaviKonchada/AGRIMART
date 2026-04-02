@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { apiGet, apiPost } from "../utils/api";
 import "../styles/AddCrop.css";
+import boxPlaceholderImg from "../assets/no-orders.png";
 
 /* 🌱 Crop Procedures Dataset (Sample – Major Crops) */
 const cropProcedures = {
@@ -112,14 +113,21 @@ function getFallbackGuidance(language) {
   return FALLBACK_GUIDANCE_MESSAGE[language] || FALLBACK_GUIDANCE_MESSAGE.en;
 }
 
-function getProcedureForCrop(cropName, language) {
+async function getProcedureForCrop(cropName, language) {
   const key = String(cropName || "").toLowerCase().trim();
   if (!key) return "";
 
-  const direct = cropProcedures[key]?.[language] || cropProcedures[key]?.en;
-  if (direct) return direct;
-
-  return getFallbackGuidance(language);
+  try {
+    const data = await apiPost("translate", {
+      text: key,
+      targetLang: language === "te" ? "Telugu" : language === "hi" ? "Hindi" : "English",
+      mode: "guidance"
+    });
+    return data.procedure;
+  } catch (err) {
+    console.error("AI Guidance Error:", err);
+    return FALLBACK_GUIDANCE_MESSAGE[language] || FALLBACK_GUIDANCE_MESSAGE.en;
+  }
 }
 
 function normalizeDDMMYYYYInput(value) {
@@ -253,80 +261,46 @@ export default function AddCrop() {
     "";
 
   useEffect(() => {
-    if (procedureEdited) {
-      const source = baseLang || "en";
-      const sourceText = procedureTexts[source] || procedureTexts.en || "";
-      const existing = procedureTexts[language] || "";
-      const curatedFromSource = getCuratedGuidanceTranslation(sourceText, language);
-      const key = cropName.toLowerCase().trim();
-      const curatedByCrop = cropProcedures[key]?.[language] || null;
-      const localizedFallback = getFallbackGuidance(language);
-
-      // If target language currently contains copied English, replace it using curated/crop translation.
-      if (
-        language !== "en" &&
-        normalizeGuidanceText(existing) === normalizeGuidanceText(sourceText)
-      ) {
-        const resolved = curatedFromSource || curatedByCrop;
-        if (resolved) {
-          setProcedureTexts((prev) => ({ ...prev, [language]: resolved }));
-          setProcedure(resolved);
-          return;
+    const updateProcedure = async () => {
+      if (procedureEdited) {
+        const source = baseLang || "en";
+        const sourceText = procedureTexts[source] || procedureTexts.en || "";
+        const existing = procedureTexts[language] || "";
+        
+        // If target translation is missing or a copy of English, try AI translation
+        if (language !== "en" && (!existing.trim() || normalizeGuidanceText(existing) === normalizeGuidanceText(sourceText))) {
+          try {
+            const data = await apiPost("translate", {
+              text: sourceText,
+              targetLang: language === "te" ? "Telugu" : language === "hi" ? "Hindi" : "English",
+              mode: "translate"
+            });
+            if (data.translatedText) {
+              setProcedureTexts((prev) => ({ ...prev, [language]: data.translatedText }));
+              setProcedure(data.translatedText);
+              return;
+            }
+          } catch (err) {
+            console.warn("AI Translation failed, using fallback.");
+          }
         }
-      }
-
-      // If target language text is missing or only copied from source English, apply curated translation.
-      if (
-        curatedFromSource &&
-        language !== "en" &&
-        (!existing.trim() || normalizeGuidanceText(existing) === normalizeGuidanceText(sourceText))
-      ) {
-        setProcedureTexts((prev) => ({ ...prev, [language]: curatedFromSource }));
-        setProcedure(curatedFromSource);
+        
+        setProcedure(existing || sourceText);
         return;
       }
 
-      // In manual mode, always prefer text previously typed in the selected language.
-      const existingTargetText = procedureTexts[language];
-      if (existingTargetText && existingTargetText.trim()) {
-        setProcedure(existingTargetText);
-        return;
+      const key = cropName.toLowerCase().trim();
+      if (key) {
+        setProcedure(t("addCrop.loadingCatalog")); // Temporary loading state
+        const text = await getProcedureForCrop(cropName, language);
+        setProcedure(text);
+        setProcedureTexts((prev) => ({ ...prev, [language]: text }));
+      } else {
+        setProcedure("");
       }
-
-      // If current language has no text yet, derive from English/source text first.
-      if (sourceText && sourceText.trim()) {
-        const resolved =
-          language === "en"
-            ? sourceText
-            : curatedFromSource || curatedByCrop || localizedFallback;
-        setProcedureTexts((prev) => ({ ...prev, [language]: resolved }));
-        setProcedure(resolved);
-        return;
-      }
-
-      const curated = cropProcedures[key]?.[language];
-      if (curated) {
-        setProcedure(curated);
-        return;
-      }
-
-      if (cropName.trim()) {
-        setProcedure(localizedFallback);
-        setProcedureTexts((prev) => ({ ...prev, [language]: localizedFallback }));
-        return;
-      }
-
-      setProcedure("");
-      return;
-    }
-    const key = cropName.toLowerCase().trim();
-    if (key) {
-      const text = getProcedureForCrop(cropName, language);
-      setProcedure(text);
-      setProcedureTexts((prev) => ({ ...prev, [language]: text }));
-    } else {
-      setProcedure("");
-    }
+    };
+    
+    updateProcedure();
   }, [cropName, language, procedureEdited]);
 
   const handleLanguageChange = (targetLanguage) => {

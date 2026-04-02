@@ -158,7 +158,7 @@ export default function Login() {
 
   return (
     <div className="auth-bg">
-      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 0 0 0' }}>
+      <div className="auth-lang-switcher">
         <LanguageSwitcher />
       </div>
       <div className="auth-box">
@@ -172,7 +172,7 @@ export default function Login() {
           <option value="">{t("selectRole")}</option>
           <option value="customer">{t("customer")}</option>
           <option value="farmer">{t("farmer")}</option>
-          <option value="admin">{t("admin")}</option>
+          <option value="admin">{t("adminLabel")}</option>
           <option value="transport dealer">{t("transportDealer")}</option>
         </select>
 

@@ -1,27 +1,75 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { apiGet, apiDelete } from "../utils/api";
-import "../styles/FarmerAccount.css"; 
+import { apiGet, apiDelete, apiPost } from "../utils/api";
+import "../styles/MyCrops.css";
 import { useTranslation } from "react-i18next";
+import noCropsImg from "../assets/no-orders.png";
 
 export default function MyCrops() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [crops, setCrops] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCrop, setSelectedCrop] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [translatedDescription, setTranslatedDescription] = useState("");
+  const [translatingDesc, setTranslatingDesc] = useState(false);
 
   useEffect(() => {
     loadCrops();
   }, []);
 
+  // Auto-translate description when modal opens in a non-English language
+  useEffect(() => {
+    if (!showModal || !selectedCrop?.description) {
+      setTranslatedDescription("");
+      return;
+    }
+    const lang = i18n.language;
+    if (lang === "en") {
+      setTranslatedDescription(selectedCrop.description);
+      return;
+    }
+    const targetLangName = lang === "hi" ? "Hindi" : "Telugu";
+    setTranslatingDesc(true);
+    apiPost("translate", {
+      text: selectedCrop.description,
+      targetLang: targetLangName,
+      mode: "general",
+    })
+      .then((res) => setTranslatedDescription(res?.translatedText || selectedCrop.description))
+      .catch(() => setTranslatedDescription(selectedCrop.description))
+      .finally(() => setTranslatingDesc(false));
+  }, [showModal, selectedCrop, i18n.language]);
+
+  // Map raw DB values to i18next translation keys
+  const translateStorageType = (value) => {
+    if (!value) return "N/A";
+    const keyMap = { Ambient: "storageAmbient", Chilled: "storageChilled", Frozen: "storageFrozen" };
+    const key = keyMap[value];
+    return key ? t(`addCrop.${key}`, value) : value;
+  };
+
+  const translateIrrigation = (value) => {
+    if (!value) return "N/A";
+    const keyMap = { Drip: "irrigationDrip", Sprinkler: "irrigationSprinkler", Flood: "irrigationFlood" };
+    const key = keyMap[value];
+    return key ? t(`addCrop.${key}`, value) : value;
+  };
+
+  const translateQuality = (value) => {
+    if (!value) return t("common.standard", "Standard");
+    const keyMap = { Premium: "qualityPremium", Standard: "qualityStandard", Economy: "qualityEconomy" };
+    const key = keyMap[value];
+    return key ? t(`addCrop.${key}`, value) : value;
+  };
+
   const loadCrops = async () => {
     try {
       const token = localStorage.getItem("authToken") || localStorage.getItem("accessToken");
       const storedRole = localStorage.getItem("userRole");
-      
+
       if (!token) {
         setError(t('ordersPage.noAccessToken', 'No access token found'));
         setLoading(false);
@@ -95,15 +143,16 @@ export default function MyCrops() {
                 <div className="crop-details">
                   <p><strong>📂 {t('myCrops.details.category')}:</strong> {t(`addCrop.category.${crop.category?.toLowerCase()}`, crop.category)}</p>
                   <p><strong>🏷️ {t('myCrops.details.variety')}:</strong> {crop.variety || "N/A"}</p>
-                  <p><strong>💰 {t('myCrops.details.pricePerKg')}:</strong> ₹{crop.pricePerKg}/kg</p>
-                  <p><strong>🌾 {t('myCrops.details.totalQuantity')}:</strong> {totalQty} kg</p>
-                  <p><strong>📦 {t('myCrops.details.availableQuantity')}:</strong> {availableQty} kg</p>
-                  <p><strong>✅ {t('myCrops.details.soldQuantity')}:</strong> {soldQty} kg</p>
-                  <p><strong>⭐ {t('myCrops.details.qualityGrade')}:</strong> {t(`addCrop.quality${crop.quality || 'Standard'}`, crop.quality || t('common.standard'))}</p>
+                  <p><strong>💰 {t('myCrops.details.pricePerKg')}:</strong> ₹{crop.pricePerKg}/{t("addCrop.unitKg")}</p>
+                  <p><strong>🌾 {t('myCrops.details.totalQuantity')}:</strong> {totalQty} {t("addCrop.unitKg")}</p>
+                  <p><strong>📦 {t('myCrops.details.availableQuantity')}:</strong> {availableQty} {t("addCrop.unitKg")}</p>
+                  <p><strong>✅ {t('myCrops.details.soldQuantity')}:</strong> {soldQty} {t("addCrop.unitKg")}</p>
+                  <p><strong>⭐ {t('myCrops.details.qualityGrade')}:</strong> {translateQuality(crop.quality)}</p>
+
                   <p><strong>🌱 {t('myCrops.details.organic')}:</strong> {crop.isOrganic ? `${t('common.yes')} ✅` : t('common.no')}</p>
                   <p><strong>📅 {t('myCrops.details.added')}:</strong> {new Date(crop.createdAt).toLocaleDateString()}</p>
                 </div>
-                <button 
+                <button
                   className="view-details-btn"
                   onClick={() => {
                     setSelectedCrop(crop);
@@ -126,6 +175,7 @@ export default function MyCrops() {
 
       {!loading && !error && crops.length === 0 && (
         <div className="empty-state">
+          <img src={noCropsImg} alt="No Crops" className="empty-state-img" />
           <p>📭 {t('myCrops.noCrops', "You haven't added any crops yet.")}</p>
           <button className="add-crop-link" onClick={() => navigate("/farmer/add-crop")}>
             ➕ {t('myCrops.addFirst', 'Add Your First Crop')}
@@ -141,7 +191,7 @@ export default function MyCrops() {
               <h2>🌾 {selectedCrop.cropName} - {t('myCrops.details.title')}</h2>
               <button className="close-modal" onClick={() => setShowModal(false)}>✕</button>
             </div>
-            
+
             <div className="modal-body">
               {/* Crop Images */}
               {selectedCrop.images && selectedCrop.images.length > 0 && (
@@ -149,9 +199,9 @@ export default function MyCrops() {
                   <h3>📸 {t('addCrop.photosTitle')}</h3>
                   <div className="images-grid">
                     {selectedCrop.images.map((img, idx) => (
-                      <img 
-                        key={idx} 
-                        src={img} 
+                      <img
+                        key={idx}
+                        src={img}
                         alt={`${selectedCrop.cropName} ${idx + 1}`}
                         className="crop-image"
                         onError={(e) => { e.target.style.display = 'none'; }}
@@ -178,7 +228,7 @@ export default function MyCrops() {
                   </div>
                   <div className="detail-item">
                     <span className="label">{t('myCrops.details.qualityGrade')}:</span>
-                    <span className="value">{t(`addCrop.quality${selectedCrop.quality || 'Standard'}`, selectedCrop.quality || t('common.standard'))}</span>
+                    <span className="value">{translateQuality(selectedCrop.quality)}</span>
                   </div>
                   <div className="detail-item">
                     <span className="label">{t('myCrops.details.organic')}:</span>
@@ -226,7 +276,7 @@ export default function MyCrops() {
                 <div className="detail-grid">
                   <div className="detail-item">
                     <span className="label">{t('myCrops.details.irrigation')}:</span>
-                    <span className="value">{selectedCrop.irrigationMethod || "N/A"}</span>
+                    <span className="value">{translateIrrigation(selectedCrop.irrigationMethod)}</span>
                   </div>
                   <div className="detail-item">
                     <span className="label">{t('myCrops.details.fertilizer')}:</span>
@@ -234,7 +284,7 @@ export default function MyCrops() {
                   </div>
                   <div className="detail-item">
                     <span className="label">{t('myCrops.details.storage')}:</span>
-                    <span className="value">{selectedCrop.storageType || "N/A"}</span>
+                    <span className="value">{translateStorageType(selectedCrop.storageType)}</span>
                   </div>
                   <div className="detail-item">
                     <span className="label">{t('myCrops.details.moisture')}:</span>
@@ -267,7 +317,15 @@ export default function MyCrops() {
 
               <div className="details-section">
                 <h3>📝 {t('myCrops.details.description')}</h3>
-                <p className="full-description">{selectedCrop.description}</p>
+                {translatingDesc ? (
+                  <p className="full-description" style={{ color: "#888", fontStyle: "italic" }}>
+                    {t("common.refreshing", "Translating...")}
+                  </p>
+                ) : (
+                  <p className="full-description">
+                    {translatedDescription || selectedCrop.description}
+                  </p>
+                )}
               </div>
 
               <div className="details-section">
@@ -294,8 +352,8 @@ export default function MyCrops() {
             </div>
 
             <div className="modal-footer">
-              <button 
-                className="delete-crop-btn" 
+              <button
+                className="delete-crop-btn"
                 onClick={() => handleDeleteCrop(selectedCrop._id)}
               >
                 🗑️ {t('myCrops.deleteCrop')}
@@ -310,4 +368,4 @@ export default function MyCrops() {
     </div>
   );
 }
-              
+

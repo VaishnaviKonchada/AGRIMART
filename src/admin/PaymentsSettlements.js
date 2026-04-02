@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { apiGet } from "../utils/api";
 import './styles/ManagementPages.css';
 
 
 
 const PaymentsSettlements = () => {
+  const { t } = useTranslation();
   const [payments, setPayments] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -104,12 +106,12 @@ const PaymentsSettlements = () => {
   return (
     <div className="management-page">
       <button className="back-btn" onClick={goBack}>
-        <span>←</span> Back
+        <span>←</span> {t('admin.reports.back')}
       </button>
 
       <div className="management-header">
-        <h1>Payments & Settlements</h1>
-        <p>View payment status and settlement details</p>
+        <h1>{t('admin.payments.title')}</h1>
+        <p>{t('admin.payments.subtitle')}</p>
       </div>
 
       <div className="stats-grid">
@@ -118,15 +120,15 @@ const PaymentsSettlements = () => {
           <span className="stat-value">₹{stats.totalPayout}</span>
         </div>
         <div className="stat-card">
-          <span className="stat-label">Platform Commission</span>
+          <span className="stat-label">{t('admin.payments.platformCommission')}</span>
           <span className="stat-value">₹{stats.platformCommission}</span>
         </div>
         <div className="stat-card">
-          <span className="stat-label">Pending Settlements</span>
+          <span className="stat-label">{t('admin.payments.pendingSettlements')}</span>
           <span className="stat-value">{stats.pendingSettlement}</span>
         </div>
         <div className="stat-card">
-          <span className="stat-label">Completed Payments</span>
+          <span className="stat-label">{t('admin.payments.completedPayments')}</span>
           <span className="stat-value">{stats.completedPayments}</span>
         </div>
       </div>
@@ -135,14 +137,14 @@ const PaymentsSettlements = () => {
         <table className="payments-table">
           <thead>
             <tr>
-              <th>Order ID</th>
-              <th>Dealer</th>
-              <th>Order Amount</th>
-              <th>Platform Fee (2%, max ₹100)</th>
-              <th>Dealer Earnings</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>Action</th>
+              <th>{t('admin.payments.orderId')}</th>
+              <th>{t('admin.payments.dealer')}</th>
+              <th>{t('admin.payments.orderAmount')}</th>
+              <th>{t('admin.payments.platformFeeLabel')}</th>
+              <th>{t('admin.payments.dealerEarnings')}</th>
+              <th>{t('admin.payments.status')}</th>
+              <th>{t('admin.payments.date')}</th>
+              <th>{t('admin.payments.action')}</th>
             </tr>
           </thead>
           <tbody>
@@ -150,7 +152,7 @@ const PaymentsSettlements = () => {
               const fee = getPlatformFee(payment);
               const dealerEarnings = getDealerEarnings(payment);
               const amount = getOrderAmount(payment);
-              
+
               return (
                 <tr key={payment._id || payment.orderId || payment.id}>
                   <td><strong>#{getOrderId(payment)}</strong></td>
@@ -163,16 +165,16 @@ const PaymentsSettlements = () => {
                       background: payment.status === 'Delivered' ? '#22c55e' : '#f97316',
                       color: 'white'
                     }}>
-                      {payment.status === 'Delivered' ? 'Completed' : 'Pending'}
+                      {payment.status === 'Delivered' ? t('admin.payments.completed') : t('admin.payments.pending')}
                     </span>
                   </td>
                   <td>{formatDate(getOrderDate(payment))}</td>
                   <td>
-                    <button 
+                    <button
                       className="action-btn"
                       onClick={() => viewPaymentDetails(payment)}
                     >
-                      View
+                      {t('admin.payments.view')}
                     </button>
                   </td>
                 </tr>
@@ -186,28 +188,28 @@ const PaymentsSettlements = () => {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Payment Details - Order #{getOrderId(selectedPayment)}</h2>
+              <h2>{t('admin.payments.paymentDetails')}{getOrderId(selectedPayment)}</h2>
               <button className="close-btn" onClick={() => setShowModal(false)}>✕</button>
             </div>
 
             <div className="modal-body">
               <section className="info-section">
-                <h3>Order Information</h3>
+                <h3>{t('admin.payments.orderInfo')}</h3>
                 <div className="info-rows">
                   <div className="info-row">
-                    <label>Order ID</label>
+                    <label>{t('admin.payments.orderId')}</label>
                     <span>#{getOrderId(selectedPayment)}</span>
                   </div>
                   <div className="info-row">
-                    <label>Dealer Name</label>
+                    <label>{t('admin.payments.dealerName')}</label>
                     <span>{getDealerName(selectedPayment)}</span>
                   </div>
                   <div className="info-row">
-                    <label>Order Date</label>
+                    <label>{t('admin.payments.orderDate')}</label>
                     <span>{formatDate(getOrderDate(selectedPayment))}</span>
                   </div>
                   <div className="info-row">
-                    <label>Order Status</label>
+                    <label>{t('admin.payments.orderStatus')}</label>
                     <span className="status-pill" style={{
                       background: selectedPayment.status === 'Delivered' ? '#22c55e' : '#f97316',
                       color: 'white',
@@ -220,18 +222,18 @@ const PaymentsSettlements = () => {
               </section>
 
               <section className="info-section">
-                <h3>Payment Breakdown</h3>
+                <h3>{t('admin.payments.paymentBreakdown')}</h3>
                 <div className="payment-breakdown">
                   <div className="breakdown-row">
-                    <span>Order Amount</span>
+                    <span>{t('admin.payments.orderAmountLabel')}</span>
                     <span className="amount">₹{getOrderAmount(selectedPayment).toLocaleString()}</span>
                   </div>
                   <div className="breakdown-row">
-                    <span>Platform Fee (2%, max ₹100)</span>
+                    <span>{t('admin.payments.platformFeeBreakdown')}</span>
                     <span className="amount">₹{getPlatformFee(selectedPayment).toLocaleString()}</span>
                   </div>
                   <div className="breakdown-row total">
-                    <span>Dealer Earnings</span>
+                    <span>{t('admin.payments.dealerEarningsLabel')}</span>
                     <span className="amount">₹{getDealerEarnings(selectedPayment).toLocaleString()}</span>
                   </div>
                 </div>
@@ -239,14 +241,14 @@ const PaymentsSettlements = () => {
 
               {selectedPayment.requestDetails && (
                 <section className="info-section">
-                  <h3>Route Details</h3>
+                  <h3>{t('admin.payments.routeDetails')}</h3>
                   <div className="info-rows">
                     <div className="info-row">
-                      <label>Pickup</label>
+                      <label>{t('admin.payments.pickup')}</label>
                       <span>{selectedPayment.requestDetails.pickupLocation}</span>
                     </div>
                     <div className="info-row">
-                      <label>Delivery</label>
+                      <label>{t('admin.payments.delivery')}</label>
                       <span>{selectedPayment.requestDetails.deliveryLocation}</span>
                     </div>
                   </div>
@@ -254,19 +256,19 @@ const PaymentsSettlements = () => {
               )}
 
               <section className="info-section">
-                <h3>Settlement Status</h3>
+                <h3>{t('admin.payments.settlementStatus')}</h3>
                 <div className="settlement-status">
                   {selectedPayment.status === 'Delivered' ? (
-                    <p className="success-msg">✓ Payment completed and settled</p>
+                    <p className="success-msg">{t('admin.payments.paymentCompleted')}</p>
                   ) : (
-                    <p className="pending-msg">⏳ Payment pending - Order still in transit</p>
+                    <p className="pending-msg">{t('admin.payments.paymentPending')}</p>
                   )}
                 </div>
               </section>
             </div>
 
             <div className="modal-footer">
-              <button className="modal-close-btn" onClick={() => setShowModal(false)}>Close</button>
+              <button className="modal-close-btn" onClick={() => setShowModal(false)}>{t('admin.payments.close')}</button>
             </div>
           </div>
         </div>

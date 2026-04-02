@@ -245,9 +245,12 @@ router.post('/', requireAuth, async (req, res) => {
       customerEmail: customer.email,
       farmerId: safeFarmerId,
       farmerName: farmer ? farmer.name : (items[0]?.farmerName || 'Unknown'),
+      farmerEmail: farmer?.email || null,
+      farmerPhone: farmer?.profile?.phone || null,
       dealerId: safeDealerId,
       dealerName: transport.dealerName || dealer?.name || null,
       dealerEmail: dealer?.email || null,
+      dealerPhone: dealer?.profile?.phone || null,
       dealerRequestId: safeDealerRequestId,
       customerSnapshot: {
         phone: String(customerSnapshotPayload.phone || delivery.dropPhone || customer?.profile?.phone || ''),

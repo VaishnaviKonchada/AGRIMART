@@ -8,13 +8,13 @@ export default function CustomerHeader() {
   
   return (
     <header className="home-header">
-      <div className="header-inner" style={{ position: 'relative' }}>
+      <div className="section-container header-inner">
         <div className="logo-wrap">
-          <span className="logo-icon">🌾</span>
+          <span className="logo-icon">🌿</span>
           <span className="logo-text">Agri<span>Mart</span></span>
         </div>
-        <span className="tagline">{t('Fresh from Farmers, Daily', 'Fresh from Farmers, Daily')}</span>
-        <div style={{ position: 'absolute', right: '15px', top: '15px' }}>
+        <div className="header-actions">
+          <span className="tagline">{t('Fresh from Farmers, Daily', 'Fresh from Farmers, Daily')}</span>
           <LanguageSwitcher />
         </div>
       </div>

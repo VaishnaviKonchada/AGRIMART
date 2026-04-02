@@ -14,6 +14,7 @@ def normalize_key(value: str) -> str:
 
 
 def load_image_tensor(image_path: Path, image_size: int):
+    # Using tf.keras.utils to load and convert to array with 0-1 scaling
     img = tf.keras.utils.load_img(image_path, target_size=(image_size, image_size))
     arr = tf.keras.utils.img_to_array(img)
     arr = arr / 255.0
@@ -21,28 +22,36 @@ def load_image_tensor(image_path: Path, image_size: int):
 
 
 def build_solution(label: str, solutions: dict):
-    normalized = normalize_key(label)
+    # Clean label (remove triple underscores or other common dataset artifacts)
+    normalized = normalize_key(label).replace("___", "_").replace("__", "_")
 
+    # Direct match
     if normalized in solutions:
         return solutions[normalized]
 
-    if "healthy" in normalized and "healthy" in solutions:
-        return solutions["healthy"]
+    # Crop-specific healthy check
+    if "healthy" in normalized:
+        crop = normalized.split("_")[0]
+        if f"{crop}_healthy" in solutions:
+            return solutions[f"{crop}_healthy"]
+        return solutions.get("healthy", solutions.get("default"))
 
-    for key in solutions.keys():
-        if key == "default":
-            continue
-        if key in normalized or normalized in key:
-            return solutions[key]
-
+    # Keyword search (e.g., if label contains 'blight')
     for key in ["blight", "rust", "powdery_mildew", "downy_mildew", "leaf_spot", "bacterial", "viral", "scab"]:
-        if key in normalized and key in solutions:
-            return solutions[key]
+        if key in normalized:
+            if normalized in solutions: return solutions[normalized]
+            # Try to find a specific match in solutions for this crop + disease
+            for sol_key in solutions.keys():
+                if key in sol_key and normalized.split("_")[0] in sol_key:
+                    return solutions[sol_key]
+            # Fallback to generic disease type advice
+            if key in solutions:
+                return solutions[key]
 
     return solutions.get("default", {
-        "disease": "Unknown condition",
-        "severity": "Needs inspection",
-        "solution": ["Capture clearer image and consult extension officer."]
+        "disease": "Observation noted",
+        "severity": "Unknown",
+        "solution": ["The AI detected symptoms that need manual confirmation. Please consult an expert."]
     })
 
 

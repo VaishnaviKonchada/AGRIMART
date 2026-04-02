@@ -1,0 +1,257 @@
+/* Transport Dealer Global UI Refinement */
+:root {
+  --dealer-primary: #1e8e3e; /* Professional Green */
+  --dealer-secondary: #2e7d32;
+  --dealer-bg: #ffffff;
+
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --header-bg: rgba(255, 255, 255, 0.85);
+}
+
+.transport-dealer-layout {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1e293b;
+  min-height: 100vh;
+  background-color: var(--dealer-bg) !important;
+}
+
+
+/* General Card Styling */
+.stat-card, .earnings-card, .rating-card, .profile-card, .section-card, .vehicle-card-modal, .form-section {
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 20px !important;
+  box-shadow: var(--card-shadow) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  padding: 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Vibrant Status Colors */
+.stat-card.primary { border-top: 4px solid #6366f1 !important; background: linear-gradient(to bottom, #f5f3ff, #ffffff) !important; }
+.stat-card.warning { border-top: 4px solid #f59e0b !important; background: linear-gradient(to bottom, #fffbeb, #ffffff) !important; }
+.stat-card.info { border-top: 4px solid #0ea5e9 !important; background: linear-gradient(to bottom, #f0f9ff, #ffffff) !important; }
+.stat-card.success { border-top: 4px solid #10b981 !important; background: linear-gradient(to bottom, #f0fdf4, #ffffff) !important; }
+
+/* Enhanced Icon Circles */
+.stat-icon {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 24px !important;
+  margin-bottom: 12px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+.primary .stat-icon { background: linear-gradient(135deg, #6366f1, #4f46e5) !important; color: white !important; }
+.warning .stat-icon { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: white !important; }
+.info .stat-icon { background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; color: white !important; }
+.success .stat-icon { background: linear-gradient(135deg, #10b981, #059669) !important; color: white !important; }
+
+/* Professional Typographic Hierarchy */
+.stat-value {
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  color: #0f172a !important;
+  margin: 4px 0 !important;
+}
+
+.stat-label {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: #64748b !important;
+}
+
+/* Quick Action Improvements */
+.action-btn {
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 12px !important;
+  color: #334155 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+}
+
+.action-btn:hover {
+  background: var(--dealer-primary) !important;
+  color: white !important;
+  border-color: transparent !important;
+  transform: translateY(-3px) !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* High-End Global Overrides for Sub-Pages */
+
+/* Page Headers / Banner Enhancements */
+.page-header, .account-header, .header-container, .requests-header, .earnings-header {
+  background: white !important;
+  color: #1e293b !important;
+  padding: 30px !important;
+  border-radius: 20px !important;
+  margin-bottom: 25px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.page-header h1, .page-header h2, .section-title, .earnings-title, .header-title {
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+  margin: 0 !important;
+  text-shadow: none !important;
+}
+
+/* Back Button Refinement */
+.back-btn, .dashboard-btn {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #1e293b !important;
+  padding: 10px 20px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  font-size: 12px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+}
+
+.back-btn:hover, .dashboard-btn:hover {
+  background: #1e8e3e !important;
+  color: white !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Info Banners (e.g. 'You have 5 minutes...') */
+.info-banner, .alert-banner, .timer-info {
+  background: linear-gradient(90deg, #ecfeff, #cffafe) !important;
+  border-left: 5px solid #0ea5e9 !important;
+  color: #0369a1 !important;
+  padding: 18px 25px !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  margin-bottom: 25px !important;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.05) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 15px !important;
+}
+
+/* Empty States Improvements */
+.empty-state, .no-requests, .no-data {
+  background: white !important;
+  border: 2px dashed #e2e8f0 !important;
+  border-radius: 20px !important;
+  padding: 60px 40px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.empty-state h3, .empty-state p {
+  color: #64748b !important;
+  font-weight: 700 !important;
+  margin-top: 15px !important;
+}
+
+/* Standard List Items / History Items */
+.history-item, .order-item, .vehicle-card, .earnings-row {
+  background: white !important;
+  border: 1px solid #f1f5f9 !important;
+  border-radius: 16px !important;
+  padding: 20px !important;
+  margin-bottom: 12px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+}
+
+.history-item:hover, .order-item:hover, .vehicle-item:hover {
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.04) !important;
+  transform: scale(1.01) !important;
+}
+
+/* Avatar/Profile enhancements */
+.avatar, .profile-image-container {
+  border: 6px solid white !important;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+  background: linear-gradient(135deg, #1e8e3e, #2e7d32) !important;
+  color: white !important;
+  font-weight: 900 !important;
+  font-size: 32px !important;
+}
+
+/* Form Styles for Dealer Account */
+.form-grid input, .form-grid select {
+  padding: 14px 18px !important;
+  border-radius: 12px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  font-family: inherit !important;
+  transition: all 0.3s ease !important;
+  font-weight: 500 !important;
+}
+
+.form-grid input:focus {
+  border-color: #1e8e3e !important;
+  outline: none !important;
+  box-shadow: 0 0 0 4px rgba(30, 142, 62, 0.1) !important;
+}
+
+/* Badge Refinement */
+.badge, .status-badge {
+  padding: 6px 14px !important;
+  border-radius: 100px !important;
+  font-weight: 800 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.03em !important;
+  text-transform: uppercase !important;
+}
+
+/* Responsive Main View */
+main {
+  animation: fadeIn 0.4s ease-out;
+  padding: 40px 30px !important;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  main {
+    padding: 10px !important;
+  }
+}

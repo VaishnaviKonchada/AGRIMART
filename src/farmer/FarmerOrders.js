@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
+import { apiGet } from "../utils/api";
+import noOrdersImg from "../assets/no-orders.png";
+import "../styles/FarmerOrders.css";
 
 function FarmerOrders() {
   const navigate = useNavigate();
@@ -19,25 +21,25 @@ function FarmerOrders() {
     return String(value);
   };
 
+  const user = JSON.parse(localStorage.getItem("registeredUser") || "null");
+
   // Fetch farmer orders from backend
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("accessToken");
+        const farmerId = user?.id || user?._id;
         
-        if (!token) {
+        if (!token || !farmerId) {
           console.warn(t("orders.noAccessToken", "No access token found, showing empty orders"));
           setOrders([]);
           setLoading(false);
           return;
         }
 
-        const response = await fetch("/api/orders", {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (!response.ok) throw new Error('Failed to fetch orders');
-        const ordersData = await response.json();
+        const data = await apiGet(`orders/farmer/${farmerId}`);
+        const ordersData = Array.isArray(data) ? data : data?.orders || [];
         console.log('✅ Fetched farmer orders:', ordersData.length);
         setOrders(ordersData);
       } catch (error) {
@@ -49,7 +51,7 @@ function FarmerOrders() {
     };
 
     fetchOrders();
-  }, [t]);
+  }, [t, user?.id, user?._id]);
 
   const stats = useMemo(() => {
     const total = orders.length;
@@ -59,7 +61,7 @@ function FarmerOrders() {
         (o.items?.reduce((a, i) => a + ((i.quantity || 0) * (i.pricePerKg || 0)), 0) || 0);
       return s + itemsTotal;
     }, 0);
-    const pending = orders.filter((o) => o.status !== "Delivered" && o.status !== "Cancelled").length;
+    const pending = orders.filter((o) => o.status === "Pending").length;
     return { total, revenue, pending };
   }, [orders]);
 
@@ -97,7 +99,7 @@ function FarmerOrders() {
     const country = String(delivery?.dropCountry || snapshot?.country || profile?.country || "").trim();
 
     const parts = [];
-    if (doorNo) parts.push(`Door No: ${doorNo}`);
+    if (doorNo) parts.push(`${t("farmerAccount.doorNo")}: ${doorNo}`);
     [locationText, mandal, district, state, pincode, country]
       .filter((part) => String(part || "").trim())
       .forEach((part) => {
@@ -168,10 +170,13 @@ function FarmerOrders() {
       {loading ? (
         <div className="empty">{t("orders.loading")}</div>
       ) : filtered.length === 0 ? (
-        <div className="empty">
-          {orders.length === 0 
-            ? t("orders.noOrdersYet")
-            : t("orders.noOrdersFound")}
+        <div className="empty-state">
+          <img src={noOrdersImg} alt="No Orders" className="empty-state-img" />
+          <p>
+            {orders.length === 0 
+              ? t("orders.noOrdersYet")
+              : t("orders.noOrdersFound")}
+          </p>
         </div>
       ) : (
         <div className="orders-list">
@@ -221,7 +226,9 @@ function FarmerOrders() {
                 <div className="order-main">
                   <div className="crop-pill">{isSingleItem ? firstItem.name : `${firstItem.name} +${orderItems.length - 1}`}</div>
                   <div className="order-id">{o.orderId || o.id || "N/A"}</div>
-                  <div className={`status ${getStatusClass(o.status)}`}>{o.status}</div>
+                  <div className={`status ${getStatusClass(o.status)}`}>
+                    {t(`orders.status.${(o.status || "").replace(/\s+/g, "").toLowerCase()}`, o.status)}
+                  </div>
                 </div>
                 <div className="order-info">
                   <div>
@@ -230,11 +237,11 @@ function FarmerOrders() {
                   </div>
                   <div>
                     <div className="label">{t("orders.quantity")}</div>
-                    <div className="value">{totalQuantity} kg</div>
+                    <div className="value">{totalQuantity} {t("addCrop.unitKg")}</div>
                   </div>
                   <div>
                     <div className="label">{t("orders.pricePerKg")}</div>
-                    <div className="value">{isSingleItem ? `₹${firstItem.pricePerKg.toLocaleString()}` : "Mixed"}</div>
+                    <div className="value">{isSingleItem ? `₹${firstItem.pricePerKg.toLocaleString()}` : t("common.mixed", "Mixed")}</div>
                   </div>
                   <div>
                     <div className="label">{t("orders.farmerAmount")}</div>

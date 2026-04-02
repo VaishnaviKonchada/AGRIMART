@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { apiGet } from "../utils/api";
 import "../styles/FarmerDashboard.css";
 import { useTranslation } from "react-i18next";
+import emptyBoxImg from "../assets/no-orders.png";
 
 export default function FarmerDashboard() {
   const { t, i18n } = useTranslation();
@@ -113,7 +114,7 @@ export default function FarmerDashboard() {
     );
   }, [farmerCrops]);
   const pendingOrders = useMemo(
-    () => farmerOrders.filter((o) => o.status !== "Delivered" && o.status !== "Cancelled").length,
+    () => farmerOrders.filter((o) => o.status === "Pending").length,
     [farmerOrders]
   );
   const completedOrders = useMemo(
@@ -195,24 +196,24 @@ export default function FarmerDashboard() {
       })
       .slice(0, 6)
       .map((o, idx) => {
-        const firstItem = (o.items || [])[0] || {};
+        const cropString = (o.items || []).map(it => it.cropName || it.name).filter(Boolean).join(', ');
         const m = mapStatus(o.status);
         return {
           id: idx + 1,
           action: m.label,
-          crop: firstItem.cropName || firstItem.name || "",
+          crop: cropString,
           time: timeAgo(o.createdAt),
           status: m.status,
         };
       });
   }, [farmerOrders]);
-  const weatherData = {
+  const [weatherData, setWeatherData] = useState({
     temp: "28°C",
-    condition: t('farmerDashboard.weather.partlyCloudy'),
+    condition: 'farmerDashboard.weather.partlyCloudy',
     humidity: "65%",
-    rainfall: "Light",
-    windSpeed: `12 ${t('farmerDashboard.wind')}`
-  };
+    rainfall: "12%",
+    windSpeed: "15 km/h"
+  });
   const buildAnalytics = () => {
     const getTimestamp = (createdAt) => {
       if (!createdAt) return 0;
@@ -298,7 +299,30 @@ export default function FarmerDashboard() {
       {/* Main Dashboard Content */}
       <div className="dashboard-content">
         
-        {/* Statistics Cards */}
+        {/* Welcome Header Section */}
+        <header className="dashboard-hero">
+          <div className="greeting-wrapper">
+            <h1 className="main-greeting">
+              {new Date().getHours() < 12 ? "🌅 " + t("farmerDashboard.goodMorning") : 
+               new Date().getHours() < 17 ? "☀️ " + t("farmerDashboard.goodAfternoon") : 
+               "🌙 " + t("farmerDashboard.goodEvening")}, 
+              <span className="user-name">{user?.name || t("common.farmer")}</span>
+            </h1>
+            <p className="dashboard-subtitle">{t("farmerDashboard.welcomeBackMsg")}</p>
+          </div>
+          
+          <div className="digital-clock">
+            <div className="clock-col">
+              <span className="clock-time">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              <span className="clock-date">{new Date().toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'short' })}</span>
+            </div>
+            <div className="profile-btn" onClick={() => handleNavigate('/farmer-account')}>
+              <div className="profile-img-placeholder">
+                {(user?.name || "F")[0].toUpperCase()}
+              </div>
+            </div>
+          </div>
+        </header>
         <div className="stats-grid">
           <div className="stat-card stat-primary">
             <div className="stat-icon">🌾</div>
@@ -371,36 +395,29 @@ export default function FarmerDashboard() {
 
           {/* Weather Card */}
           <div className="weather-card">
-            <h2 className="section-title">
-              <span className="title-icon">🌤️</span>
-              {t('farmerDashboard.weatherToday')}
-            </h2>
+            <div className="weather-header">
+              <h2 className="section-title">
+                <span className="title-icon">🌤️</span>
+                {t('farmerDashboard.weatherToday')}
+              </h2>
+            </div>
             <div className="weather-content">
               <div className="weather-main">
-                <div className="temp-display">{weatherData.temp}</div>
-                <div className="weather-condition">{weatherData.condition}</div>
+                <div className="temp-huge">{weatherData.temp}</div>
+                <div className="weather-condition">{t(weatherData.condition)}</div>
               </div>
-              <div className="weather-details">
-                <div className="weather-item">
-                  <span className="weather-icon">💧</span>
-                  <div className="weather-info">
-                    <span className="weather-label">{t('farmerDashboard.humidity')}</span>
-                    <span className="weather-value">{weatherData.humidity}</span>
-                  </div>
+              <div className="weather-info-box">
+                <div className="weather-mini-item">
+                  <span className="weather-label">💧 {t('farmerDashboard.humidity')}</span>
+                  <span className="weather-value">{weatherData.humidity}</span>
                 </div>
-                <div className="weather-item">
-                  <span className="weather-icon">🌧️</span>
-                  <div className="weather-info">
-                    <span className="weather-label">{t('farmerDashboard.rainfall')}</span>
-                    <span className="weather-value">{weatherData.rainfall}</span>
-                  </div>
+                <div className="weather-mini-item">
+                  <span className="weather-label">🌧️ {t('farmerDashboard.rainfall')}</span>
+                  <span className="weather-value">{weatherData.rainfall}</span>
                 </div>
-                <div className="weather-item">
-                  <span className="weather-icon">💨</span>
-                  <div className="weather-info">
-                    <span className="weather-label">{t('farmerDashboard.wind')}</span>
-                    <span className="weather-value">{weatherData.windSpeed}</span>
-                  </div>
+                <div className="weather-mini-item">
+                  <span className="weather-label">💨 {t('farmerDashboard.wind')}</span>
+                  <span className="weather-value">{weatherData.windSpeed}</span>
                 </div>
               </div>
             </div>
@@ -414,16 +431,25 @@ export default function FarmerDashboard() {
             {t('farmerDashboard.recentActivities')}
           </h2>
           <div className="activities-list">
-            {recentActivities.map(activity => (
-              <div key={activity.id} className={`activity-item status-${activity.status}`}>
-                <div className="activity-indicator"></div>
-                <div className="activity-content">
-                  <p className="activity-action">{activity.action}</p>
-                  <p className="activity-crop">{activity.crop}</p>
+            {recentActivities.length > 0 ? (
+              recentActivities.map(activity => (
+                <div key={activity.id} className={`activity-item status-${activity.status}`}>
+                  <div className="activity-main">
+                    <div className={`activity-status-dot dot-${activity.status}`}></div>
+                    <div className="activity-label-group">
+                      <h4>{activity.action}</h4>
+                      <p>{activity.crop}</p>
+                    </div>
+                  </div>
+                  <span className="activity-time">{activity.time}</span>
                 </div>
-                <span className="activity-time">{activity.time}</span>
+              ))
+            ) : (
+              <div className="no-activities">
+                <img src={emptyBoxImg} alt="No activity" className="empty-box-graphic" />
+                <p>{t("farmerDashboard.noActivityYet")}</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -434,15 +460,15 @@ export default function FarmerDashboard() {
             {t('farmerDashboard.tipsTitle')}
           </h2>
           <div className="tips-content">
-            <div className="tip-item">
+            <div className="tip-pill">
               <span className="tip-icon">🌱</span>
               <p>{t('farmerDashboard.tip1')}</p>
             </div>
-            <div className="tip-item">
+            <div className="tip-pill">
               <span className="tip-icon">💧</span>
               <p>{t('farmerDashboard.tip2')}</p>
             </div>
-            <div className="tip-item">
+            <div className="tip-pill">
               <span className="tip-icon">🔔</span>
               <p>{t('farmerDashboard.tip3', { count: 3 })}</p>
             </div>

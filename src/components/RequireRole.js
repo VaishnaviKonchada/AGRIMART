@@ -85,7 +85,22 @@ export default function RequireRole({ role, children }) {
 
   // If check not complete, show nothing (prevents flash of content)
   if (!isCheckComplete) {
-    return <div style={{display: 'none'}}>Checking access...</div>;
+    return (
+      <div className="loading-state" style={{ 
+        position: 'fixed', 
+        top: 0, left: 0, right: 0, bottom: 0, 
+        backgroundColor: '#ffffff', 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        zIndex: 9999 
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="spinner"></div>
+          <p style={{ marginTop: '15px', fontWeight: '600', color: '#059669' }}>Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   // Check passed - render children

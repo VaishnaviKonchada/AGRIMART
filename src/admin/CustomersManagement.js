@@ -166,7 +166,7 @@ const CustomersManagement = () => {
                   </div>
                   <div className="info-row">
                     <label>{t('admin.customers.address')}</label>
-                    <span>{selectedCustomer.profile?.fullAddress || ""}</span>
+                    <span>{selectedCustomer.location || selectedCustomer.profile?.fullLocation || selectedCustomer.profile?.locationText || 'N/A'}</span>
                   </div>
                   <div className="info-row">
                     <label>{t('admin.customers.memberSince')}</label>

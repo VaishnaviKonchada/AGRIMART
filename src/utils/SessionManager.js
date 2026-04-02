@@ -136,42 +136,49 @@ class SessionManager {
 
     // If we have user + token + role, consider it valid for client-side routing
     // Server will validate token on actual API calls
-    if (session.user && session.token && session.role) {
-      // Only do basic token format check (must have 3 parts separated by dots)
-      const parts = session.token.split('.');
-      if (parts.length !== 3) {
-        console.warn('⚠️ Token has invalid format - clearing session');
-        return false;
-      }
-
-      // Try to check expiry, but don't fail if we can't decode
-      try {
-        const payload = JSON.parse(atob(parts[1]));
-        if (payload.exp) {
-          const expTime = payload.exp * 1000;
-          const now = Date.now();
-          
-          if (expTime < now) {
-            console.warn('⚠️ Token is expired - session invalid');
-            return false;
+      // If we have user + token + role, consider it valid for client-side routing
+      // Server will validate token on actual API calls
+      if (session.user && session.token && session.role) {
+        // Try basic token format check (JWTs have 3 parts separated by dots)
+        const parts = session.token.split('.');
+        
+        // If it looks like a JWT, check its expiry
+        if (parts.length === 3) {
+          try {
+            const payload = JSON.parse(atob(parts[1]));
+            if (payload.exp) {
+              const expTime = payload.exp * 1000;
+              const now = Date.now();
+              
+              if (expTime < now) {
+                console.warn('⚠️ Token is expired - session invalid');
+                return false;
+              }
+              
+              // Log expiry only once every 5 seconds to avoid log spam
+              const now_time = Date.now();
+              if (now_time - lastValidationLog > 5000) {
+                const minutesLeft = Math.round((expTime - now) / 60000);
+                console.log(`✅ Session valid (${minutesLeft}m left)`);
+                lastValidationLog = now_time;
+              }
+            }
+          } catch (error) {
+            // Can't decode token payload, but it's okay - backend will validate it
+            console.log('✅ Session appears valid (token payload is unreadable)');
           }
-          
-          // Log expiry only once every 5 seconds to avoid log spam
+        } else {
+          // It's a non-JWT token, but we still consider it valid as a base token
+          // Backend will validate it on the next API request
           const now_time = Date.now();
           if (now_time - lastValidationLog > 5000) {
-            const minutesLeft = Math.round((expTime - now) / 60000);
-            console.log(`✅ Session valid (${minutesLeft}m left)`);
+            console.log('✅ Session valid (simple token format)');
             lastValidationLog = now_time;
           }
         }
-      } catch (error) {
-        // Can't decode token, but if session exists, let it through
-        // Backend will do final validation on API calls
-        console.log('✅ Session appears valid (token validation deferred to API)');
-      }
 
-      return true;
-    }
+        return true;
+      }
 
     return false;
   }

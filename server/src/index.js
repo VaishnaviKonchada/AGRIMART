@@ -49,7 +49,44 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+// Database connection state
+let isConnected = false;
+
+async function connectToDatabase() {
+  if (isConnected) return;
+  if (!process.env.MONGODB_URI) {
+    console.warn('⚠️ MONGODB_URI is not set! The server might fail on DB operations.');
+  }
+  if (!process.env.JWT_SECRET) {
+    console.error('❌ JWT_SECRET is not set! All logins will FAIL on Vercel.');
+  }
+  try {
+    await connectDB(process.env.MONGODB_URI);
+    isConnected = true;
+    console.log('✅ MongoDB connected');
+  } catch (err) {
+    console.error('❌ MongoDB connection failed:', err.message);
+  }
+}
+
+// Middleware to ensure DB is connected BEFORE routes
+app.use(async (req, res, next) => {
+  await connectToDatabase();
+  next();
+});
+
 app.use(morgan('dev'));
+
+// Diagnostic route
+app.get('/api/debug-db', async (req, res) => {
+  const state = {
+    connected: isConnected,
+    env_uri: !!process.env.MONGODB_URI,
+    mongoose_state: mongoose.connection.readyState,
+    ts: Date.now()
+  };
+  res.json(state);
+});
 
 app.get('/', (req, res) => res.json({ 
   message: '🌾 AgriMart API is running', 
@@ -119,31 +156,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Database connection state
-let isConnected = false;
-
-async function connectToDatabase() {
-  if (isConnected) return;
-  if (!process.env.MONGODB_URI) {
-    console.warn('⚠️ MONGODB_URI is not set! The server might fail on DB operations.');
-  }
-  if (!process.env.JWT_SECRET) {
-    console.error('❌ JWT_SECRET is not set! All logins will FAIL on Vercel.');
-  }
-  try {
-    await connectDB(process.env.MONGODB_URI);
-    isConnected = true;
-    console.log('✅ MongoDB connected');
-  } catch (err) {
-    console.error('❌ MongoDB connection failed:', err.message);
-  }
-}
-
-// Middleware to ensure DB is connected
-app.use(async (req, res, next) => {
-  await connectToDatabase();
-  next();
-});
 
 const port = process.env.PORT || 8080;
 

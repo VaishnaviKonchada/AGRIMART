@@ -26,7 +26,11 @@ import { importDistricts, importMandals } from './services/csvImportService.js';
 dotenv.config();
 
 const app = express();
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+  crossOriginOpenerPolicy: false,
+  contentSecurityPolicy: false
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 const allowedOrigins = (process.env.CLIENT_ORIGIN || '*').split(',').map(o => o.trim());
@@ -167,13 +171,16 @@ async function start() {
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
   console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error.message, error.stack);
-  process.exit(1);
 });
 
+// Connect DB and start server (for local dev / traditional hosting)
 start();
+
+// Export for Vercel serverless functions
+export default app;
+

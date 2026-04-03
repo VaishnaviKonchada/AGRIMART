@@ -116,24 +116,23 @@ export default function Login() {
         verified: savedSession?.user?.role === data.user.role
       });
 
-      // Determine navigation target based on the user role
-      const effectiveRole = data.user.role;
+      // Determine navigation target based on the user role (case-insensitive)
+      const rawRole = (data.user.role || "").toLowerCase().trim();
+      const effectiveRole = rawRole === "dealer" ? "transport dealer" : rawRole;
+      
       const targetPath = 
         effectiveRole === "customer" ? "/home" :
         effectiveRole === "farmer" ? "/farmer-dashboard" :
-        effectiveRole === "dealer" || effectiveRole === "transport dealer" ? "/transport-dealer-dashboard" :
+        effectiveRole === "transport dealer" ? "/transport-dealer-dashboard" :
         effectiveRole === "admin" ? "/admin" :
         "/";
 
       console.log("🎯 NAVIGATION PLAN:", { 
         selectedRole: role, 
-        normalizedRole: normalizedRole, 
         backendRole: data.user.role,
         effectiveRole: effectiveRole,
         targetPath: targetPath
       });
-
-      alert("Login Successful 🎉");
 
       // Clear logout flag and intended role since login succeeded
       sessionStorage.removeItem("logoutInProgress");
@@ -143,9 +142,9 @@ export default function Login() {
       console.log("🔄 Starting session monitoring...");
       SessionManager.startSessionMonitoring();
 
-      // Hard redirect to ensure the dashboard opens
+      // Use navigate for smoother transition without full page reload
       console.log(`⚡ Navigating to ${targetPath}...`);
-      window.location.assign(targetPath);
+      navigate(targetPath);
       return;
 
     } catch (error) {

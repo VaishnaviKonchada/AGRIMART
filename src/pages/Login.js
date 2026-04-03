@@ -142,9 +142,11 @@ export default function Login() {
       console.log("🔄 Starting session monitoring...");
       SessionManager.startSessionMonitoring();
 
-      // Use navigate for smoother transition without full page reload
-      console.log(`⚡ Navigating to ${targetPath}...`);
-      navigate(targetPath);
+      // Use navigate with small delay for storage persistence
+      console.log(`⚡ Navigating to ${targetPath} (100ms safety delay)...`);
+      setTimeout(() => {
+        navigate(targetPath);
+      }, 100);
       return;
 
     } catch (error) {

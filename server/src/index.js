@@ -34,20 +34,20 @@ app.use(helmet({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-const allowedOrigins = (process.env.CLIENT_ORIGIN || '*').split(',').map(o => o.trim());
+
+// CORS configuration
+const allowedOrigin = process.env.CLIENT_ORIGIN || '*';
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    // Allow if wildcard
-    if (allowedOrigins.includes('*')) return callback(null, true);
-    // Allow if origin is in the list
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    // Allow any *.vercel.app subdomain
-    if (/\.vercel\.app$/.test(origin)) return callback(null, true);
+    if (!origin || allowedOrigin === '*') return callback(null, true);
+    if (origin === allowedOrigin || /\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
     callback(new Error('Not allowed by CORS'));
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(morgan('dev'));
 

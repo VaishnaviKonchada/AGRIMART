@@ -13,6 +13,7 @@ class SessionManager {
     this.SESSION_CHECK_INTERVAL = 1000; // Check every 1 second
     this.isSessionCheckRunning = false;
     this.VALIDATION_LOG_INTERVAL = 5000; // Log every 5 seconds max
+    this.isSavingInProgress = false; // Flag to prevent race conditions during login
   }
 
   /**
@@ -66,11 +67,11 @@ class SessionManager {
         return false;
       }
 
-      // Clear stale data first to ensure atomic operation
-      SessionManager.clearSession();
+      // Signal for monitoring to pause clearing
+      if (monitoringInstance) monitoringInstance.isSavingInProgress = true;
       
-      // Save new session atomically - all or nothing
-      const startTime = Date.now();
+      // Clear stale data first
+      SessionManager.clearSession();
       
       localStorage.setItem('accessToken', token);
       localStorage.setItem('authToken', token); // Backup
@@ -79,21 +80,13 @@ class SessionManager {
       localStorage.setItem('sessionStartTime', new Date().toISOString());
       localStorage.setItem('sessionValid', 'true');
       
-      // Verify it was saved
-      const verifyUser = localStorage.getItem('registeredUser');
-      const verifyToken = localStorage.getItem('accessToken');
-      const verifyRole = localStorage.getItem('userRole');
-      
-      if (!verifyUser || !verifyToken || !verifyRole) {
-        console.error('❌ Session save verification failed - localStorage might be full or blocked');
-        SessionManager.clearSession();
-        return false;
-      }
+      // End signal
+      if (monitoringInstance) monitoringInstance.isSavingInProgress = false;
 
-      const saveTime = Date.now() - startTime;
-      console.log(`✅ Session saved successfully in ${saveTime}ms for: ${userData.name} (${userData.role})`);
+      console.log(`✅ Session saved successfully for: ${userData.name}`);
       return true;
     } catch (error) {
+      if (monitoringInstance) monitoringInstance.isSavingInProgress = false;
       console.error('❌ Error saving session:', error.message);
       return false;
     }
@@ -202,13 +195,18 @@ class SessionManager {
 
     const monitoringInterval = setInterval(() => {
       try {
+        // SKIP check if we are in the middle of saving a new session (prevents race condition)
+        if (monitoringInstance.isSavingInProgress) return;
+
         const isValid = SessionManager.isSessionValid();
         if (!isValid) {
-          console.warn('⚠️ Session became invalid during monitoring - clearing');
-          SessionManager.clearSession();
-          // Don't redirect here - let route guards handle it
-          clearInterval(monitoringInterval);
-          monitoringInstance.isSessionCheckRunning = false;
+          // Double check to be sure (wait 500ms and check once more before clearing)
+          setTimeout(() => {
+            if (!SessionManager.isSessionValid() && !monitoringInstance.isSavingInProgress) {
+              console.warn('⚠️ Session definitely invalid - clearing');
+              SessionManager.clearSession();
+            }
+          }, 500);
         }
       } catch (error) {
         console.error('❌ Error during session monitoring:', error.message);

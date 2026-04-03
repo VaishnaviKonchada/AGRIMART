@@ -72,9 +72,9 @@ export default function Login() {
       });
 
       if (!response.ok) {
-        console.error("❌ LOGIN FAILED:", data.message);
+        console.error("❌ LOGIN FAILED:", data.message, data.error);
         setIsLoginAttempted(false); // Reset flag on error
-        alert(data.message || "Invalid login credentials");
+        alert(`Login failed: ${data.message}${data.error ? ' (' + data.error + ')' : ''}`);
         return;
       }
 

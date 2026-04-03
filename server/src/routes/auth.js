@@ -363,7 +363,11 @@ router.post('/login', async (req, res) => {
     });
   } catch (e) {
     console.error('❌ Login error:', e.message, e.stack);
-    return res.status(500).json({ message: 'Server error during login', error: e.message });
+    return res.status(500).json({ 
+      message: 'Server error during login', 
+      error: e.message,
+      stack: process.env.NODE_ENV === 'development' ? e.stack : undefined 
+    });
   }
 });
 

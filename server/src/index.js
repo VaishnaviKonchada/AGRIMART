@@ -125,8 +125,10 @@ let isConnected = false;
 async function connectToDatabase() {
   if (isConnected) return;
   if (!process.env.MONGODB_URI) {
-    console.error('❌ MONGODB_URI not set');
-    return;
+    console.warn('⚠️ MONGODB_URI is not set! The server might fail on DB operations.');
+  }
+  if (!process.env.JWT_SECRET) {
+    console.error('❌ JWT_SECRET is not set! All logins will FAIL on Vercel.');
   }
   try {
     await connectDB(process.env.MONGODB_URI);

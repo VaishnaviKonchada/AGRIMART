@@ -12,6 +12,11 @@ export async function connectDB(uri) {
     w: 'majority'
   };
   
+  if (mongoose.connection.readyState === 1) {
+    console.log('✅ MongoDB already connected');
+    return;
+  }
+  
   try {
     await mongoose.connect(uri, options);
     console.log('✅ MongoDB connection successful');

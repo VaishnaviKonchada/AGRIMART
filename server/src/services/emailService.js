@@ -4,14 +4,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 // Ensure .env is loaded even if this module initializes before the main app
-try {
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  const envPath = path.join(__dirname, '../../.env');
-  dotenv.config({ path: envPath });
-} catch (e) {
-  // Fallback: default .env lookup
-  dotenv.config();
-}
+// Load .env - for Vercel, we recommend using Environment Variables in the dashboard
+dotenv.config(); 
+// If local dev needs it from ../../.env, it's safer to just let the main app handle it.
 
 // Configure your email service here
 // Using Gmail example - replace with your email service

@@ -1,120 +1,109 @@
-# EXECUTION PROCESS OF THE PROJECT
-**AGRIMART – AI-POWERED AGRICULTURE MARKETPLACE**
+AGRIMART – AI-POWERED AGRICULTURE MARKETPLACE FOR FARMERS AND CONSUMERS
 
-## 1. Project Overview
-AgriMart is a comprehensive full-stack AI-enabled platform designed to bridge the gap between farmers, customers, and transport dealers. It provides an all-in-one ecosystem for crop listing, direct marketing, and efficient logistics.
-The system leverages AI for crop disease detection and real-time multi-language support, ensuring that farmers can interact with the platform in their native language (English, Hindi, Telugu) while accessing expert-level agricultural insights.
+1. PROJECT OVERVIEW
+AgriMart is a full-stack web application designed to bridge the gap between farmers, consumers, and transport dealers. The platform enables farmers to list crops with government mandi price references, allows customers to purchase fresh produce directly, and integrates transport dealers for logistics. The system features an AI-powered crop health assistant for disease diagnosis and real-time multi-language support (English, Hindi, Telugu) to ensure accessibility for rural users.
 
-## 2. System Architecture
-AgriMart follows a distributed client-server architecture with integrated AI and logistics layers.
+2. SYSTEM REQUIREMENTS
+• Node.js v18 or higher — Required for running the frontend and backend servers.
+• MongoDB — Active database for storing users, crops, and transaction details.
+• Active internet connection — Essential for Gemini AI services, Govt Mandi API, and email notifications.
+• Any modern browser: Chrome, Firefox, Edge, or Safari.
+• Minimum 8 GB RAM recommended for smooth execution of AI and backend processes.
 
-### Frontend (Client Layer)
-Built using **React.js** and **Bootstrap**, the frontend provides specific dashboards for different user roles (Farmer, Customer, Transport Dealer, Admin). It handles interactive crop browsing, cart management, and real-time negotiation chats.
+3. TECH STACK
+Layer	Technology	Purpose
+Frontend	React.js, Bootstrap, Vanilla CSS	UI and client-side logic
+Backend	Node.js, Express.js	Server-side processing and REST API
+Database	MongoDB (Mongoose)	NoSQL data storage
+AI Engine	Gemini AI (Google)	Disease diagnosis & Translate proxy
+Localization	i18next	Multi-language (EN, HI, TE) support
+Authentication	JWT, Bcrypt	Secure login and session management
+Tools	VS Code, MongoDB Compass, npm	Development and database管理
 
-### Backend / Services Layer
-The backend is a **RESTful API** built with **Node.js** and **Express**. It handles authentication (JWT), role-based access control, file uploads (Multer), and integrates with the database and AI proxies.
+4. SYSTEM ARCHITECTURE
+AgriMart follows a modern three-tier MERN-style architecture consisting of a React frontend, a Node/Express backend, and a MongoDB database. The frontend communicates with the backend via RESTful APIs using Axios. The backend processes business logic, interacts with the MongoDB database for persistent storage, and utilizes external AI proxies for intelligent features like crop diagnosis and dynamic translations.
 
-### AI & Intelligence Layer
-- **Gemini AI Integration**: Powers the dynamic translation proxy for multi-language support and the intelligent crop disease diagnosis bot.
-- **ML Engine**: A Python/Keras-based engine for specialized plant disease detection models.
+5. MODULES OVERVIEW
+• Authentication Module – Handles role-based registration and login for Farmers, Customers, and Dealers.
+• Farmer Dashboard Module – Manages crop listings, stock availability, and government price references.
+• Marketplace Module – Enables customers to browse available crops with real-time localized names.
+• AI Health Module – Provides leaf-based disease diagnosis and farming recommendations via Gemini AI.
+• Logistics & Chat Module – Facilitates real-time negotiation and coordination between customers and transport dealers.
+• Order Management Module – Tracks the lifecycle of crops from pending to confirmed and delivered.
+• Admin Desk Module – Centralized support system for handling user complaints and platform management.
 
-### External Integrations
-- **Govt Mandi API**: Fetches real-time wholesale price references from data.gov.in.
-- **NodeMailer**: Handles automated email notifications for order status and support.
-- **i18next**: Manages localization strings for seamless language switching.
-
-## 3. System Requirements
-### Hardware Requirements
-- Processor: Intel Core i5 or above
-- RAM: Minimum 8 GB
-- Storage: 128 GB SSD (recommended for ML models)
-- Network: Stable internet connection
-
-### Software Requirements
-- Operating System: Windows 10/11
-- Browser: Chrome / Firefox / Edge
-- Node.js: v18 or above
-- MongoDB: Community Server or MongoDB Atlas
-- Python: 3.8+ (for ML modules)
-
-### Tech Stack
-| Layer | Technology | Purpose |
-|---|---|---|
-| Frontend | React.js, Bootstrap | UI and Responsive Frontend |
-| Backend | Node.js, Express | Server-side business logic |
-| Database | MongoDB (Mongoose) | Real-time data storage |
-| AI Engine | Gemini AI / Python Keras | Disease diagnosis & Translations |
-| Localization| i18next | Multi-language (EN, HI, TE) support |
-| Security | JWT, Bcrypt.js | Authentication & Authorization |
-
-## 4. Installation Process
-
-### Step 1 — Install Environment
-Install Node.js (v18+) and MongoDB. Verify using:
-```bash
-node --version
-npm --version
-```
-
-### Step 2 — Project Setup
-Clone or extract the AgriMart project folder.
-```bash
-cd agrimart-client
-```
-
-### Step 3 — Install Dependencies
-Run in both root and server directories:
-```bash
+6. INSTALLATION STEPS
+Step 1 — Install Environment
+Download and install Node.js (v18+) and ensure MongoDB is running locally or via MongoDB Atlas.
+Step 2 — Setup Project
+Extract the AgriMart project and navigate to the root directory. Install dependencies for both the frontend and the backend:
 npm install
 cd server
 npm install
-```
+Step 3 — Configure Environment Variables
+Create a .env file in the /server directory and add your credentials:
+PORT=8081
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+Gemini_API_KEY=your_google_ai_key
+Step 4 — Setup Frontend Config
+Ensure the root .env file points to your local or deployed backend:
+REACT_APP_API_URL=http://localhost:8081/api
+Step 5 — Run the Application
+Start the backend first, followed by the frontend:
+Backend: cd server && npm start
+Frontend: npm start (in a separate terminal)
 
-### Step 4 — Configuration
-Create a `.env` file in the `server` directory and configure:
-- `MONGODB_URI`: Your database connection string
-- `JWT_SECRET`: Secure key for token generation
-- `Gemini_API_KEY`: Google Generative AI key
-- `GOVT_CROP_API_KEY`: API key for Mandi prices
-- `EMAIL_USER/PASSWORD`: SMTP credentials for notifications
+7. RUNNING THE APPLICATION
+The application requires two active processes:
+• Start the Node.js server to handle API requests.
+• Start the React development server to view the interface.
+• Ensure MongoDB is connected and the AI API keys are valid.
 
-### Step 5 — Database Setup
-Start your local MongoDB service or ensure MongoDB Atlas is connected.
+8. EXECUTION FLOW
+8.1 User Registration and Role Selection
+1.	User visits the landing page and selects a role (Farmer, Customer, or Dealer).
+2.	Enters details including email, password, and location (State/District/Mandal).
+3.	The system hashes the password and stores the profile in MongoDB.
+4.	User logs in to receive a JWT (JSON Web Token) stored in the browser session.
+5.	User is redirected to their specific role-based dashboard.
 
-## 5. Running the Application
-1. **Start Backend**: `cd server && npm start`
-2. **Start Frontend**: `npm start` (in root directory)
-3. **Open Browser**: `http://localhost:3000`
-4. **Login**: Use test credentials or register as Farmer/Customer.
+8.2 Crop Listing (Farmer)
+1.	Farmer selects 'Add Crop' from their dashboard.
+2.	Enters crop details; the system fetches real-time Govt Mandi rates for price reference.
+3.	Farmer uploads photos and specifies the harvest date and quantity.
+4.	The crop is listed on the marketplace and becomes visible to customers.
 
-## 6. Execution Flow
+8.3 Smart Marketplace and Buying (Customer)
+1.	Logged-in Customer browses crops localized in their selected language.
+2.	Adds items to the cart; the system calculates the total weight for transport logistics.
+3.	Customer chooses a delivery location using GPS or address search.
+4.	Selects an available Transport Dealer and sends a delivery request.
 
-### 6.1 Authentication & Role Management
-Users register as Farmers, Customers, or Dealers. JWT handles secure session management across device refreshes.
+8.4 AI Disease Diagnosis
+1.	Farmer/User visits the AI Assistant section.
+2.	Uploads an image of a crop leaf; the Gemini AI model analyzes the image.
+3.	System provides a diagnosis, confidence score, and specific treatment recommendations.
+4.	Users can ask follow-up questions about fertilizers or irrigation.
 
-### 6.2 Crop Listing (Farmer)
-Farmers upload crop details (Name, Price, Quantity, Quality). The system fetches govt mandi prices as a reference.
+8.5 Logistics and Negotiation
+1.	Transport Dealers receive delivery requests on their dashboard.
+2.	Dealer and Customer use the real-time chat to negotiate the delivery price.
+3.	Once both parties confirm, the customer proceeds to final order placement.
+4.	Order status is updated, and the farmer is notified to prepare the harvest for pickup.
 
-### 6.3 Smart Marketplace (Customer)
-Customers browse real-time listings with localized names. They add crops to their cart which tracks weights for transport calculations.
+9. KEY RULES
+• Every user must choose exactly one role (Farmer, Customer, or Dealer).
+• Crop listings require valid price and quantity data.
+• Transport negotiations must be confirmed by both parties before order finalization.
+• AI diagnosis requires a clear image of the affected plant leaf.
+• Access to secure pages is restricted to users with a valid JWT session.
 
-### 6.4 AI Disease Detection
-Farmers upload images of crop leaves. The Gemini AI/ML assistant analyzes the image and provides diagnosis and treatment suggestions.
+10. DEPLOYMENT
+The application is designed for cloud scalability and can be deployed on various platforms.
+Layer	Platform	URL (Current)
+Frontend	Vercel / Netlify	https://agrimartfrontend.vercel.app
+Backend	Render / Railway	https://agrimartbackend.vercel.app
+Database	MongoDB Atlas	Cloud Instance
 
-### 6.5 Transport Negotiation
-When a customer checks out, they select a Transport Dealer. Real-time chat allows negotiation of delivery rates between the parties.
-
-### 6.6 Multi-Language Support
-The entire UI translates dynamically based on user selection. Missing keys are auto-translated using the Gemini AI proxy.
-
-### 6.7 Order Processing
-Orders transition through states (Pending, Confirmed, In-Transit, Delivered) with email updates sent to all stakeholders.
-
-## 7. Key Features & Rules
-- **Direct Trade**: Eliminates middle-men for better farmers' margins.
-- **Mandi References**: Real government data prevents price manipulation.
-- **AI-Doctor**: Instant crop health diagnostics for farmers.
-- **Secure Payments**: Orders only proceed after dealer and customer agreement.
-
-## 8. Conclusion
-AgriMart successfully integrates modern web technologies with AI to revolutionize the agricultural supply chain, empowering rural farmers with digital tools in their own language.
+For production, the Frontend is built using npm run build, and the Backend is hosted on a cloud environment where the .env variables are securely managed in the platform settings.

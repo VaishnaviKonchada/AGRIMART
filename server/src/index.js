@@ -21,7 +21,8 @@ import dealerOperationsRoutes from './routes/dealerOperations.js';
 import diseaseRoutes from './routes/disease.js';
 import translateRoutes from './routes/translate.js';
 import cartRoutes from './routes/cart.js';
-import { importDistricts, importMandals } from './services/csvImportService.js';
+// import { importDistricts, importMandals } from './services/csvImportService.js'; <--- Removed
+
 
 dotenv.config();
 
@@ -104,9 +105,11 @@ app.use((req, res) => {
 
 // Central error handler (JSON only)
 app.use((err, req, res, next) => {
-  console.error('❌ Unhandled error:', err.message);
+  console.error('❌ Server error:', err);
   res.status(err.status || 500).json({
-    error: 'Server error'
+    error: 'Internal Server Error',
+    message: err.message || 'An unexpected error occurred',
+    path: req.path
   });
 });
 
@@ -140,9 +143,7 @@ const port = process.env.PORT || 8080;
 if (process.env.NODE_ENV !== 'production') {
   app.listen(port, () => {
     console.log(`✅ API running locally on port ${port}`);
-    // Run imports only in dev
-    importDistricts().catch(e => console.error(e));
-    importMandals().catch(e => console.error(e));
+    // Run any local dev initialization if needed.
   });
 }
 

@@ -128,8 +128,8 @@ async function start() {
     
     console.log('[START] About to initialize Express server...');
     
-    const server = app.listen(port, 'localhost', () => {
-      console.log(`✅ API running on http://localhost:${port}`);
+    const server = app.listen(port, () => {
+      console.log(`✅ API running on port ${port}`);
       console.log(`✅ CORS enabled for: ${process.env.CLIENT_ORIGIN || '*'}`);
     });
     

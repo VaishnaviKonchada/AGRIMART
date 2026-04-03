@@ -51,6 +51,12 @@ app.use(cors({
 }));
 app.use(morgan('dev'));
 
+app.get('/', (req, res) => res.json({ 
+  message: '🌾 AgriMart API is running', 
+  status: 'active',
+  documentation: 'Refer to AGRIMART_EXECUTION_PROCESS.md'
+}));
+
 app.get('/api/health', (req, res) => res.json({ ok: true, ts: Date.now() }));
 
 // Authentication Routes

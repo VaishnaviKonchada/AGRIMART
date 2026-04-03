@@ -110,63 +110,42 @@ app.use((err, req, res, next) => {
   });
 });
 
-const port = process.env.PORT || 8080;
+// Database connection state
+let isConnected = false;
 
-async function start() {
+async function connectToDatabase() {
+  if (isConnected) return;
+  if (!process.env.MONGODB_URI) {
+    console.error('❌ MONGODB_URI not set');
+    return;
+  }
   try {
-    if (process.env.MONGODB_URI) {
-      try {
-        await connectDB(process.env.MONGODB_URI);
-        console.log('✅ MongoDB connected');
-
-        // Auto-import CSV data on startup
-        console.log('\n📍 Checking and importing location data...');
-        try {
-          const districtResult = await importDistricts();
-          console.log(`   ✅ ${districtResult}`);
-        } catch (err) {
-          console.error(`   ⚠️  Districts: ${err.message}`);
-        }
-
-        try {
-          const mandalResult = await importMandals();
-          console.log(`   ✅ ${mandalResult}`);
-        } catch (err) {
-          console.error(`   ⚠️  Mandals: ${err.message}`);
-        }
-        console.log('');
-      } catch (dbErr) {
-        console.error('❌ MongoDB connection failed:', dbErr.message);
-        process.exit(1);
-      }
-    } else {
-      console.error('❌ MONGODB_URI not set in .env file');
-      process.exit(1);
-    }
-    
-    console.log('[START] About to initialize Express server...');
-    
-    const server = app.listen(port, () => {
-      console.log(`✅ API running on port ${port}`);
-      console.log(`✅ CORS enabled for: ${process.env.CLIENT_ORIGIN || '*'}`);
-    });
-    
-    // Handle server errors
-    server.on('error', (err) => {
-      console.error('❌ Server error:', err.message);
-      process.exit(1);
-    });
-    
-    server.on('listening', () => {
-      console.log('📍 Server is now actively listening');
-    });
-    
-    console.log('[END] Server initialization code completed');
-  } catch (e) {
-    console.error('❌ Failed to start server:', e.message, e.stack);
-    process.exit(1);
+    await connectDB(process.env.MONGODB_URI);
+    isConnected = true;
+    console.log('✅ MongoDB connected');
+  } catch (err) {
+    console.error('❌ MongoDB connection failed:', err.message);
   }
 }
+
+// Middleware to ensure DB is connected
+app.use(async (req, res, next) => {
+  await connectToDatabase();
+  next();
+});
+
+const port = process.env.PORT || 8080;
+
+// Local development server
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`✅ API running locally on port ${port}`);
+    // Run imports only in dev
+    importDistricts().catch(e => console.error(e));
+    importMandals().catch(e => console.error(e));
+  });
+}
+
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
@@ -179,7 +158,8 @@ process.on('uncaughtException', (error) => {
 });
 
 // Connect DB and start server (for local dev / traditional hosting)
-start();
+// start(); <--- removed
+
 
 // Export for Vercel serverless functions
 export default app;

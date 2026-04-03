@@ -224,6 +224,7 @@
     "cancel": "रद्द करें"
   },
   "farmerDashboard": {
+    "dashboard": "होम",
     "greeting": "{{greeting}}, {{name}}!",
     "totalCrops": "कुल फसलें",
     "activeCrops": "{{count}} सक्रिय",

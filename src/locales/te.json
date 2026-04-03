@@ -186,6 +186,7 @@
     "cancel": "రద్దు చేయండి"
   },
   "farmerDashboard": {
+    "dashboard": "హోమ్",
     "greeting": "{{greeting}}, {{name}}!",
     "totalCrops": "మొత్తం పంటలు",
     "activeCrops": "{{count}} క్రియాశీల",

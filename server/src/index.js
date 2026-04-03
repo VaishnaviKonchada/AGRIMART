@@ -29,7 +29,21 @@ const app = express();
 app.use(helmet());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || '*', credentials: true }));
+const allowedOrigins = (process.env.CLIENT_ORIGIN || '*').split(',').map(o => o.trim());
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    // Allow if wildcard
+    if (allowedOrigins.includes('*')) return callback(null, true);
+    // Allow if origin is in the list
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow any *.vercel.app subdomain
+    if (/\.vercel\.app$/.test(origin)) return callback(null, true);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true
+}));
 app.use(morgan('dev'));
 
 app.get('/api/health', (req, res) => res.json({ ok: true, ts: Date.now() }));

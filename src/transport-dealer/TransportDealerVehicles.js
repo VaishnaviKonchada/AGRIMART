@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import TransportDealerBottomNav from "./TransportDealerBottomNav";
-import { apiGet, apiPost, apiPut, apiDelete, apiPatch, API_BASE_URL } from "../utils/api";
+import { API_BASE_URL } from "../utils/api";
 import "../styles/TransportDealerVehicles.css";
 const parseJsonResponse = async response => {
   const text = await response.text();
@@ -14,7 +14,7 @@ const parseJsonResponse = async response => {
   } catch (err) {
     const snippet = text.trim().slice(0, 120);
     if (snippet.startsWith("<!DOCTYPE") || snippet.toLowerCase().includes("<html")) {
-      throw new Error(`API returned HTML instead of JSON (status ${response.status}). ` + `Please confirm backend is running on ${API_BASE_URL} and you are logged in.`);
+      throw new Error(`API returned HTML instead of JSON (status ${response.status}). Please confirm backend is running on ${API_BASE_URL} and you are logged in.`);
     }
     throw new Error(`Invalid JSON response (status ${response.status}): ${snippet}`);
   }
@@ -112,7 +112,7 @@ export default function TransportDealerVehicles() {
   const [mandals, setMandals] = useState([]);
   const [districtSearch, setDistrictSearch] = useState("");
   const [mandalSearch, setMandalSearch] = useState("");
-  const [districtsLoading, setDistrictsLoading] = useState(false);
+  const [districtsLoading] = useState(false); // eslint-disable-line no-unused-vars
   const [expandedServiceAreas, setExpandedServiceAreas] = useState({});
   const getDealerId = () => user?._id || user?.id || user?.userId || user?.dealerId || null;
   const isServiceAreaExpanded = (vehicleId, areaType) => Boolean(expandedServiceAreas[`${vehicleId}:${areaType}`]);
@@ -170,6 +170,7 @@ export default function TransportDealerVehicles() {
   // Load districts on component mount
   useEffect(() => {
     loadVehicles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load districts when inline service areas form is shown
@@ -177,6 +178,7 @@ export default function TransportDealerVehicles() {
     if (showInlineServiceAreas && districts.length === 0) {
       loadInlineDistricts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showInlineServiceAreas]);
   const handleAddVehicle = async () => {
     if (!newVehicle.name || !newVehicle.licensePlate || !newVehicle.capacity) {
@@ -605,7 +607,7 @@ export default function TransportDealerVehicles() {
       alert(err.message || "Failed to update visibility");
     }
   };
-  const openMatchModal = vehicleId => {
+  const _openMatchModal = vehicleId => { // eslint-disable-line no-unused-vars
     setMatchVehicleId(vehicleId || null);
     setMatchPickup("");
     setMatchDrop("");
@@ -614,7 +616,7 @@ export default function TransportDealerVehicles() {
     setMatchError("");
     setShowMatchModal(true);
   };
-  const enableVisibilityForVehicle = async vehicleId => {
+  const _enableVisibilityForVehicle = async vehicleId => { // eslint-disable-line no-unused-vars
     try {
       const token = localStorage.getItem("accessToken");
       const response = await fetch(`${API_BASE_URL}/dealer/vehicles/${vehicleId}`, {

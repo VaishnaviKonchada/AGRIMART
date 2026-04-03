@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SessionManager from "../utils/SessionManager";
-import { API_BASE_URL } from "../utils/api";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "https://agrimartbackend.vercel.app/api";
 import "../styles/Auth.css";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useTranslation } from "react-i18next";

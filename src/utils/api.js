@@ -6,7 +6,7 @@
 
 import SessionManager from './SessionManager';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8081/api";
+const API_BASE_URL = process.env.REACT_APP_API_URL || "https://agrimartbackend.vercel.app/api";
 
 /**
  * Make an API call with automatic authentication and error handling

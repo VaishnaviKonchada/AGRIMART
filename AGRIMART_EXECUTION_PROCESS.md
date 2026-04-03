@@ -102,8 +102,8 @@ The application requires two active processes:
 10. DEPLOYMENT
 The application is designed for cloud scalability and can be deployed on various platforms.
 Layer	Platform	URL (Current)
-Frontend	Vercel / Netlify	https://agrimartfrontend.vercel.app
-Backend	Render / Railway	https://agrimartbackend.vercel.app
+Frontend	Vercel	https://agrimartfrontend.vercel.app
+Backend	Vercel	https://agrimartbackend.vercel.app
 Database	MongoDB Atlas	Cloud Instance
 
 For production, the Frontend is built using npm run build, and the Backend is hosted on a cloud environment where the .env variables are securely managed in the platform settings.

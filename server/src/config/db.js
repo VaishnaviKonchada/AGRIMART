@@ -1,7 +1,11 @@
 import mongoose from 'mongoose';
 
 export async function connectDB(uri) {
-  console.log('🔄 Attempting MongoDB connection to:', uri);
+  if (!uri) {
+    throw new Error('MONGODB_URI is undefined! Check your Vercel Environment Variables.');
+  }
+  
+  console.log('🔄 Attempting MongoDB connection...');
   mongoose.set('strictQuery', true);
   
   // Add connection options
@@ -9,7 +13,8 @@ export async function connectDB(uri) {
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
     retryWrites: true,
-    w: 'majority'
+    w: 'majority',
+    bufferCommands: false // DISABLE buffering so errors show up immediately
   };
   
   if (mongoose.connection.readyState === 1) {

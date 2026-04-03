@@ -54,23 +54,30 @@ let isConnected = false;
 
 async function connectToDatabase() {
   if (isConnected) return;
-  if (!process.env.MONGODB_URI) {
-    console.warn('⚠️ MONGODB_URI is not set! The server might fail on DB operations.');
-  }
-  if (!process.env.JWT_SECRET) {
-    console.error('❌ JWT_SECRET is not set! All logins will FAIL on Vercel.');
-  }
+  
+  // Hard timeout for DB connection (5 seconds)
+  const timeoutPromise = new Promise((_, reject) => 
+    setTimeout(() => reject(new Error('MongoDB Connection Timeout (5s)')), 5000)
+  );
+
   try {
-    await connectDB(process.env.MONGODB_URI);
+    console.log('🔌 DB CONNECTION ATTEMPT START...');
+    await Promise.race([
+      connectDB(process.env.MONGODB_URI),
+      timeoutPromise
+    ]);
     isConnected = true;
-    console.log('✅ MongoDB connected');
+    console.log('✅ MongoDB connected successfully');
   } catch (err) {
     console.error('❌ MongoDB connection failed:', err.message);
+    // Don't throw - let the request proceed and fail at the query level with a better error
+    isConnected = false;
   }
 }
 
 // Middleware to ensure DB is connected BEFORE routes
 app.use(async (req, res, next) => {
+  console.log(`🌐 [${req.method}] ${req.path} - Processing...`);
   await connectToDatabase();
   next();
 });
